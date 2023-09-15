@@ -183,6 +183,12 @@ public class FtcRobotControllerActivity extends Activity
 
   private WifiDirectChannelChanger wifiDirectChannelChanger;
 
+
+  private static FtcRobotControllerActivity appActivity;
+  public static FtcRobotControllerActivity getAppActivity() {
+    return appActivity;
+  }
+
   protected class RobotRestarter implements Restarter {
 
     public void requestRestart() {
@@ -267,6 +273,8 @@ public class FtcRobotControllerActivity extends Activity
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    appActivity = this;
+
     super.onCreate(savedInstanceState);
 
     if (enforcePermissionValidator()) {
