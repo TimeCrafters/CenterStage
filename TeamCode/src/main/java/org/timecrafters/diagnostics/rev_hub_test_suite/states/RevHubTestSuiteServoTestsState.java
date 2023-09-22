@@ -8,7 +8,6 @@ import org.timecrafters.diagnostics.rev_hub_test_suite.RevHubTestSuiteRobot;
 import java.util.ArrayList;
 
 public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
-    private final int STAGE_SERVO_ROTATING = 0;
     private int servo_index = 0;
     private final ArrayList<ServoEx> servos;
     private double lastMonitorTime;
@@ -27,14 +26,14 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
 
         test_servos();
 
-        if (stage > STAGE_SERVO_ROTATING) {
+        if (stage.ordinal() > STAGE.SERVO_SWEEP.ordinal()) {
             testComplete = true;
         }
     }
 
     private void test_servos() {
         if (servo_index >= servos.size()) {
-            stage += 1;
+            nextStage();
             return;
         }
 
@@ -55,7 +54,7 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
     }
 
     public void buttonUp(Gamepad gamepad, String button) {
-        if (stage != STAGE_SERVO_ROTATING) {
+        if (stage != STAGE.SERVO_SWEEP) {
             return;
         }
 
@@ -75,7 +74,7 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
     }
 
     public void telemetry() {
-        if (stage == STAGE_SERVO_ROTATING) {
+        if (stage == STAGE.SERVO_SWEEP) {
             engine.telemetry.addLine("MANUAL TEST");
             engine.telemetry.addLine("PRESS `A` if Servo " + servo_index + " is ROTATING.");
             engine.telemetry.addLine();

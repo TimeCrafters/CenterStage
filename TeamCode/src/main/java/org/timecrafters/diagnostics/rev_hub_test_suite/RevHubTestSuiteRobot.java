@@ -3,8 +3,10 @@ package org.timecrafters.diagnostics.rev_hub_test_suite;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -25,9 +27,13 @@ public class RevHubTestSuiteRobot extends Robot {
     public ArrayList<AnalogInput> controlHubAnalogSensors, expansionHubAnalogSensors;
     public ArrayList<DigitalChannel> controlHubDigitalSensors, expansionHubDigitalSensors;
     public ArrayList<Rev2mDistanceSensor> controlHubI2cSensors, expansionHubI2cSensors;
+
+    public ArrayList<LynxModule> lynxModules;
     @Override
     public void setup() {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
+
+        this.lynxModules = new ArrayList<>(hardwareMap.getAll(LynxModule.class));
 
         /* ------------------------------------------------ Control Hub Devices ------------------------------------------------ */
         // MOTORS
@@ -102,5 +108,31 @@ public class RevHubTestSuiteRobot extends Robot {
         expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_1"));
         expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_2"));
         expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_3"));
+
+        /* ------------------------------------------------ Hub Sensor Reading Optimization ------------------------------------------------ */
+        for (LynxModule hub : lynxModules) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+
+        /* ------------------------------------------------ Motor Configuration ------------------------------------------------ */
+        configureMotors();
+    }
+
+    private void configureMotors() {
+        for(MotorEx motor : controlHubMotors) {
+            motor.motorEx.setDirection(DcMotorSimple.Direction.FORWARD);
+            motor.stopAndResetEncoder();
+        }
+
+        for(MotorEx motor : expansionHubMotors) {
+            motor.motorEx.setDirection(DcMotorSimple.Direction.FORWARD);
+            motor.stopAndResetEncoder();
+        }
+    }
+
+    protected void clearStaleData() {
+        for (LynxModule hub : lynxModules) {
+            hub.clearBulkCache();
+        }
     }
 }
