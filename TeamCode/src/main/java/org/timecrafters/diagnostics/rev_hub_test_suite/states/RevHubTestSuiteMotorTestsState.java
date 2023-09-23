@@ -15,7 +15,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
 
     private final ArrayList<MotorEx> motors;
     private double lastMonitorTime, lastSampleMonitorTime;
-    private final double automaticInterval = 500.0; // milliseconds
+    private final double automaticInterval = 3_000; // milliseconds
     private final double automaticSampleInterval = 3_000.0; // milliseconds - test motor current and ticks per second
 
     private final ArrayList<Double> sampleAmpsList = new ArrayList<>();
@@ -30,6 +30,13 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
     }
 
     @Override
+    public void start() {
+        super.start();
+
+        nextStage();
+    }
+
+    @Override
     public void exec() {
         super.exec();
 
@@ -39,21 +46,27 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
         switch (stage) {
             case MOTOR_ENCODER_STEADY: {
                 test_encoder_steady();
+                break;
             }
             case MOTOR_ENCODER_FORWARD: {
                 test_encoder_changes(true);
+                break;
             }
             case MOTOR_ENCODER_REVERSE: {
                 test_encoder_changes(false);
+                break;
             }
             case MOTOR_50_PERCENT_SPEED: {
                 test_motor_current_and_ticks_per_second(0.5);
+                break;
             }
             case MOTOR_100_PERCENT_SPEED: {
                 test_motor_current_and_ticks_per_second(1.0);
+                break;
             }
             case MOTOR_BRAKING_MODE: {
                 test_motor_braking();
+                break;
             }
         }
 
@@ -76,6 +89,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             setInitialValue = false;
             initialValue = motor.getCurrentPosition();
             lastMonitorTime = runTime();
+            motor.resetEncoder();
         }
 
         if (runTime() - lastMonitorTime >= automaticInterval) {
@@ -83,11 +97,12 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
 
             if (lastValue <= 2) {
                 report("PASSED: Motor Encoder " + motor_index + " STEADY");
-                motor_index++;
-                setInitialValue = true;
             } else {
                 report("FAILED: Motor Encoder " + motor_index + " STEADY (" + lastValue + " > 2)");
             }
+
+            motor_index++;
+            setInitialValue = true;
         }
     }
 
@@ -106,7 +121,8 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             initialValue = motor.getCurrentPosition();
             lastMonitorTime = runTime();
 
-            motor.setVelocity(forward ? 0.5 : -0.5);
+            motor.resetEncoder();
+            motor.motorEx.setPower(forward ? 1.0 : -1.0);
         }
 
         if (runTime() - lastMonitorTime >= automaticInterval) {
@@ -116,13 +132,14 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             String fail = forward ? "NO CHANGE; FORWARD." : "NO CHANGE; REVERSE.";
 
             if (Math.abs(lastValue) >= 100) {
-                motor.stopMotor();
-                report("PASSED: Motor Encoder `" + motor_index + "` CHANGE");
-                motor_index++;
-                setInitialValue = true;
+                report("PASSED: Motor Encoder `" + motor_index + "` " + pass);
             } else {
-                report("FAILED: Motor Encoder `" + motor_index + "` CHANGE (" + lastValue + " < 100)");
+                report("FAILED: Motor Encoder `" + motor_index + "` " + fail + " (" + lastValue + " < 100)");
             }
+
+            motor.stopMotor();
+            motor_index++;
+            setInitialValue = true;
         }
     }
 
@@ -167,8 +184,8 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             if (runTime() - lastSampleMonitorTime >= 100) {
                 lastSampleMonitorTime = runTime();
 
-                motor.motorEx.getCurrent(CurrentUnit.AMPS);
-                motor.motorEx.getCurrentPosition();
+                sampleAmpsList.add(motor.motorEx.getCurrent(CurrentUnit.AMPS));
+                sampleTicksList.add(motor.motorEx.getCurrentPosition());
             }
 
             /* --- Generate report --- */
@@ -189,7 +206,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
                 average_ticks = total_ticks / sampleTicksList.size();
                 average_ticks = average_ticks * (1.0 / (automaticSampleInterval * 0.001)); // Convert to PER SECOND
 
-                report(String.format(Locale.US, "RESULT: Motor %d: Sample Period: %.2fms, Average AMPS: %.4f, Average TICKS/s: %d", motor_index, average_amps, average_ticks));
+                report(String.format(Locale.US, "RESULT: Motor %d: Speed: %.2f, Average AMPS: %.4f, Average TICKS/s: %d", motor_index, motor.motorEx.getPower(), average_amps, (int)average_ticks));
 
                 motor_index++;
                 motor.motorEx.setPower(0.0);

@@ -20,6 +20,7 @@ public class RevHubTestSuiteEngine extends CyberarmEngine {
     @Override
     public void setup() {
         this.robot = new RevHubTestSuiteRobot();
+        this.robot.setup();
 
         addState(new RevHubTestSuiteHubSelectionState(robot));
 

@@ -28,7 +28,7 @@ public class RevTestSuiteTestState extends CyberarmState {
     final String TAG = "RevTestSuite|State";
     RevHubTestSuiteRobot robot;
     protected STAGE stage = STAGE.NONE;
-    protected ArrayList<String> reports;
+    protected final ArrayList<String> reports = new ArrayList<>();
     protected boolean testComplete = false;
     public RevTestSuiteTestState(RevHubTestSuiteRobot robot) {
         super();
@@ -43,8 +43,10 @@ public class RevTestSuiteTestState extends CyberarmState {
         }
     }
 
-    public void report(String reason) {
-        reports.add(reason);
+    void report(String reason) {
+        synchronized (reports) {
+            reports.add(reason);
+        }
     }
 
     public void nextStage() {
@@ -65,8 +67,11 @@ public class RevTestSuiteTestState extends CyberarmState {
         engine.telemetry.addData("STAGE", stage);
         engine.telemetry.addLine();
         engine.telemetry.addLine("REPORTS");
-        for (String report : reports) {
-            engine.telemetry.addLine(report);
+
+        synchronized (reports) {
+            for (String report : reports) {
+                engine.telemetry.addLine(report);
+            }
         }
     }
 }

@@ -22,13 +22,13 @@ public class RevHubTestSuiteRobot extends Robot {
 
     private HardwareMap hardwareMap;
     public boolean testingControlHub = true;
-    public ArrayList<MotorEx> controlHubMotors, expansionHubMotors;
-    public ArrayList<ServoEx> controlHubServos, expansionHubServos;
-    public ArrayList<AnalogInput> controlHubAnalogSensors, expansionHubAnalogSensors;
-    public ArrayList<DigitalChannel> controlHubDigitalSensors, expansionHubDigitalSensors;
-    public ArrayList<Rev2mDistanceSensor> controlHubI2cSensors, expansionHubI2cSensors;
+    public ArrayList<MotorEx> controlHubMotors = new ArrayList<>(), expansionHubMotors = new ArrayList<>();
+    public ArrayList<ServoEx> controlHubServos = new ArrayList<>(), expansionHubServos = new ArrayList<>();
+    public ArrayList<AnalogInput> controlHubAnalogSensors = new ArrayList<>(), expansionHubAnalogSensors = new ArrayList<>();
+    public ArrayList<DigitalChannel> controlHubDigitalSensors = new ArrayList<>(), expansionHubDigitalSensors = new ArrayList<>();
+    public ArrayList<Rev2mDistanceSensor> controlHubI2cSensors = new ArrayList<>(), expansionHubI2cSensors = new ArrayList<>();
 
-    public ArrayList<LynxModule> lynxModules;
+    public ArrayList<LynxModule> lynxModules = new ArrayList<>();
     @Override
     public void setup() {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
@@ -42,77 +42,77 @@ public class RevHubTestSuiteRobot extends Robot {
         controlHubMotors.add(new MotorEx(hardwareMap, "c_motor_2"));
         controlHubMotors.add(new MotorEx(hardwareMap, "c_motor_3"));
 
-        // SERVOS
-        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_0", 0.0, 180.0, AngleUnit.DEGREES));
-        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_1", 0.0, 180.0, AngleUnit.DEGREES));
-        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_2", 0.0, 180.0, AngleUnit.DEGREES));
-        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_3", 0.0, 180.0, AngleUnit.DEGREES));
-        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_4", 0.0, 180.0, AngleUnit.DEGREES));
-        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_5", 0.0, 180.0, AngleUnit.DEGREES));
-
-        // ANALOG SENSORS
-        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_0"));
-        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_1"));
-        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_2"));
-        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_3"));
-
-        // DIGITAL SENSORS
-        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_0"));
-        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_1"));
-        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_2"));
-        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_3"));
-        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_4"));
-        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_5"));
-        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_6"));
-        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_7"));
-
-        // I2C SENSORS
-        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_0"));
-        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_1"));
-        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_2"));
-        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_3"));
-
-        /* ------------------------------------------------ Expansion Hub Devices ------------------------------------------------ */
-        // MOTORS
-        expansionHubMotors.add(new MotorEx(hardwareMap, "x_motor_0"));
-        expansionHubMotors.add(new MotorEx(hardwareMap, "x_motor_1"));
-        expansionHubMotors.add(new MotorEx(hardwareMap, "x_motor_2"));
-        expansionHubMotors.add(new MotorEx(hardwareMap, "x_motor_3"));
-
-        // SERVOS
-        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_0", 0.0, 180.0, AngleUnit.DEGREES));
-        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_1", 0.0, 180.0, AngleUnit.DEGREES));
-        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_2", 0.0, 180.0, AngleUnit.DEGREES));
-        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_3", 0.0, 180.0, AngleUnit.DEGREES));
-        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_4", 0.0, 180.0, AngleUnit.DEGREES));
-        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_5", 0.0, 180.0, AngleUnit.DEGREES));
-
-        // ANALOG SENSORS
-        expansionHubAnalogSensors.add(hardwareMap.analogInput.get("x_analog_0"));
-        expansionHubAnalogSensors.add(hardwareMap.analogInput.get("x_analog_1"));
-        expansionHubAnalogSensors.add(hardwareMap.analogInput.get("x_analog_2"));
-        expansionHubAnalogSensors.add(hardwareMap.analogInput.get("x_analog_3"));
-
-        // DIGITAL SENSORS
-        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_0"));
-        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_1"));
-        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_2"));
-        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_3"));
-        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_4"));
-        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_5"));
-        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_6"));
-        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_7"));
-
-        // I2C SENSORS
-        expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_0"));
-        expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_1"));
-        expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_2"));
-        expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_3"));
-
-        /* ------------------------------------------------ Hub Sensor Reading Optimization ------------------------------------------------ */
-        for (LynxModule hub : lynxModules) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
+//        // SERVOS
+//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_0", 0.0, 180.0, AngleUnit.DEGREES));
+//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_1", 0.0, 180.0, AngleUnit.DEGREES));
+//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_2", 0.0, 180.0, AngleUnit.DEGREES));
+//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_3", 0.0, 180.0, AngleUnit.DEGREES));
+//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_4", 0.0, 180.0, AngleUnit.DEGREES));
+//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_5", 0.0, 180.0, AngleUnit.DEGREES));
+//
+//        // ANALOG SENSORS
+//        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_0"));
+//        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_1"));
+//        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_2"));
+//        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_3"));
+//
+//        // DIGITAL SENSORS
+//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_0"));
+//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_1"));
+//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_2"));
+//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_3"));
+//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_4"));
+//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_5"));
+//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_6"));
+//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_7"));
+//
+//        // I2C SENSORS
+//        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_0"));
+//        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_1"));
+//        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_2"));
+//        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_3"));
+//
+//        /* ------------------------------------------------ Expansion Hub Devices ------------------------------------------------ */
+//        // MOTORS
+//        expansionHubMotors.add(new MotorEx(hardwareMap, "x_motor_0"));
+//        expansionHubMotors.add(new MotorEx(hardwareMap, "x_motor_1"));
+//        expansionHubMotors.add(new MotorEx(hardwareMap, "x_motor_2"));
+//        expansionHubMotors.add(new MotorEx(hardwareMap, "x_motor_3"));
+//
+//        // SERVOS
+//        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_0", 0.0, 180.0, AngleUnit.DEGREES));
+//        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_1", 0.0, 180.0, AngleUnit.DEGREES));
+//        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_2", 0.0, 180.0, AngleUnit.DEGREES));
+//        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_3", 0.0, 180.0, AngleUnit.DEGREES));
+//        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_4", 0.0, 180.0, AngleUnit.DEGREES));
+//        expansionHubServos.add(new SimpleServo(hardwareMap, "x_servo_5", 0.0, 180.0, AngleUnit.DEGREES));
+//
+//        // ANALOG SENSORS
+//        expansionHubAnalogSensors.add(hardwareMap.analogInput.get("x_analog_0"));
+//        expansionHubAnalogSensors.add(hardwareMap.analogInput.get("x_analog_1"));
+//        expansionHubAnalogSensors.add(hardwareMap.analogInput.get("x_analog_2"));
+//        expansionHubAnalogSensors.add(hardwareMap.analogInput.get("x_analog_3"));
+//
+//        // DIGITAL SENSORS
+//        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_0"));
+//        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_1"));
+//        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_2"));
+//        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_3"));
+//        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_4"));
+//        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_5"));
+//        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_6"));
+//        expansionHubDigitalSensors.add(hardwareMap.digitalChannel.get("x_digital_7"));
+//
+//        // I2C SENSORS
+//        expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_0"));
+//        expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_1"));
+//        expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_2"));
+//        expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_3"));
+//
+//        /* ------------------------------------------------ Hub Sensor Reading Optimization ------------------------------------------------ */
+//        for (LynxModule hub : lynxModules) {
+//            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//        }
 
         /* ------------------------------------------------ Motor Configuration ------------------------------------------------ */
         configureMotors();
@@ -131,8 +131,8 @@ public class RevHubTestSuiteRobot extends Robot {
     }
 
     protected void clearStaleData() {
-        for (LynxModule hub : lynxModules) {
-            hub.clearBulkCache();
-        }
+//        for (LynxModule hub : lynxModules) {
+//            hub.clearBulkCache();
+//        }
     }
 }
