@@ -10,5 +10,9 @@ public class RevHubTestSuiteAnalogTestsState extends RevTestSuiteTestState {
     @Override
     public void exec() {
         super.exec();
+
+        if (testComplete)
+            return;
+
     }
 }

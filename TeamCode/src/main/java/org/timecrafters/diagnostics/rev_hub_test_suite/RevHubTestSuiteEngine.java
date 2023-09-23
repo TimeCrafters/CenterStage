@@ -22,6 +22,7 @@ public class RevHubTestSuiteEngine extends CyberarmEngine {
         this.robot = new RevHubTestSuiteRobot();
 
         addState(new RevHubTestSuiteHubSelectionState(robot));
+
         addState(new RevHubTestSuiteMotorTestsState(robot));
         addState(new RevHubTestSuiteServoTestsState(robot));
         addState(new RevHubTestSuiteAnalogTestsState(robot));

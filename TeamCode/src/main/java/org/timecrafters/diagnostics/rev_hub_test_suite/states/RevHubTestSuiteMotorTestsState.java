@@ -33,6 +33,9 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
     public void exec() {
         super.exec();
 
+        if (testComplete)
+            return;
+
         switch (stage) {
             case MOTOR_ENCODER_STEADY: {
                 test_encoder_steady();

@@ -24,6 +24,9 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
     public void exec() {
         super.exec();
 
+        if (testComplete)
+            return;
+
         test_servos();
 
         if (stage.ordinal() > STAGE.SERVO_SWEEP.ordinal()) {
