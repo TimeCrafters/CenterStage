@@ -11,7 +11,7 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
     private int servo_index = 0;
     private final ArrayList<ServoEx> servos;
     private double lastMonitorTime;
-    private double automaticInterval = 1500.0; // milliseconds
+    private final double automaticInterval = 1_500.0; // milliseconds
     private boolean setInitialValue = true;
     public RevHubTestSuiteServoTestsState(RevHubTestSuiteRobot robot) {
         super(robot);

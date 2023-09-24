@@ -80,6 +80,9 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             nextStage();
             motor_index = 0;
             setInitialValue = true;
+
+            report("-"); // Embed newline
+
             return;
         }
 
@@ -111,6 +114,9 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             nextStage();
             motor_index = 0;
             setInitialValue = true;
+
+            report("-"); // Embed newline
+
             return;
         }
 
@@ -122,7 +128,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             lastMonitorTime = runTime();
 
             motor.resetEncoder();
-            motor.motorEx.setPower(forward ? 1.0 : -1.0);
+            motor.motorEx.setPower(forward ? 0.5 : -0.5);
         }
 
         if (runTime() - lastMonitorTime >= automaticInterval) {
@@ -134,7 +140,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             if (Math.abs(lastValue) >= 100) {
                 report("PASSED: Motor Encoder `" + motor_index + "` " + pass);
             } else {
-                report("FAILED: Motor Encoder `" + motor_index + "` " + fail + " (" + lastValue + " < 100)");
+                report("FAILED: Motor Encoder `" + motor_index + "` " + fail + " (" + lastValue + " < " + (forward ? "" : "-") + "100)");
             }
 
             motor.stopMotor();
@@ -148,6 +154,9 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             nextStage();
             motor_index = 0;
             setInitialValue = true;
+
+            report("-"); // Embed newline
+
             return;
         }
 
@@ -206,7 +215,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
                 average_ticks = total_ticks / sampleTicksList.size();
                 average_ticks = average_ticks * (1.0 / (automaticSampleInterval * 0.001)); // Convert to PER SECOND
 
-                report(String.format(Locale.US, "RESULT: Motor %d: Speed: %.2f, Average AMPS: %.4f, Average TICKS/s: %d", motor_index, motor.motorEx.getPower(), average_amps, (int)average_ticks));
+                report(String.format(Locale.US, "RESULT: Motor %d | %.2f: AMPS: %.4f, TICKS/s: %d", motor_index, motor.motorEx.getPower(), average_amps, (int)average_ticks));
 
                 motor_index++;
                 motor.motorEx.setPower(0.0);
@@ -220,6 +229,9 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             nextStage();
             motor_index = 0;
             setInitialValue = true;
+
+            report("-"); // Embed newline
+
             return;
         }
 
