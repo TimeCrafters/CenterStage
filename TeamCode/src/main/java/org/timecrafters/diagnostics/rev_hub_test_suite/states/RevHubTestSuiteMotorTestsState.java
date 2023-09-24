@@ -275,6 +275,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
     public void telemetry() {
         engine.telemetry.addLine("MOTOR CONTROLLER TESTING");
         engine.telemetry.addLine();
+
         if (motor_index < 4) {
             MotorEx motor = motors.get(motor_index);
 

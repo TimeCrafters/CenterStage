@@ -77,6 +77,9 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
     }
 
     public void telemetry() {
+        engine.telemetry.addLine("SERVO CONTROLLER TESTING");
+        engine.telemetry.addLine();
+
         if (stage == STAGE.SERVO_SWEEP) {
             engine.telemetry.addLine("MANUAL TEST");
             engine.telemetry.addLine("PRESS `A` if Servo " + servo_index + " is ROTATING.");

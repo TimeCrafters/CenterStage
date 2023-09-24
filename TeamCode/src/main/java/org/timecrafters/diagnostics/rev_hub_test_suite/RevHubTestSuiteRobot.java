@@ -116,6 +116,15 @@ public class RevHubTestSuiteRobot extends Robot {
 
         /* ------------------------------------------------ Motor Configuration ------------------------------------------------ */
         configureMotors();
+
+        /* ------------------------------------------------ Digital Sensor Configuration ------------------------------------------------ */
+        configureDigitalSensors();
+    }
+
+    protected void clearStaleData() {
+//        for (LynxModule hub : lynxModules) {
+//            hub.clearBulkCache();
+//        }
     }
 
     private void configureMotors() {
@@ -130,9 +139,13 @@ public class RevHubTestSuiteRobot extends Robot {
         }
     }
 
-    protected void clearStaleData() {
-//        for (LynxModule hub : lynxModules) {
-//            hub.clearBulkCache();
-//        }
+    private void configureDigitalSensors() {
+        for(DigitalChannel sensor : controlHubDigitalSensors) {
+            sensor.setMode(DigitalChannel.Mode.INPUT);
+        }
+
+        for(DigitalChannel sensor : expansionHubDigitalSensors) {
+            sensor.setMode(DigitalChannel.Mode.INPUT);
+        }
     }
 }
