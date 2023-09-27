@@ -11,5 +11,6 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
     }
     @Override
     public void exec() {
+        robot.driveTrainTeleOp();
     }
 }
