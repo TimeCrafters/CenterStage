@@ -29,7 +29,7 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
 
         test_servos();
 
-        if (stage.ordinal() > STAGE.SERVO_SWEEP.ordinal()) {
+        if (robot.stage.ordinal() > STAGE.SERVO_SWEEP.ordinal()) {
             testComplete = true;
         }
     }
@@ -57,7 +57,7 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
     }
 
     public void buttonUp(Gamepad gamepad, String button) {
-        if (stage != STAGE.SERVO_SWEEP) {
+        if (robot.stage != STAGE.SERVO_SWEEP) {
             return;
         }
 
@@ -80,7 +80,7 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
         engine.telemetry.addLine("SERVO CONTROLLER TESTING");
         engine.telemetry.addLine();
 
-        if (stage == STAGE.SERVO_SWEEP) {
+        if (robot.stage == STAGE.SERVO_SWEEP) {
             engine.telemetry.addLine("MANUAL TEST");
             engine.telemetry.addLine("PRESS `A` if Servo " + servo_index + " is ROTATING.");
             engine.telemetry.addLine();

@@ -27,8 +27,6 @@ public class RevTestSuiteTestState extends CyberarmState {
 
     final String TAG = "RevTestSuite|State";
     RevHubTestSuiteRobot robot;
-    protected STAGE stage = STAGE.NONE;
-    protected final ArrayList<String> reports = new ArrayList<>();
     protected boolean testComplete = false;
     public RevTestSuiteTestState(RevHubTestSuiteRobot robot) {
         super();
@@ -40,36 +38,37 @@ public class RevTestSuiteTestState extends CyberarmState {
     public void exec() {
         if (testComplete && engine.gamepad1.guide) {
             setHasFinished(true);
+            testComplete = false;
         }
     }
 
     void report(String reason) {
-        synchronized (reports) {
-            reports.add(reason);
+        synchronized (robot.reports) {
+            robot.reports.add(reason);
         }
     }
 
     public void nextStage() {
-        if (stage == STAGE.COMPLETE)
+        if (robot.stage == STAGE.COMPLETE)
             return;
 
-        stage = STAGE.values()[stage.ordinal() + 1];
+        robot.stage = STAGE.values()[robot.stage.ordinal() + 1];
     }
 
     @Override
     public void telemetry() {
         if (testComplete) {
-            engine.telemetry.addLine("TESTING");
-        } else {
             engine.telemetry.addLine("PRESS `GUIDE` TO CONTINUE");
+        } else {
+            engine.telemetry.addLine("TESTING");
         }
         engine.telemetry.addLine();
-        engine.telemetry.addData("STAGE", stage);
+        engine.telemetry.addData("STAGE", robot.stage);
         engine.telemetry.addLine();
         engine.telemetry.addLine("REPORTS");
 
-        synchronized (reports) {
-            for (String report : reports) {
+        synchronized (robot.reports) {
+            for (String report : robot.reports) {
                 engine.telemetry.addLine(report);
             }
         }

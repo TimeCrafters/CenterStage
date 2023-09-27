@@ -32,7 +32,7 @@ public class RevHubTestSuiteI2CTestsState extends RevTestSuiteTestState {
             report("-"); // Add newline
         }
 
-        if (stage.ordinal() > STAGE.I2C_SENSOR.ordinal()) {
+        if (robot.stage.ordinal() > STAGE.I2C_SENSOR.ordinal()) {
             testComplete = true;
         }
     }

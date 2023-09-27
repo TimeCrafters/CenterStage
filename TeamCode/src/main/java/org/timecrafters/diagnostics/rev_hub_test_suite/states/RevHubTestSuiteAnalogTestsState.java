@@ -28,7 +28,7 @@ public class RevHubTestSuiteAnalogTestsState extends RevTestSuiteTestState {
             report("-"); // Add newline
         }
 
-        if (stage.ordinal() > STAGE.ANALOG_SENSOR.ordinal()) {
+        if (robot.stage.ordinal() > STAGE.ANALOG_SENSOR.ordinal()) {
             testComplete = true;
         }
     }

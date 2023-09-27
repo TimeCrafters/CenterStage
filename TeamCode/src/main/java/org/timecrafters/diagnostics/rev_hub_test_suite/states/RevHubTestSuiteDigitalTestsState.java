@@ -29,7 +29,7 @@ public class RevHubTestSuiteDigitalTestsState extends RevTestSuiteTestState {
             report("-"); // Add newline
         }
 
-        if (stage.ordinal() > STAGE.DIGITAL_SENSOR.ordinal()) {
+        if (robot.stage.ordinal() > STAGE.DIGITAL_SENSOR.ordinal()) {
             testComplete = true;
         }
     }

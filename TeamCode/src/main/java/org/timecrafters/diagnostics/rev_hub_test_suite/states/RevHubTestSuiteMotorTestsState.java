@@ -43,7 +43,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
         if (testComplete)
             return;
 
-        switch (stage) {
+        switch (robot.stage) {
             case MOTOR_ENCODER_STEADY: {
                 test_encoder_steady();
                 break;
@@ -70,7 +70,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             }
         }
 
-        if (stage.ordinal() > STAGE.MOTOR_BRAKING_MODE.ordinal()) {
+        if (robot.stage.ordinal() > STAGE.MOTOR_BRAKING_MODE.ordinal()) {
             testComplete = true;
         }
     }
@@ -242,7 +242,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
 
     @Override
     public void buttonUp(Gamepad gamepad, String button) {
-        if (stage != STAGE.MOTOR_BRAKING_MODE) {
+        if (robot.stage != STAGE.MOTOR_BRAKING_MODE) {
             return;
         }
 
@@ -283,7 +283,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
             engine.telemetry.addLine();
         }
 
-        if (stage == STAGE.MOTOR_BRAKING_MODE) {
+        if (robot.stage == STAGE.MOTOR_BRAKING_MODE) {
             engine.telemetry.addLine("MANUAL TEST");
             engine.telemetry.addLine("PRESS `A` if Motor " + motor_index + " is BRAKING.");
             engine.telemetry.addLine();

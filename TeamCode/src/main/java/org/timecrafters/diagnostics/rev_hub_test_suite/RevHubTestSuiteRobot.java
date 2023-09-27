@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.timecrafters.Library.Robot;
+import org.timecrafters.diagnostics.rev_hub_test_suite.states.RevTestSuiteTestState;
 
 import java.util.ArrayList;
 
@@ -22,6 +23,8 @@ public class RevHubTestSuiteRobot extends Robot {
 
     private HardwareMap hardwareMap;
     public boolean testingControlHub = true;
+    public RevTestSuiteTestState.STAGE stage = RevTestSuiteTestState.STAGE.NONE;
+    public final ArrayList<String> reports = new ArrayList<>();
     public ArrayList<MotorEx> controlHubMotors = new ArrayList<>(), expansionHubMotors = new ArrayList<>();
     public ArrayList<ServoEx> controlHubServos = new ArrayList<>(), expansionHubServos = new ArrayList<>();
     public ArrayList<AnalogInput> controlHubAnalogSensors = new ArrayList<>(), expansionHubAnalogSensors = new ArrayList<>();
@@ -43,12 +46,12 @@ public class RevHubTestSuiteRobot extends Robot {
         controlHubMotors.add(new MotorEx(hardwareMap, "c_motor_3"));
 
 //        // SERVOS
-//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_0", 0.0, 180.0, AngleUnit.DEGREES));
-//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_1", 0.0, 180.0, AngleUnit.DEGREES));
-//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_2", 0.0, 180.0, AngleUnit.DEGREES));
-//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_3", 0.0, 180.0, AngleUnit.DEGREES));
-//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_4", 0.0, 180.0, AngleUnit.DEGREES));
-//        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_5", 0.0, 180.0, AngleUnit.DEGREES));
+        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_0", 0.0, 180.0, AngleUnit.DEGREES));
+        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_1", 0.0, 180.0, AngleUnit.DEGREES));
+        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_2", 0.0, 180.0, AngleUnit.DEGREES));
+        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_3", 0.0, 180.0, AngleUnit.DEGREES));
+        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_4", 0.0, 180.0, AngleUnit.DEGREES));
+        controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_5", 0.0, 180.0, AngleUnit.DEGREES));
 //
 //        // ANALOG SENSORS
 //        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_0"));
