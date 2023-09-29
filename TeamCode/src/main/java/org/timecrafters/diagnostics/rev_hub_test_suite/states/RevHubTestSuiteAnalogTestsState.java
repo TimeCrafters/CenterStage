@@ -38,7 +38,7 @@ public class RevHubTestSuiteAnalogTestsState extends RevTestSuiteTestState {
         engine.telemetry.addLine("ANALOG SENSOR PORT TESTING");
         engine.telemetry.addLine();
 
-        if (sensor_index < 4) {
+        if (sensor_index < sensors.size()) {
             AnalogInput sensor = sensors.get(sensor_index);
 
             engine.telemetry.addData("Analog Sensor", "Port: %d, V: %.2f/%.2f (%.2f%%)", sensor_index, sensor.getVoltage(), sensor.getMaxVoltage(), (sensor.getVoltage() / sensor.getMaxVoltage()) * 100.0);
@@ -56,6 +56,9 @@ public class RevHubTestSuiteAnalogTestsState extends RevTestSuiteTestState {
 
     @Override
     public void buttonUp(Gamepad gamepad, String button) {
+        if (robot.stage != STAGE.ANALOG_SENSOR)
+            return;
+
         if (gamepad == engine.gamepad1) {
             if (button.equals("a")) {
                 report("PASSED: Analog Sensor " + sensor_index + " OKAY");

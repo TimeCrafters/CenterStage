@@ -52,29 +52,29 @@ public class RevHubTestSuiteRobot extends Robot {
         controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_3", 0.0, 180.0, AngleUnit.DEGREES));
         controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_4", 0.0, 180.0, AngleUnit.DEGREES));
         controlHubServos.add(new SimpleServo(hardwareMap, "c_servo_5", 0.0, 180.0, AngleUnit.DEGREES));
-//
-//        // ANALOG SENSORS
-//        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_0"));
-//        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_1"));
-//        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_2"));
-//        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_3"));
-//
-//        // DIGITAL SENSORS
-//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_0"));
-//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_1"));
-//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_2"));
-//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_3"));
-//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_4"));
-//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_5"));
-//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_6"));
-//        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_7"));
-//
-//        // I2C SENSORS
-//        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_0"));
-//        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_1"));
-//        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_2"));
-//        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_3"));
-//
+
+        // ANALOG SENSORS
+        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_0"));
+        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_1"));
+        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_2"));
+        controlHubAnalogSensors.add(hardwareMap.analogInput.get("c_analog_3"));
+
+        // DIGITAL SENSORS
+        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_0"));
+        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_1"));
+        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_2"));
+        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_3"));
+        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_4"));
+        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_5"));
+        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_6"));
+        controlHubDigitalSensors.add(hardwareMap.digitalChannel.get("c_digital_7"));
+
+        // I2C SENSORS
+        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_0"));
+        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_1"));
+        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_2"));
+        controlHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "c_i2c_3"));
+
 //        /* ------------------------------------------------ Expansion Hub Devices ------------------------------------------------ */
 //        // MOTORS
 //        expansionHubMotors.add(new MotorEx(hardwareMap, "x_motor_0"));
@@ -113,9 +113,9 @@ public class RevHubTestSuiteRobot extends Robot {
 //        expansionHubI2cSensors.add(hardwareMap.get(Rev2mDistanceSensor.class, "x_i2c_3"));
 //
 //        /* ------------------------------------------------ Hub Sensor Reading Optimization ------------------------------------------------ */
-//        for (LynxModule hub : lynxModules) {
-//            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-//        }
+        for (LynxModule hub : lynxModules) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
 
         /* ------------------------------------------------ Motor Configuration ------------------------------------------------ */
         configureMotors();
@@ -125,9 +125,9 @@ public class RevHubTestSuiteRobot extends Robot {
     }
 
     protected void clearStaleData() {
-//        for (LynxModule hub : lynxModules) {
-//            hub.clearBulkCache();
-//        }
+        for (LynxModule hub : lynxModules) {
+            hub.clearBulkCache();
+        }
     }
 
     private void configureMotors() {

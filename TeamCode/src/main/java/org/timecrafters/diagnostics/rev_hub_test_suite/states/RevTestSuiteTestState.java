@@ -21,6 +21,7 @@ public class RevTestSuiteTestState extends CyberarmState {
         ANALOG_SENSOR,
         DIGITAL_SENSOR,
         I2C_SENSOR,
+        IMU,
 
         COMPLETE
     }

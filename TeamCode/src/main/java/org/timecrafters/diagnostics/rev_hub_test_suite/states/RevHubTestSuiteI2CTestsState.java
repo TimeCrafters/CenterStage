@@ -63,11 +63,11 @@ public class RevHubTestSuiteI2CTestsState extends RevTestSuiteTestState {
     public void buttonUp(Gamepad gamepad, String button) {
         if (gamepad == engine.gamepad1) {
             if (button.equals("a")) {
-                report("PASSED: Digital Sensor " + sensor_index + " OKAY");
+                report("PASSED: I2C Sensor " + sensor_index + " OKAY");
 
                 sensor_index++;
             } else if (button.equals("y")) {
-                report("FAILED: Digital Sensor " + sensor_index + " NOT OKAY");
+                report("FAILED: I2C Sensor " + sensor_index + " NOT OKAY");
 
                 sensor_index++;
             }

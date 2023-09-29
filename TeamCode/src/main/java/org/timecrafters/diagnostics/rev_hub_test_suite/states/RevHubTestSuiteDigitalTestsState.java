@@ -39,7 +39,7 @@ public class RevHubTestSuiteDigitalTestsState extends RevTestSuiteTestState {
         engine.telemetry.addLine("DIGITAL SENSOR PORT TESTING");
         engine.telemetry.addLine();
 
-        if (sensor_index < 4) {
+        if (sensor_index < sensors.size()) {
             DigitalChannel sensor = sensors.get(sensor_index);
 
             engine.telemetry.addData("Digital Sensor", "Port: %d, State: %s", sensor_index, (sensor.getState() ? "ON" : "OFF"));
@@ -58,6 +58,9 @@ public class RevHubTestSuiteDigitalTestsState extends RevTestSuiteTestState {
 
     @Override
     public void buttonUp(Gamepad gamepad, String button) {
+        if (robot.stage != STAGE.DIGITAL_SENSOR)
+            return;
+
         if (gamepad == engine.gamepad1) {
             if (button.equals("a")) {
                 report("PASSED: Digital Sensor " + sensor_index + " OKAY");

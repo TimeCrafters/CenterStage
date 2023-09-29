@@ -8,6 +8,7 @@ import org.timecrafters.diagnostics.rev_hub_test_suite.states.RevHubTestSuiteHub
 import org.timecrafters.diagnostics.rev_hub_test_suite.states.RevHubTestSuiteI2CTestsState;
 import org.timecrafters.diagnostics.rev_hub_test_suite.states.RevHubTestSuiteMotorTestsState;
 import org.timecrafters.diagnostics.rev_hub_test_suite.states.RevHubTestSuiteServoTestsState;
+import org.timecrafters.diagnostics.rev_hub_test_suite.states.RevTestSuiteTestState;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
@@ -29,10 +30,14 @@ public class RevHubTestSuiteEngine extends CyberarmEngine {
         addState(new RevHubTestSuiteAnalogTestsState(robot));
         addState(new RevHubTestSuiteDigitalTestsState(robot));
         addState(new RevHubTestSuiteI2CTestsState(robot));
+
+        // robot.stage = RevTestSuiteTestState.STAGE.ANALOG_SENSOR;
     }
 
     @Override
     public void loop() {
+        // robot.controlHubMotors.get(0).motorEx.setPower(gamepad1.left_stick_y * 0.1);
+
         robot.clearStaleData();
 
         super.loop();
