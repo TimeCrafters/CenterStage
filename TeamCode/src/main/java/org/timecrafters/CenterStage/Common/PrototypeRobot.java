@@ -37,8 +37,11 @@ public class PrototypeRobot extends Robot {
         backLeft = new MotorEx(hardwareMap, "backLeft");
 
         //IMU
-        imu = hardwareMap.get(RevIMU.class, "imu");
-        imu.init(new BNO055IMU.Parameters());
+        imu = new RevIMU(hardwareMap, "imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        imu.init(parameters);
 
         // input motors exactly as shown below
         xDrive = new HDrive(frontLeft, frontRight,

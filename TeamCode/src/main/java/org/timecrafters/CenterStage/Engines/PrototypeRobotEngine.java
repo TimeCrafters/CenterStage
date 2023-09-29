@@ -12,6 +12,7 @@ public class PrototypeRobotEngine extends CyberarmEngine {
     @Override
     public void setup() {
         this.robot = new PrototypeRobot("Hello World");
+        this.robot.setup();
 
         addState(new PrototypeRobotDrivetrainState(robot));
     }
