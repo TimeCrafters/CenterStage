@@ -13,7 +13,7 @@ import java.util.Locale;
 public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
     private int motor_index = 0;
 
-    private final ArrayList<MotorEx> motors;
+    private ArrayList<MotorEx> motors;
     private double lastMonitorTime, lastSampleMonitorTime;
     private final double automaticInterval = 3_000; // milliseconds
     private final double automaticSampleInterval = 3_000.0; // milliseconds - test motor current and ticks per second
@@ -24,14 +24,14 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
     private boolean setInitialValue = true;
     public RevHubTestSuiteMotorTestsState(RevHubTestSuiteRobot robot) {
         super(robot);
-
-        motors = robot.testingControlHub ? robot.controlHubMotors : robot.expansionHubMotors;
-        lastMonitorTime = runTime();
     }
 
     @Override
     public void start() {
         super.start();
+
+        motors = robot.testingControlHub ? robot.controlHubMotors : robot.expansionHubMotors;
+        lastMonitorTime = runTime();
 
         nextStage();
     }

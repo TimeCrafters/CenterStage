@@ -12,10 +12,15 @@ import java.util.ArrayList;
 import dev.cyberarm.engine.V2.CyberarmState;
 
 public class RevHubTestSuiteI2CTestsState extends RevTestSuiteTestState {
-    private final ArrayList<Rev2mDistanceSensor> sensors;
+    private ArrayList<Rev2mDistanceSensor> sensors;
     private int sensor_index = 0;
     public RevHubTestSuiteI2CTestsState(RevHubTestSuiteRobot robot) {
         super(robot);
+    }
+
+    @Override
+    public void start() {
+        super.start();
 
         sensors = robot.testingControlHub ? robot.controlHubI2cSensors : robot.expansionHubI2cSensors;
     }

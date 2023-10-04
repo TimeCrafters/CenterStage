@@ -9,12 +9,17 @@ import java.util.ArrayList;
 
 public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
     private int servo_index = 0;
-    private final ArrayList<ServoEx> servos;
+    private ArrayList<ServoEx> servos;
     private double lastMonitorTime;
     private final double automaticInterval = 1_500.0; // milliseconds
     private boolean setInitialValue = true;
     public RevHubTestSuiteServoTestsState(RevHubTestSuiteRobot robot) {
         super(robot);
+    }
+
+    @Override
+    public void start() {
+        super.start();
 
         servos = robot.testingControlHub ? robot.controlHubServos : robot.expansionHubServos;
         lastMonitorTime = runTime();

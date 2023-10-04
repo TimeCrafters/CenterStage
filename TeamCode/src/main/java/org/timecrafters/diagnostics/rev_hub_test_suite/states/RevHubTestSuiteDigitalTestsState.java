@@ -9,10 +9,15 @@ import org.timecrafters.diagnostics.rev_hub_test_suite.RevHubTestSuiteRobot;
 import java.util.ArrayList;
 
 public class RevHubTestSuiteDigitalTestsState extends RevTestSuiteTestState {
-    private final ArrayList<DigitalChannel> sensors;
+    private ArrayList<DigitalChannel> sensors;
     private int sensor_index = 0;
     public RevHubTestSuiteDigitalTestsState(RevHubTestSuiteRobot robot) {
         super(robot);
+    }
+
+    @Override
+    public void start() {
+        super.start();
 
         sensors = robot.testingControlHub ? robot.controlHubDigitalSensors : robot.expansionHubDigitalSensors;
     }

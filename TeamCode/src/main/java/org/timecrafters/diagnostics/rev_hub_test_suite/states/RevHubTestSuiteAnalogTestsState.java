@@ -8,10 +8,15 @@ import org.timecrafters.diagnostics.rev_hub_test_suite.RevHubTestSuiteRobot;
 import java.util.ArrayList;
 
 public class RevHubTestSuiteAnalogTestsState extends RevTestSuiteTestState {
-    private final ArrayList<AnalogInput> sensors;
+    private ArrayList<AnalogInput> sensors;
     private int sensor_index = 0;
     public RevHubTestSuiteAnalogTestsState(RevHubTestSuiteRobot robot) {
         super(robot);
+    }
+
+    @Override
+    public void start() {
+        super.start();
 
         sensors = robot.testingControlHub ? robot.controlHubAnalogSensors : robot.expansionHubAnalogSensors;
     }

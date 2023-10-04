@@ -63,6 +63,11 @@ public class RevTestSuiteTestState extends CyberarmState {
         } else {
             engine.telemetry.addLine("TESTING");
         }
+
+        engine.telemetry.addLine();
+        engine.telemetry.addData("TEST MODE", (robot.testingControlHub ? "Control Hub" : "Expansion Hub"));
+        engine.telemetry.addLine();
+
         engine.telemetry.addLine();
         engine.telemetry.addData("STAGE", robot.stage);
         engine.telemetry.addLine();
