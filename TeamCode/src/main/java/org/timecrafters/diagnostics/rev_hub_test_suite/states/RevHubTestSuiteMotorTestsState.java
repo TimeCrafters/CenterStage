@@ -124,10 +124,11 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
 
         if (setInitialValue) {
             setInitialValue = false;
+            motor.resetEncoder();
+
             initialValue = motor.getCurrentPosition();
             lastMonitorTime = runTime();
 
-            motor.resetEncoder();
             motor.motorEx.setPower(forward ? 0.5 : -0.5);
         }
 
