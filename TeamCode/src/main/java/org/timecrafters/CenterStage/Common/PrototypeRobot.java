@@ -12,11 +12,16 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.timecrafters.Library.Robot;
+import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
 public class PrototypeRobot extends Robot {
 
+    public float ELBOW_COLLECT;
+    public float ELBOW_DEPOSIT;
+    public float SHOULDER_COLLECT;
+    public float SHOULDER_DEPOSIT;
     private HardwareMap hardwareMap;
     public MotorEx frontLeft, frontRight, backLeft, backRight, lift;
     public IMU imu;
@@ -25,9 +30,18 @@ public class PrototypeRobot extends Robot {
     private String string;
     private CyberarmEngine engine;
 
+    public TimeCraftersConfiguration configuration;
+
     public PrototypeRobot(String string) {
         this.string = string;
     }
+
+    public void initConstants(){
+            ELBOW_DEPOSIT = configuration.variable("Robot", "Tuning", "ELBOW_DEPOSIT").value();
+            ELBOW_COLLECT = configuration.variable("Robot", "Tuning", "ELBOW_COLLECT").value();
+            SHOULDER_DEPOSIT = configuration.variable("Robot", "Tuning", "SHOULDER_DEPOSIT").value();
+            SHOULDER_COLLECT = configuration.variable("Robot", "Tuning", "SHOULDER_COLLECT").value();
+        }
 
     @Override
     public void setup() {
@@ -44,6 +58,9 @@ public class PrototypeRobot extends Robot {
         backLeft = new MotorEx(hardwareMap, "backLeft");
         lift = new MotorEx(hardwareMap, "lift");
 
+        configuration = new TimeCraftersConfiguration("Robbie");
+
+        initConstants();
 
         frontRight.motor.setDirection(DcMotorSimple.Direction.FORWARD);
         backRight.motor.setDirection(DcMotorSimple.Direction.FORWARD);
