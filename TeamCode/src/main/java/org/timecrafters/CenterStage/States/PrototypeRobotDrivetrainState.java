@@ -10,8 +10,47 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
     private int maxExtension = 2000;
     private int minExtension = 0;
 
+    private long lastCheckedTime;
+
     public PrototypeRobotDrivetrainState(PrototypeRobot robot) {
         this.robot = robot;
+    }
+    private void depositorAutomation(){
+        // TODO: 10/7/2023 Workout Logic to move each limb step by step
+        
+        lastCheckedTime = System.currentTimeMillis();
+
+        if (engine.gamepad2.a){
+        // setting Servo Positions to do time Math
+        robot.currentSetPosShoulder = robot.SHOULDER_COLL
+        robot.depositorShoulder.setPosition(robot.currentSetPosShoulder);
+        // running math function to determine time
+        robot.ShoulderServoWaitTime();
+        // determining if the time is met to do the next action
+        if (lastCheckedTime - System.currentTimeMillis() >= robot.servoWaitTime){
+            robot.lastSetPosShoulder = robot.currentSetPosShoulder;
+            // setting Servo Positions to do time Math
+            robot.currentSetPosElbow = robot.ELBOW_COLLECT;
+            robot.depositorElbow.setPosition(robot.currentSetPosElbow);
+            robot.lastSetPosElbow = robot.currentSetPosElbow;
+        }
+    }
+        if (engine.gamepad2.y){
+            // setting Servo Positions to do time Math
+            robot.currentSetPosShoulder = robot.SHOULDER_DEPOSIT;
+            robot.depositorShoulder.setPosition(robot.currentSetPosShoulder);
+            // running math function to determine time
+            robot.ShoulderServoWaitTime();
+            // determining if the time is met to do the next action
+            if (lastCheckedTime - System.currentTimeMillis() >= robot.servoWaitTime){
+                robot.lastSetPosShoulder = robot.currentSetPosShoulder;
+                // setting Servo Positions to do time Math
+                robot.currentSetPosElbow = robot.ELBOW_COLLECT;
+                robot.depositorElbow.setPosition(robot.currentSetPosElbow);
+                robot.lastSetPosElbow = robot.currentSetPosElbow;
+
+            }
+        }
     }
 
     // --------------------------------------------------------------------------------------------------------- Depositor control function

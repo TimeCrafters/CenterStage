@@ -17,11 +17,16 @@ import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfig
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
 public class PrototypeRobot extends Robot {
-
+    public double servoWaitTime;
+    public double servoSecPerDeg = 0.14/60;;
     public float ELBOW_COLLECT;
     public float ELBOW_DEPOSIT;
     public float SHOULDER_COLLECT;
     public float SHOULDER_DEPOSIT;
+    public float lastSetPosShoulder = SHOULDER_COLLECT;
+    public float lastSetPosElbow = ELBOW_COLLECT;
+    public float currentSetPosShoulder;
+    public float currentSetPosElbow;
     private HardwareMap hardwareMap;
     public MotorEx frontLeft, frontRight, backLeft, backRight, lift;
     public IMU imu;
@@ -91,9 +96,24 @@ public class PrototypeRobot extends Robot {
         xDrive = new HDrive(frontLeft, frontRight,
                             backLeft, backRight);
 
+        depositorShoulder.setPosition(SHOULDER_COLLECT);
+        depositorElbow.setPosition(ELBOW_COLLECT);
+
     }
 
     public void driveTrainTeleOp() {
         xDrive.driveRobotCentric(-engine.gamepad1.left_stick_x, engine.gamepad1.left_stick_y, -engine.gamepad1.right_stick_x);
+    }
+
+    public void ShoulderServoWaitTime(){
+
+        servoWaitTime = servoSecPerDeg * (Math.abs(lastSetPosShoulder - currentSetPosShoulder));
+
+    }
+
+    public void ElbowServoWaitTime(){
+
+        servoWaitTime = 1000 * (servoSecPerDeg * (Math.abs(lastSetPosElbow - currentSetPosElbow)));
+
     }
 }
