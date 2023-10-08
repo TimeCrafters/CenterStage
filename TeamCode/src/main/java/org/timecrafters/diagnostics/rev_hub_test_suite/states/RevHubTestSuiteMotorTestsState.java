@@ -33,7 +33,7 @@ public class RevHubTestSuiteMotorTestsState extends RevTestSuiteTestState {
         motors = robot.testingControlHub ? robot.controlHubMotors : robot.expansionHubMotors;
         lastMonitorTime = runTime();
 
-        nextStage();
+        robot.stage = STAGE.MOTOR_ENCODER_STEADY;
     }
 
     @Override

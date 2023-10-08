@@ -79,4 +79,11 @@ public class RevTestSuiteTestState extends CyberarmState {
             }
         }
     }
+
+    @Override
+    public void setHasFinished(boolean value) {
+        Log.i(TAG, "finished state: " + this.getClass() +", stage: " + robot.stage.toString());
+
+        super.setHasFinished(value);
+    }
 }

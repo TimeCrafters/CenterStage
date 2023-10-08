@@ -23,6 +23,8 @@ public class RevHubTestSuiteServoTestsState extends RevTestSuiteTestState {
 
         servos = robot.testingControlHub ? robot.controlHubServos : robot.expansionHubServos;
         lastMonitorTime = runTime();
+
+        robot.stage = STAGE.SERVO_SWEEP;
     }
 
     @Override

@@ -23,6 +23,7 @@ public class RevHubTestSuiteI2CTestsState extends RevTestSuiteTestState {
         super.start();
 
         sensors = robot.testingControlHub ? robot.controlHubI2cSensors : robot.expansionHubI2cSensors;
+        robot.stage = STAGE.I2C_SENSOR;
     }
 
     @Override

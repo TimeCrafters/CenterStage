@@ -25,14 +25,12 @@ public class RevHubTestSuiteEngine extends CyberarmEngine {
 
         addState(new RevHubTestSuiteHubSelectionState(robot));
 
-//        addState(new RevHubTestSuiteMotorTestsState(robot));
-//        addState(new RevHubTestSuiteServoTestsState(robot));
-//        addState(new RevHubTestSuiteAnalogTestsState(robot));
-//        addState(new RevHubTestSuiteDigitalTestsState(robot));
+        addState(new RevHubTestSuiteMotorTestsState(robot));
+        addState(new RevHubTestSuiteServoTestsState(robot));
+        addState(new RevHubTestSuiteAnalogTestsState(robot));
+        addState(new RevHubTestSuiteDigitalTestsState(robot));
         addState(new RevHubTestSuiteI2CTestsState(robot));
 
-//         robot.stage = RevTestSuiteTestState.STAGE.ANALOG_SENSOR;
-         robot.stage = RevTestSuiteTestState.STAGE.I2C_SENSOR;
     }
 
     @Override

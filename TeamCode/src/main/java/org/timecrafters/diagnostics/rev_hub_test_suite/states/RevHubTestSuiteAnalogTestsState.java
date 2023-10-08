@@ -1,5 +1,7 @@
 package org.timecrafters.diagnostics.rev_hub_test_suite.states;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -19,6 +21,7 @@ public class RevHubTestSuiteAnalogTestsState extends RevTestSuiteTestState {
         super.start();
 
         sensors = robot.testingControlHub ? robot.controlHubAnalogSensors : robot.expansionHubAnalogSensors;
+        robot.stage = STAGE.ANALOG_SENSOR;
     }
 
     @Override

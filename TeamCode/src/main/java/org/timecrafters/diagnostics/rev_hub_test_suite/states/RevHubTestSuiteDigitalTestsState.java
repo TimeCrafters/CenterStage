@@ -20,6 +20,7 @@ public class RevHubTestSuiteDigitalTestsState extends RevTestSuiteTestState {
         super.start();
 
         sensors = robot.testingControlHub ? robot.controlHubDigitalSensors : robot.expansionHubDigitalSensors;
+        robot.stage = STAGE.DIGITAL_SENSOR;
     }
 
     @Override
