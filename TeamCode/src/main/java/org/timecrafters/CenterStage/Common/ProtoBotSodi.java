@@ -25,8 +25,13 @@ public class ProtoBotSodi extends Robot {
     public MotorEx flDrive, frDrive, blDrive, brDrive, bloodWorm;
     public CRServo fang;
     public Servo jaw;
+
+    private TimeCraftersConfiguration configuration;
+
     @Override
     public void setup() {
+
+        configuration = new TimeCraftersConfiguration("Rigel");
 
         //Motors
         flDrive = new MotorEx(hardwareMap, "FrontLeftDrive");
