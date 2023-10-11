@@ -18,7 +18,7 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 
 public class PrototypeRobot extends Robot {
     public double servoWaitTime;
-    public double servoSecPerDeg = 0.14/60;;
+    public double servoSecPerDeg = 0.14/60;
     public float ELBOW_COLLECT;
     public float ELBOW_DEPOSIT;
     public float SHOULDER_COLLECT;
@@ -38,6 +38,8 @@ public class PrototypeRobot extends Robot {
     public TimeCraftersConfiguration configuration;
 
     public PrototypeRobot(String string) {
+        this.engine = engine;
+        setup();
         this.string = string;
     }
 
