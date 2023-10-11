@@ -1,4 +1,4 @@
-package org.timecrafters.CenterStage.States;
+package org.timecrafters.CenterStage.TeleOp.States;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.timecrafters.CenterStage.Common.PrototypeRobot;
@@ -22,7 +22,6 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
 
         if (engine.gamepad2.a){
         // setting Servo Positions to do time Math
-        robot.currentSetPosShoulder = robot.SHOULDER_COLL
         robot.depositorShoulder.setPosition(robot.currentSetPosShoulder);
         // running math function to determine time
         robot.ShoulderServoWaitTime();

@@ -1,9 +1,10 @@
-package org.timecrafters.CenterStage.Engines;
+package org.timecrafters.CenterStage.TeleOp.Engines;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.timecrafters.CenterStage.Common.PrototypeRobot;
-import org.timecrafters.CenterStage.States.PrototypeRobotDrivetrainState;
+import org.timecrafters.CenterStage.TeleOp.States.PrototypeRobotDrivetrainState;
+
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
 @TeleOp(name = "Prototype Robot", group = "PROTOTYPE")
