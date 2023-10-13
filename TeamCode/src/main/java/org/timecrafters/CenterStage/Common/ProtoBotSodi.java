@@ -31,14 +31,14 @@ public class ProtoBotSodi extends Robot {
     @Override
     public void setup() {
 
-        configuration = new TimeCraftersConfiguration("Rigel");
+        configuration = new TimeCraftersConfiguration("Robbie");
 
         //Motors
-        flDrive = new MotorEx(hardwareMap, "FrontLeftDrive");
-        frDrive = new MotorEx(hardwareMap, "FrontRightDrive");
-        blDrive = new MotorEx(hardwareMap, "BackLeftDrive");
-        brDrive = new MotorEx(hardwareMap, "BackRightDrive");
-        bloodWorm = new MotorEx(hardwareMap, "Proboscis");
+        flDrive = new MotorEx(hardwareMap, "frontLeft");
+        frDrive = new MotorEx(hardwareMap, "frontRight");
+        blDrive = new MotorEx(hardwareMap, "backLeft");
+        brDrive = new MotorEx(hardwareMap, "backRight");
+        bloodWorm = new MotorEx(hardwareMap, "lift");
         //The motor bloodWorm is the one that raises the deliverer.
         //The reason it's called bloodworm is because of what bloodworms are. Better left unsaid.
 
