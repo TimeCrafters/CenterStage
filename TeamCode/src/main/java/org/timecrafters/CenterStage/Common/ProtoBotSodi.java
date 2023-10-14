@@ -23,24 +23,47 @@ public class ProtoBotSodi extends Robot {
 
     public HardwareMap hardwareMap;
     public MotorEx flDrive, frDrive, blDrive, brDrive, bloodWorm;
-    public CRServo fang;
-    public Servo jaw;
-
+    public Servo fang, jaw, neck, shoulder, wrist, hand;
+    public ProtoBotSodi robot;
     private TimeCraftersConfiguration configuration;
+    private String string;
+    private CyberarmEngine engine;
+
+    public ProtoBotSodi(String string) {
+        this.engine = engine;
+        this.string = string;
+    }
 
     @Override
-    public void setup() {
+    public void setup() {System.out.println("Bacon: " + this.string);
+        this.hardwareMap = CyberarmEngine.instance.hardwareMap;
+        this.engine = CyberarmEngine.instance;
 
         configuration = new TimeCraftersConfiguration("Robbie");
 
-        //Motors
-        flDrive = new MotorEx(hardwareMap, "frontLeft");
+            //Motors
+        //MOTORS
         frDrive = new MotorEx(hardwareMap, "frontRight");
-        blDrive = new MotorEx(hardwareMap, "backLeft");
+        flDrive = new MotorEx(hardwareMap, "frontLeft");
         brDrive = new MotorEx(hardwareMap, "backRight");
-        bloodWorm = new MotorEx(hardwareMap, "lift");
+        blDrive = new MotorEx(hardwareMap, "backLeft");
+
+        robot.flDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.frDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.blDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.brDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.bloodWorm.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         //The motor bloodWorm is the one that raises the deliverer.
         //The reason it's called bloodworm is because of what bloodworms are. Better left unsaid.
+
+            //Servos
+        robot.jaw.setDirection(Servo.Direction.FORWARD);
+        robot.fang.setDirection(Servo.Direction.FORWARD);
+        robot.neck.setDirection(Servo.Direction.FORWARD);
+        robot.shoulder.setDirection(Servo.Direction.FORWARD);
+        robot.wrist.setDirection(Servo.Direction.FORWARD);
+        robot.hand.setDirection(Servo.Direction.FORWARD);
 
     }
 }
