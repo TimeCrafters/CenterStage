@@ -7,6 +7,8 @@ import dev.cyberarm.engine.V2.CyberarmState;
 public class AutoStateSample extends CyberarmState {
 
     private final boolean stateDisabled;
+    private double newX;
+    private double newY;
     PrototypeRobot robot;
     public AutoStateSample(PrototypeRobot robot, String groupName, String actionName) {
         this.robot = robot;
@@ -20,9 +22,6 @@ public class AutoStateSample extends CyberarmState {
 
     @Override
     public void exec() {
-        // do stuff
-        // -------------
-        // end:
         setHasFinished(true);
     }
 }

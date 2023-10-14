@@ -1,9 +1,7 @@
 package org.timecrafters.CenterStage.Common;
 
 import com.arcrobotics.ftclib.drivebase.HDrive;
-import com.arcrobotics.ftclib.hardware.RevIMU;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -29,10 +27,42 @@ public class PrototypeRobot extends Robot {
     public float currentSetPosElbow;
     private HardwareMap hardwareMap;
     public MotorEx frontLeft, frontRight, backLeft, backRight, lift;
+    public DcMotor odometerR, odometerL, odometerA;
     public IMU imu;
     public Servo depositorShoulder, depositorElbow, depositor;
     private HDrive xDrive;
     private String string;
+    public double xMultiplier = 1;
+    public double yMultiplier = 1;
+    public double positionX;
+    public double positionY;
+    public double positionH;
+
+    // robot geometry constants for odometry -----------------------------------------------------------------------------------------------
+    public int currentRightPosition = 0;
+    public int currentLeftPosition = 0;
+    public int currentAuxPosition = 0;
+    public int oldRightPosition = 0;
+    public int oldLeftPosition = 0;
+    public int oldAuxPosition = 0;
+    public double globalPositionX;
+    public double globalPositionY;
+    public double globalPositionH;
+    public double localPositionX;
+    public double localPositionY;
+    public double localPositionH;
+    public final static double L = 23.425; // distance between left and right encoder in cm
+    final static double B = 10; // distance between the midpoint of the left and right encoder from the auxillary encoder in cm
+    public final static double R = 4.5; // wheel radius in cm
+    final static double N = 8192; // encoder ticks per revolution (REV encoder)
+
+    public final double MaxVelocityForward = 40;
+    public final double MaxStrafeVelocity = 34;
+    public final double MaxRotationalVelocity = 20;
+
+
+
+    public final double cm_per_tick = (2 * Math.PI * R) / N;
     private CyberarmEngine engine;
 
     public TimeCraftersConfiguration configuration;
@@ -116,6 +146,42 @@ public class PrototypeRobot extends Robot {
     public void ElbowServoWaitTime(){
 
         servoWaitTime = 1000 * (servoSecPerDeg * (Math.abs(lastSetPosElbow - currentSetPosElbow)));
+
+    }
+    public void OdometryLocalizer(){
+
+        if (Math.toDegrees(positionH) > 360){
+            positionH -= 360;
+        }
+
+        globalPositionX = localPositionX;
+        globalPositionY = localPositionY;
+        globalPositionH = localPositionH;
+
+
+        // update positions
+        oldRightPosition = currentRightPosition;
+        oldLeftPosition = currentLeftPosition;
+        oldAuxPosition = currentAuxPosition;
+
+        currentRightPosition = -odometerR.getCurrentPosition();
+        currentLeftPosition = -odometerL.getCurrentPosition();
+        currentAuxPosition = odometerA.getCurrentPosition();
+
+        int dnl1 = currentLeftPosition - oldLeftPosition;
+        int dnr2 = currentRightPosition - oldRightPosition;
+        int dna3 = currentAuxPosition - oldAuxPosition;
+
+        // the robot has turned and moved a tiny bit between two measurements
+        double dtheta = cm_per_tick * (dnr2 - dnl1) / L;
+        double dx = cm_per_tick * (dnl1 + dnr2) / 2.0;
+        double dy = cm_per_tick * (dna3 - (dnr2 - dnl1) * B / L);
+
+        // the small movement of the bot gets added to the field coordinates
+        double theta = positionH + (dtheta / 2.0);
+        positionX += (dx * Math.cos(theta) - dy * Math.sin(theta)) * xMultiplier;
+        positionY += (dx * Math.sin(theta) + dy * Math.cos(theta)) * yMultiplier;
+        positionH += dtheta;
 
     }
 }
