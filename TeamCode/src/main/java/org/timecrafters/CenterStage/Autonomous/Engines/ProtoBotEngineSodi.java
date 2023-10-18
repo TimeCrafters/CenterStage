@@ -7,7 +7,7 @@ import org.timecrafters.CenterStage.Autonomous.States.ProtoBotStateSodi;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-@Autonomous(name = "Rigel", group = "PROTOTYPE")
+@Autonomous(name = "Autonomous (Sodi)", group = "PROTOTYPE")
 public class ProtoBotEngineSodi extends CyberarmEngine {
     private ProtoBotSodi robot;
     @Override

@@ -44,7 +44,7 @@ public class ProtoBotStateSodi extends CyberarmState {
         robot.frDrive.motor.setPower(0);
         robot.blDrive.motor.setPower(0);
         robot.brDrive.motor.setPower(0);
-        robot.bloodWorm.motor.setPower(0);
+        robot.liftMotor.motor.setPower(0);
 
 //        robot.fang.setPosition(0);
 //        robot.jaw.setPosition(0);
@@ -63,13 +63,13 @@ public class ProtoBotStateSodi extends CyberarmState {
             robot.frDrive.motor.setPower(0.5);
             robot.blDrive.motor.setPower(0.5);
             robot.brDrive.motor.setPower(0.5);
-            robot.bloodWorm.motor.setPower(0.5);
+            robot.liftMotor.motor.setPower(0.5);
         } else if (System.currentTimeMillis() >= 2500 && System.currentTimeMillis() < 3500) {
             robot.flDrive.motor.setPower(-0.5);
             robot.frDrive.motor.setPower(-0.5);
             robot.blDrive.motor.setPower(-0.5);
             robot.brDrive.motor.setPower(-0.5);
-            robot.bloodWorm.motor.setPower(-0.5);
+            robot.liftMotor.motor.setPower(-0.5);
         } else if (System.currentTimeMillis() >= 3500 && System.currentTimeMillis() < 4500) {
             robot.flDrive.motor.setPower(0.5);
             robot.frDrive.motor.setPower(0.5);
@@ -85,7 +85,7 @@ public class ProtoBotStateSodi extends CyberarmState {
             robot.frDrive.motor.setPower(0);
             robot.blDrive.motor.setPower(0);
             robot.brDrive.motor.setPower(0);
-            robot.bloodWorm.motor.setPower(0);
+            robot.liftMotor.motor.setPower(0);
         }
     }
 }

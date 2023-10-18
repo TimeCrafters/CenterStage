@@ -22,10 +22,9 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 public class ProtoBotSodi extends Robot {
 
     public HardwareMap hardwareMap;
-    public MotorEx flDrive, frDrive, blDrive, brDrive, bloodWorm;
+    public MotorEx flDrive, frDrive, blDrive, brDrive, liftMotor;
     public Servo fang, jaw, neck, shoulder, wrist, hand;
     public ProtoBotSodi robot;
-    private TimeCraftersConfiguration configuration;
     private String string;
     private CyberarmEngine engine;
 
@@ -39,7 +38,7 @@ public class ProtoBotSodi extends Robot {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
         this.engine = CyberarmEngine.instance;
 
-        configuration = new TimeCraftersConfiguration("Robbie");
+        TimeCraftersConfiguration configuration = new TimeCraftersConfiguration("Robbie");
 
             //Motors
         //MOTORS
@@ -52,10 +51,7 @@ public class ProtoBotSodi extends Robot {
         robot.frDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.blDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.brDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.bloodWorm.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        //The motor bloodWorm is the one that raises the deliverer.
-        //The reason it's called bloodworm is because of what bloodworms are. Better left unsaid.
+        robot.liftMotor.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
             //Servos
         robot.jaw.setDirection(Servo.Direction.FORWARD);
@@ -64,6 +60,13 @@ public class ProtoBotSodi extends Robot {
         robot.shoulder.setDirection(Servo.Direction.FORWARD);
         robot.wrist.setDirection(Servo.Direction.FORWARD);
         robot.hand.setDirection(Servo.Direction.FORWARD);
+
+//        fang = hardwareMap.servo.get("Fang");
+//        jaw = hardwareMap.servo.get("Jaw");
+//        neck = hardwareMap.servo.get("Neck");
+//        shoulder = hardwareMap.servo.get("Shoulder");
+//        wrist = hardwareMap.servo.get("Wrist");
+//        hand = hardwareMap.servo.get("Hand");
 
     }
 }
