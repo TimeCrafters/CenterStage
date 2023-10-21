@@ -11,12 +11,13 @@ import org.timecrafters.CenterStage.Common.ProtoBotSodi;
 public class ProtoBotStateSodi extends CyberarmState {
     ProtoBotSodi robot;
     private double avgVelocity, avgDrivePower;
-    public ProtoBotStateSodi() {
-
+    private long lastTimeChecked;
+    public ProtoBotStateSodi(ProtoBotSodi robot) {
+        this.robot = robot;
     }
     public void telemetry() {
-    engine.telemetry.addData("Avg Drive Velocity", avgVelocity);
-    engine.telemetry.addData("Avg Drive Power", avgDrivePower);
+//    engine.telemetry.addData("Avg Drive Velocity", avgVelocity);
+//    engine.telemetry.addData("Avg Drive Power", avgDrivePower);
     engine.telemetry.addData("Front Left Velocity", robot.flDrive.getVelocity());
     engine.telemetry.addData("Front Right Velocity", robot.frDrive.getVelocity());
     engine.telemetry.addData("Back Left Velocity", robot.blDrive.getVelocity());
@@ -28,15 +29,15 @@ public class ProtoBotStateSodi extends CyberarmState {
 
     }
 
-    public double getAvgDrivePower() {
-        avgDrivePower = (robot.flDrive.motor.getPower() + robot.frDrive.motor.getPower() + robot.blDrive.motor.getPower() + robot.brDrive.motor.getPower())/4;
-        return avgDrivePower;
-    }
+//    public double getAvgDrivePower() {
+//        avgDrivePower = (robot.flDrive.motor.getPower() + robot.frDrive.motor.getPower() + robot.blDrive.motor.getPower() + robot.brDrive.motor.getPower())/4;
+//        return avgDrivePower;
+//    }
 
-    public double getAvgVelocity() {
-        avgVelocity = (robot.flDrive.getVelocity() + robot.frDrive.getVelocity() + robot.blDrive.getVelocity() + robot.brDrive.getVelocity())/4;
-        return avgVelocity;
-    }
+//    public double getAvgVelocity() {
+//        avgVelocity = (robot.flDrive.getVelocity() + robot.frDrive.getVelocity() + robot.blDrive.getVelocity() + robot.brDrive.getVelocity())/4;
+//        return avgVelocity;
+//    }
 
     @Override
     public void init() {
@@ -46,46 +47,52 @@ public class ProtoBotStateSodi extends CyberarmState {
         robot.brDrive.motor.setPower(0);
         robot.liftMotor.motor.setPower(0);
 
-//        robot.fang.setPosition(0);
-//        robot.jaw.setPosition(0);
-//        robot.neck.setPosition(0);
-//        robot.shoulder.setPosition(0);
-//        robot.wrist.setPosition(0);
-//        robot.hand.setPosition(0);
+        robot.grabJaw.setPosition(0);
+        robot.grabElbow.setPosition(0);
+        robot.grabShoulder.setPosition(0);
+        robot.dropShoulder.setPosition(0);
+        robot.dropElbow.setPosition(0);
+        robot.dropJaw.setPosition(0);
+
+        lastTimeChecked = System.currentTimeMillis();
+
 
     }
 
     @Override
     public void exec() {
 
-        if (System.currentTimeMillis() >= 500 && System.currentTimeMillis() < 2500) {
+        if (System.currentTimeMillis() - lastTimeChecked >= 500 && System.currentTimeMillis() - lastTimeChecked < 2500) {
             robot.flDrive.motor.setPower(0.5);
             robot.frDrive.motor.setPower(0.5);
             robot.blDrive.motor.setPower(0.5);
             robot.brDrive.motor.setPower(0.5);
             robot.liftMotor.motor.setPower(0.5);
-        } else if (System.currentTimeMillis() >= 2500 && System.currentTimeMillis() < 3500) {
+        } else if (System.currentTimeMillis() - lastTimeChecked >= 2500 && System.currentTimeMillis() - lastTimeChecked < 4500) {
             robot.flDrive.motor.setPower(-0.5);
             robot.frDrive.motor.setPower(-0.5);
             robot.blDrive.motor.setPower(-0.5);
             robot.brDrive.motor.setPower(-0.5);
             robot.liftMotor.motor.setPower(-0.5);
-        } else if (System.currentTimeMillis() >= 3500 && System.currentTimeMillis() < 4500) {
+        } else if (System.currentTimeMillis() - lastTimeChecked >= 4500 && System.currentTimeMillis() - lastTimeChecked < 6500) {
             robot.flDrive.motor.setPower(0.5);
             robot.frDrive.motor.setPower(0.5);
             robot.blDrive.motor.setPower(-0.5);
             robot.brDrive.motor.setPower(-0.5);
-        } else if (System.currentTimeMillis() >= 4500 && System.currentTimeMillis() < 5500) {
+            robot.liftMotor.motor.setPower(0);
+        } else if (System.currentTimeMillis() - lastTimeChecked >= 6500 && System.currentTimeMillis() - lastTimeChecked < 8500) {
             robot.flDrive.motor.setPower(-0.5);
             robot.frDrive.motor.setPower(-0.5);
             robot.blDrive.motor.setPower(0.5);
             robot.brDrive.motor.setPower(0.5);
-        } else {
+            robot.liftMotor.motor.setPower(0);
+        } else if (System.currentTimeMillis() - lastTimeChecked >= 8600){
             robot.flDrive.motor.setPower(0);
             robot.frDrive.motor.setPower(0);
             robot.blDrive.motor.setPower(0);
             robot.brDrive.motor.setPower(0);
             robot.liftMotor.motor.setPower(0);
+            setHasFinished(true);
         }
     }
 }
