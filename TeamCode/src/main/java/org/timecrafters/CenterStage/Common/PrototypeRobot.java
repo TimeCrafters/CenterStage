@@ -15,6 +15,10 @@ import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfig
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
 public class PrototypeRobot extends Robot {
+
+    public int armPosition = 0;
+
+    public int oldArmPosititon;
     public double servoWaitTime;
     public double servoSecPerDeg = 0.14/60;
     public float ELBOW_COLLECT;
