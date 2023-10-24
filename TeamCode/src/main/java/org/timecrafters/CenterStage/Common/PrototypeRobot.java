@@ -19,11 +19,14 @@ public class PrototypeRobot extends Robot {
     public int armPosition = 0;
 
     public int oldArmPosititon;
+    public long waitTime;
     public double servoWaitTime;
     public double servoSecPerDeg = 0.14/60;
     public float ELBOW_COLLECT;
+    public float ELBOW_DRIVING;
     public float ELBOW_DEPOSIT;
     public float SHOULDER_COLLECT;
+    public float SHOULDER_DRIVING;
     public float SHOULDER_DEPOSIT;
     public float lastSetPosShoulder = SHOULDER_COLLECT;
     public float lastSetPosElbow = ELBOW_COLLECT;
@@ -82,6 +85,8 @@ public class PrototypeRobot extends Robot {
             ELBOW_COLLECT = configuration.variable("Robot", "Tuning", "ELBOW_COLLECT").value();
             SHOULDER_DEPOSIT = configuration.variable("Robot", "Tuning", "SHOULDER_DEPOSIT").value();
             SHOULDER_COLLECT = configuration.variable("Robot", "Tuning", "SHOULDER_COLLECT").value();
+            SHOULDER_DRIVING = configuration.variable("Robot", "Tuning", "SHOULDER_DRIVING").value();
+            ELBOW_DRIVING = configuration.variable("Robot", "Tuning", "ELBOW_DRIVING").value();
         }
 
     @Override
@@ -99,7 +104,7 @@ public class PrototypeRobot extends Robot {
         backLeft = new MotorEx(hardwareMap, "backLeft");
         lift = new MotorEx(hardwareMap, "lift");
 
-        configuration = new TimeCraftersConfiguration("Robbie");
+        configuration = new TimeCraftersConfiguration("Blue Crab");
 
         initConstants();
 
