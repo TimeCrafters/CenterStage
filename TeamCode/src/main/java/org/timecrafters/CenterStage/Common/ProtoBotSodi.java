@@ -30,6 +30,9 @@ public class ProtoBotSodi extends Robot {
     private String string;
     private CyberarmEngine engine;
 
+    public TimeCraftersConfiguration configuration;
+
+
     public ProtoBotSodi(String string) {
         this.engine = engine;
         this.string = string;
