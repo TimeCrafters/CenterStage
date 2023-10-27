@@ -10,15 +10,16 @@ import org.timecrafters.CenterStage.Common.ProtoBotSodi;
 
 public class ProtoBotStateSodi extends CyberarmState {
     ProtoBotSodi robot;
-    private double avgVelocity, avgDrivePower;
     private long lastTimeChecked;
     private int testSequence;
+    private int targetPos;
+    private int currentPos;
+    private int totalDist;  //
+
     public ProtoBotStateSodi(ProtoBotSodi robot) {
         this.robot = robot;
     }
     public void telemetry() {
-//    engine.telemetry.addData("Avg Drive Velocity", avgVelocity);
-//    engine.telemetry.addData("Avg Drive Power", avgDrivePower);
     engine.telemetry.addData("Front Left Velocity", robot.flDrive.getVelocity());
     engine.telemetry.addData("Front Right Velocity", robot.frDrive.getVelocity());
     engine.telemetry.addData("Back Left Velocity", robot.blDrive.getVelocity());
@@ -29,16 +30,6 @@ public class ProtoBotStateSodi extends CyberarmState {
     engine.telemetry.addData("Back Right Power", robot.brDrive.motor.getPower());
 
     }
-
-//    public double getAvgDrivePower() {
-//        avgDrivePower = (robot.flDrive.motor.getPower() + robot.frDrive.motor.getPower() + robot.blDrive.motor.getPower() + robot.brDrive.motor.getPower())/4;
-//        return avgDrivePower;
-//    }
-
-//    public double getAvgVelocity() {
-//        avgVelocity = (robot.flDrive.getVelocity() + robot.frDrive.getVelocity() + robot.blDrive.getVelocity() + robot.brDrive.getVelocity())/4;
-//        return avgVelocity;
-//    }
 
     @Override
     public void init() {
@@ -59,10 +50,14 @@ public class ProtoBotStateSodi extends CyberarmState {
         testSequence = 0;
 
 
+
+
     }
 
     @Override
     public void exec() {
+
+        currentPos = robot.liftMotor.motor.getCurrentPosition();
 //
 //        if (System.currentTimeMillis() - lastTimeChecked >= 500 && System.currentTimeMillis() - lastTimeChecked < 2500) {
 //            robot.flDrive.motor.setPower(0.5);
@@ -99,11 +94,14 @@ public class ProtoBotStateSodi extends CyberarmState {
 
         switch (testSequence) {
             case 1:
+                robot.liftMotor.motor.setPower(0.4);
+                robot.liftMotor.motor.setTargetPosition(targetPos);
 
                 //lift motor go up for some way
                 //wait for about 0.25
 
             case 2:
+                robot.liftMotor.motor.setTargetPosition(targetPos);
 
                 //lift motor go down
                 //repeat
