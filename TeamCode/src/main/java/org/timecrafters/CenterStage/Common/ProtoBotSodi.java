@@ -25,8 +25,8 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 public class ProtoBotSodi extends Robot {
 
     public HardwareMap hardwareMap;
-    public MotorEx flDrive, frDrive, blDrive, brDrive, liftMotor;
-    public Servo grabJaw, grabElbow, grabShoulder, dropShoulder, dropElbow, dropJaw;
+    public MotorEx flDrive, frDrive, blDrive, brDrive /*liftMotor*/;
+//    public Servo grabJaw, grabElbow, grabShoulder, dropShoulder, dropElbow, dropJaw;
     private String string;
     private CyberarmEngine engine;
 
@@ -43,40 +43,40 @@ public class ProtoBotSodi extends Robot {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
         this.engine = CyberarmEngine.instance;
 
-        TimeCraftersConfiguration configuration = new TimeCraftersConfiguration("Robbie");
+//        TimeCraftersConfiguration configuration = new TimeCraftersConfiguration();
 
         //Motors
         frDrive = new MotorEx(hardwareMap, "FrontRight");
         flDrive = new MotorEx(hardwareMap, "FrontLeft");
         brDrive = new MotorEx(hardwareMap, "BackRight");
         blDrive = new MotorEx(hardwareMap, "BackLeft");
-        liftMotor = new MotorEx(hardwareMap, "Lift");
+//        liftMotor = new MotorEx(hardwareMap, "Lift");
 
-        flDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        blDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        brDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftMotor.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        flDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        frDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        blDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        brDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        liftMotor.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         flDrive.motor.setDirection(FORWARD);
-        frDrive.motor.setDirection(REVERSE);
+//        frDrive.motor.setDirection(REVERSE);
         blDrive.motor.setDirection(FORWARD);
-        brDrive.motor.setDirection(REVERSE);
+//        brDrive.motor.setDirection(REVERSE);
 
         //Servos
-        grabJaw = hardwareMap.servo.get("GrabJaw");
-        grabElbow = hardwareMap.servo.get("GrabElbow");
-        grabShoulder = hardwareMap.servo.get("GrabShoulder");
-        dropShoulder = hardwareMap.servo.get("DropShoulder");
-        dropElbow = hardwareMap.servo.get("DropElbow");
-        dropJaw = hardwareMap.servo.get("DropJaw");
-     
-        grabElbow.setDirection(Servo.Direction.FORWARD);
-        grabJaw.setDirection(Servo.Direction.FORWARD);
-        grabShoulder.setDirection(Servo.Direction.FORWARD);
-        dropShoulder.setDirection(Servo.Direction.FORWARD);
-        dropElbow.setDirection(Servo.Direction.FORWARD);
-        dropJaw.setDirection(Servo.Direction.FORWARD);
+//        grabJaw = hardwareMap.servo.get("GrabJaw");
+//        grabElbow = hardwareMap.servo.get("GrabElbow");
+//        grabShoulder = hardwareMap.servo.get("GrabShoulder");
+//        dropShoulder = hardwareMap.servo.get("DropShoulder");
+//        dropElbow = hardwareMap.servo.get("DropElbow");
+//        dropJaw = hardwareMap.servo.get("DropJaw");
+//
+//        grabElbow.setDirection(Servo.Direction.FORWARD);
+//        grabJaw.setDirection(Servo.Direction.FORWARD);
+//        grabShoulder.setDirection(Servo.Direction.FORWARD);
+//        dropShoulder.setDirection(Servo.Direction.FORWARD);
+//        dropElbow.setDirection(Servo.Direction.FORWARD);
+//        dropJaw.setDirection(Servo.Direction.FORWARD);
 
 
     }

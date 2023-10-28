@@ -14,7 +14,7 @@ public class ProtoBotStateSodi extends CyberarmState {
     private int testSequence;
     private int targetPos;
     private int currentPos;
-    private int totalDist;  //
+    private int totalDist;
 
     public ProtoBotStateSodi(ProtoBotSodi robot) {
         this.robot = robot;
@@ -37,14 +37,14 @@ public class ProtoBotStateSodi extends CyberarmState {
         robot.frDrive.motor.setPower(0);
         robot.blDrive.motor.setPower(0);
         robot.brDrive.motor.setPower(0);
-        robot.liftMotor.motor.setPower(0);
-
-        robot.grabJaw.setPosition(0);
-        robot.grabElbow.setPosition(0);
-        robot.grabShoulder.setPosition(0);
-        robot.dropShoulder.setPosition(0);
-        robot.dropElbow.setPosition(0);
-        robot.dropJaw.setPosition(0);
+//        robot.liftMotor.motor.setPower(0);
+//
+//        robot.grabJaw.setPosition(0);
+//        robot.grabElbow.setPosition(0);
+//        robot.grabShoulder.setPosition(0);
+//        robot.dropShoulder.setPosition(0);
+//        robot.dropElbow.setPosition(0);
+//        robot.dropJaw.setPosition(0);
 
         lastTimeChecked = System.currentTimeMillis();
         testSequence = 0;
@@ -57,55 +57,42 @@ public class ProtoBotStateSodi extends CyberarmState {
     @Override
     public void exec() {
 
-        currentPos = robot.liftMotor.motor.getCurrentPosition();
-//
-//        if (System.currentTimeMillis() - lastTimeChecked >= 500 && System.currentTimeMillis() - lastTimeChecked < 2500) {
-//            robot.flDrive.motor.setPower(0.5);
-//            robot.frDrive.motor.setPower(0.5);
-//            robot.blDrive.motor.setPower(0.5);
-//            robot.brDrive.motor.setPower(0.5);
-//            robot.liftMotor.motor.setPower(0.5);
-//        } else if (System.currentTimeMillis() - lastTimeChecked >= 2500 && System.currentTimeMillis() - lastTimeChecked < 4500) {
-//            robot.flDrive.motor.setPower(-0.5);
-//            robot.frDrive.motor.setPower(-0.5);
-//            robot.blDrive.motor.setPower(-0.5);
-//            robot.brDrive.motor.setPower(-0.5);
-//            robot.liftMotor.motor.setPower(-0.5);
-//        } else if (System.currentTimeMillis() - lastTimeChecked >= 4500 && System.currentTimeMillis() - lastTimeChecked < 6500) {
-//            robot.flDrive.motor.setPower(0.5);
-//            robot.frDrive.motor.setPower(0.5);
-//            robot.blDrive.motor.setPower(-0.5);
-//            robot.brDrive.motor.setPower(-0.5);
-//            robot.liftMotor.motor.setPower(0);
-//        } else if (System.currentTimeMillis() - lastTimeChecked >= 6500 && System.currentTimeMillis() - lastTimeChecked < 8500) {
-//            robot.flDrive.motor.setPower(-0.5);
-//            robot.frDrive.motor.setPower(-0.5);
-//            robot.blDrive.motor.setPower(0.5);
-//            robot.brDrive.motor.setPower(0.5);
-//            robot.liftMotor.motor.setPower(0);
-//        } else if (System.currentTimeMillis() - lastTimeChecked >= 8600){
-//            robot.flDrive.motor.setPower(0);
-//            robot.frDrive.motor.setPower(0);
-//            robot.blDrive.motor.setPower(0);
-//            robot.brDrive.motor.setPower(0);
-//            robot.liftMotor.motor.setPower(0);
-//            setHasFinished(true);
-//        }
+        currentPos = robot.flDrive.motor.getCurrentPosition();
+
+        if (testSequence < 1) {
+            testSequence = 1;
+        }
 
         switch (testSequence) {
             case 1:
-                robot.liftMotor.motor.setPower(0.4);
-                robot.liftMotor.motor.setTargetPosition(targetPos);
 
-                //lift motor go up for some way
-                //wait for about 0.25
+                robot.flDrive.motor.setTargetPosition(500);
+                robot.frDrive.motor.setTargetPosition(500);
+                robot.blDrive.motor.setTargetPosition(500);
+                robot.brDrive.motor.setTargetPosition(500);
 
-            case 2:
-                robot.liftMotor.motor.setTargetPosition(targetPos);
+                if (robot.flDrive.motor.getCurrentPosition() < robot.flDrive.motor.getTargetPosition() - 50) {
+                    robot.flDrive.motor.setPower(0.5 * (robot.flDrive.motor.getTargetPosition() - robot.flDrive.motor.getCurrentPosition()));
+                    robot.frDrive.motor.setPower(0.5 * (robot.frDrive.motor.getTargetPosition() - robot.frDrive.motor.getCurrentPosition()));
+                    robot.blDrive.motor.setPower(0.5 * (robot.blDrive.motor.getTargetPosition() - robot.blDrive.motor.getCurrentPosition()));
+                    robot.brDrive.motor.setPower(0.5 * (robot.brDrive.motor.getTargetPosition() - robot.brDrive.motor.getCurrentPosition()));
+                }
+                else if (robot.flDrive.motor.getCurrentPosition() < robot.flDrive.motor.getTargetPosition() + 50 ||
+                robot.flDrive.motor.getCurrentPosition() > robot.flDrive.motor.getTargetPosition() - 50) {
 
-                //lift motor go down
-                //repeat
-                //wait for about 0.25
+                    robot.flDrive.motor.setPower(0);
+                    robot.frDrive.motor.setPower(0);
+                    robot.blDrive.motor.setPower(0);
+                    robot.brDrive.motor.setPower(0);
+
+//                    testSequence = 2;
+                }
+
+                break;
+//            case 2:
+
+
+
 
 
         }
