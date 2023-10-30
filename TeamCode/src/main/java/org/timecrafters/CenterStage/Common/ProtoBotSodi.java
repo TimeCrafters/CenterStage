@@ -52,11 +52,16 @@ public class ProtoBotSodi extends Robot {
         blDrive = new MotorEx(hardwareMap, "BackLeft");
 //        liftMotor = new MotorEx(hardwareMap, "Lift");
 
-//        flDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        frDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        blDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        brDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        liftMotor.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        flDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        blDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        brDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        flDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        blDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        brDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        liftMotor.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         flDrive.motor.setDirection(FORWARD);
 //        frDrive.motor.setDirection(REVERSE);

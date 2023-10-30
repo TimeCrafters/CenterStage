@@ -1,5 +1,6 @@
 package org.timecrafters.CenterStage.Autonomous.States;
 
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -28,7 +29,14 @@ public class ProtoBotStateSodi extends CyberarmState {
     engine.telemetry.addData("Front Right Power", robot.frDrive.motor.getPower());
     engine.telemetry.addData("Back Left Power", robot.blDrive.motor.getPower());
     engine.telemetry.addData("Back Right Power", robot.brDrive.motor.getPower());
+    engine.telemetry.addData("FL Position",robot.flDrive.motor.getCurrentPosition());
+    engine.telemetry.addData("Test Sequence", testSequence);
 
+    }
+
+    @Override
+    public void start() {
+        testSequence = 0;
     }
 
     @Override
@@ -37,6 +45,7 @@ public class ProtoBotStateSodi extends CyberarmState {
         robot.frDrive.motor.setPower(0);
         robot.blDrive.motor.setPower(0);
         robot.brDrive.motor.setPower(0);
+
 //        robot.liftMotor.motor.setPower(0);
 //
 //        robot.grabJaw.setPosition(0);
@@ -47,7 +56,7 @@ public class ProtoBotStateSodi extends CyberarmState {
 //        robot.dropJaw.setPosition(0);
 
         lastTimeChecked = System.currentTimeMillis();
-        testSequence = 0;
+
 
 
 
@@ -63,37 +72,27 @@ public class ProtoBotStateSodi extends CyberarmState {
             testSequence = 1;
         }
 
-        switch (testSequence) {
-            case 1:
+        if (testSequence == 1) {
+            robot.flDrive.motor.setTargetPosition(1000);
+            robot.frDrive.motor.setTargetPosition(1000);
+            robot.blDrive.motor.setTargetPosition(1000);
+            robot.brDrive.motor.setTargetPosition(1000);
 
-                robot.flDrive.motor.setTargetPosition(500);
-                robot.frDrive.motor.setTargetPosition(500);
-                robot.blDrive.motor.setTargetPosition(500);
-                robot.brDrive.motor.setTargetPosition(500);
+            if (robot.flDrive.motor.getCurrentPosition() < robot.flDrive.motor.getTargetPosition() - 50) {
+                robot.flDrive.motor.setPower(0.5 * (robot.flDrive.motor.getTargetPosition() - robot.flDrive.motor.getCurrentPosition()));
+                robot.frDrive.motor.setPower(0.5 * (robot.frDrive.motor.getTargetPosition() - robot.frDrive.motor.getCurrentPosition()));
+                robot.blDrive.motor.setPower(0.5 * (robot.blDrive.motor.getTargetPosition() - robot.blDrive.motor.getCurrentPosition()));
+                robot.brDrive.motor.setPower(0.5 * (robot.brDrive.motor.getTargetPosition() - robot.brDrive.motor.getCurrentPosition()));
+            } else if (robot.flDrive.motor.getCurrentPosition() < robot.flDrive.motor.getTargetPosition() + 50 ||
+                    robot.flDrive.motor.getCurrentPosition() > robot.flDrive.motor.getTargetPosition() - 50) {
 
-                if (robot.flDrive.motor.getCurrentPosition() < robot.flDrive.motor.getTargetPosition() - 50) {
-                    robot.flDrive.motor.setPower(0.5 * (robot.flDrive.motor.getTargetPosition() - robot.flDrive.motor.getCurrentPosition()));
-                    robot.frDrive.motor.setPower(0.5 * (robot.frDrive.motor.getTargetPosition() - robot.frDrive.motor.getCurrentPosition()));
-                    robot.blDrive.motor.setPower(0.5 * (robot.blDrive.motor.getTargetPosition() - robot.blDrive.motor.getCurrentPosition()));
-                    robot.brDrive.motor.setPower(0.5 * (robot.brDrive.motor.getTargetPosition() - robot.brDrive.motor.getCurrentPosition()));
-                }
-                else if (robot.flDrive.motor.getCurrentPosition() < robot.flDrive.motor.getTargetPosition() + 50 ||
-                robot.flDrive.motor.getCurrentPosition() > robot.flDrive.motor.getTargetPosition() - 50) {
+                robot.flDrive.motor.setPower(0);
+                robot.frDrive.motor.setPower(0);
+                robot.blDrive.motor.setPower(0);
+                robot.brDrive.motor.setPower(0);
 
-                    robot.flDrive.motor.setPower(0);
-                    robot.frDrive.motor.setPower(0);
-                    robot.blDrive.motor.setPower(0);
-                    robot.brDrive.motor.setPower(0);
-
-//                    testSequence = 2;
-                }
-
-                break;
-//            case 2:
-
-
-
-
+                testSequence = 2;
+            }
 
         }
 
