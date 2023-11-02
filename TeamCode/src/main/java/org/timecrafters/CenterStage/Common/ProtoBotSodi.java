@@ -28,20 +28,18 @@ public class ProtoBotSodi extends Robot {
     public MotorEx flDrive, frDrive, blDrive, brDrive, liftMotor;
     public Servo grabJaw, grabElbow, grabShoulder, dropShoulder, dropElbow, dropJaw;
     private String string;
-    private CyberarmEngine engine;
 
     public TimeCraftersConfiguration configuration;
 
 
     public ProtoBotSodi(String string) {
-        this.engine = engine;
         this.string = string;
     }
 
     @Override
     public void setup() {System.out.println("Bacon: " + this.string);
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
-        this.engine = CyberarmEngine.instance;
+        CyberarmEngine engine = CyberarmEngine.instance;
 
 //        TimeCraftersConfiguration configuration = new TimeCraftersConfiguration();
 

@@ -3,6 +3,7 @@ package org.timecrafters.CenterStage.Common;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -11,23 +12,22 @@ import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfig
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-public class MinibotTeleOPBot extends Robot {
+public class MiniYTeleOPBot extends Robot {
 
     public HardwareMap hardwareMap;
     public MotorEx flDrive, frDrive, blDrive, brDrive;
     public IMU imu;
     private String string;
-    private CyberarmEngine engine;
 
     public TimeCraftersConfiguration configuration;
 
-    public MinibotTeleOPBot() {
+    public MiniYTeleOPBot() {
     }
 
     @Override
     public void setup() {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
-        this.engine = CyberarmEngine.instance;
+        CyberarmEngine engine = CyberarmEngine.instance;
 
         imu = engine.hardwareMap.get(IMU.class, "imu");
 
@@ -43,6 +43,11 @@ public class MinibotTeleOPBot extends Robot {
         flDrive = new MotorEx(hardwareMap, "FrontLeft");
         brDrive = new MotorEx(hardwareMap, "BackRight");
         blDrive = new MotorEx(hardwareMap, "BackLeft");
+
+        flDrive.motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        frDrive.motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        blDrive.motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        brDrive.motor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         flDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
