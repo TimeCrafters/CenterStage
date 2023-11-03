@@ -16,8 +16,8 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 
 public class ServoTestRobot extends Robot {
     public int oldArmPosititon;
-    public long servoWaitTime;
-    public double servoSecPerDeg = 0.14/60;
+    public double servoWaitTime;
+    public double servoSecPerDeg = 0.14/(60/270);
     public long waitTime;
 
     public float DEPOSITOR_SHOULDER_IN;
@@ -89,16 +89,16 @@ public class ServoTestRobot extends Robot {
         collectorShoulder = hardwareMap.servo.get("collector_shoulder");
         collectorElbow = hardwareMap.servo.get("collector_elbow");
 
-        depositorShoulder.setPosition(DEPOSITOR_SHOULDER_IN);
-        depositorElbow.setPosition(DEPOSITOR_ELBOW_IN);
-        collectorShoulder.setPosition(COLLECTOR_SHOULDER_IN);
-        collectorElbow.setPosition(COLLECTOR_ELBOW_IN);
+        depositorShoulder.setPosition(DEPOSITOR_SHOULDER_OUT);
+        depositorElbow.setPosition(DEPOSITOR_ELBOW_OUT);
+        collectorShoulder.setPosition(COLLECTOR_SHOULDER_PASSIVE);
+        collectorElbow.setPosition(COLLECTOR_ELBOW_PASSIVE);
 
     }
 
     public void ServoWaitTime(Float lastSetPos, Float currentSetPos){
 
-        servoWaitTime = (long) (servoSecPerDeg * (Math.abs(lastSetPos - currentSetPosShoulder)));
+        servoWaitTime = 1000 * (servoSecPerDeg * (Math.abs((double)lastSetPos - (double)currentSetPos)));
 
     }
 
