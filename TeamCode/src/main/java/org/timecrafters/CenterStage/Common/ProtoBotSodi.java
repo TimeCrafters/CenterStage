@@ -28,22 +28,20 @@ public class ProtoBotSodi extends Robot {
     public MotorEx flDrive, frDrive, blDrive, brDrive, liftMotor;
     public Servo grabJaw, grabElbow, grabShoulder, dropShoulder, dropElbow, dropJaw;
     private String string;
-    private CyberarmEngine engine;
 
     public TimeCraftersConfiguration configuration;
 
 
     public ProtoBotSodi(String string) {
-        this.engine = engine;
         this.string = string;
     }
 
     @Override
     public void setup() {System.out.println("Bacon: " + this.string);
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
-        this.engine = CyberarmEngine.instance;
+        CyberarmEngine engine = CyberarmEngine.instance;
 
-        TimeCraftersConfiguration configuration = new TimeCraftersConfiguration("Robbie");
+//        TimeCraftersConfiguration configuration = new TimeCraftersConfiguration();
 
         //Motors
         frDrive = new MotorEx(hardwareMap, "FrontRight");
@@ -52,16 +50,22 @@ public class ProtoBotSodi extends Robot {
         blDrive = new MotorEx(hardwareMap, "BackLeft");
         liftMotor = new MotorEx(hardwareMap, "Lift");
 
-        flDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        blDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        brDrive.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftMotor.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        flDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        blDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        brDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftMotor.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        flDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        blDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        brDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftMotor.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         flDrive.motor.setDirection(FORWARD);
-        frDrive.motor.setDirection(REVERSE);
+//        frDrive.motor.setDirection(REVERSE);
         blDrive.motor.setDirection(FORWARD);
-        brDrive.motor.setDirection(REVERSE);
+//        brDrive.motor.setDirection(REVERSE);
 
         //Servos
         grabJaw = hardwareMap.servo.get("GrabJaw");
@@ -70,7 +74,7 @@ public class ProtoBotSodi extends Robot {
         dropShoulder = hardwareMap.servo.get("DropShoulder");
         dropElbow = hardwareMap.servo.get("DropElbow");
         dropJaw = hardwareMap.servo.get("DropJaw");
-     
+
         grabElbow.setDirection(Servo.Direction.FORWARD);
         grabJaw.setDirection(Servo.Direction.FORWARD);
         grabShoulder.setDirection(Servo.Direction.FORWARD);
