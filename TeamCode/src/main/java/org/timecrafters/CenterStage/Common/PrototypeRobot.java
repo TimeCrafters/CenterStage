@@ -22,21 +22,25 @@ public class PrototypeRobot extends Robot {
     public long waitTime;
     public double servoWaitTime;
     public double servoSecPerDeg = 0.14/60;
-    public float ELBOW_COLLECT;
-    public float ELBOW_DRIVING;
-    public float ELBOW_DEPOSIT;
-    public float SHOULDER_COLLECT;
-    public float SHOULDER_DRIVING;
-    public float SHOULDER_DEPOSIT;
-    public float lastSetPosShoulder = SHOULDER_COLLECT;
-    public float lastSetPosElbow = ELBOW_COLLECT;
+    public float DEPOSITOR_SHOULDER_IN;
+    public float DEPOSITOR_SHOULDER_OUT;
+    public float DEPOSITOR_ELBOW_IN;
+    public float DEPOSITOR_ELBOW_OUT;
+    public float COLLECTOR_SHOULDER_IN;
+    public float COLLECTOR_SHOULDER_PASSIVE;
+    public float COLLECTOR_SHOULDER_OUT;
+    public float COLLECTOR_ELBOW_IN;
+    public float COLLECTOR_ELBOW_PASSIVE;
+    public float COLLECTOR_ELBOW_OUT;
+    public float lastSetPosShoulder;
+    public float lastSetPosElbow;
     public float currentSetPosShoulder;
     public float currentSetPosElbow;
     private HardwareMap hardwareMap;
     public MotorEx frontLeft, frontRight, backLeft, backRight, lift;
     public DcMotor odometerR, odometerL, odometerA;
     public IMU imu;
-    public Servo depositorShoulder, depositorElbow, depositor;
+//    public Servo depositorShoulder, depositorElbow, depositor;
     private HDrive xDrive;
     private String string;
     public double xMultiplier = 1;
@@ -81,12 +85,16 @@ public class PrototypeRobot extends Robot {
     }
 
     public void initConstants(){
-            ELBOW_DEPOSIT = configuration.variable("Robot", "Tuning", "ELBOW_DEPOSIT").value();
-            ELBOW_COLLECT = configuration.variable("Robot", "Tuning", "ELBOW_COLLECT").value();
-            SHOULDER_DEPOSIT = configuration.variable("Robot", "Tuning", "SHOULDER_DEPOSIT").value();
-            SHOULDER_COLLECT = configuration.variable("Robot", "Tuning", "SHOULDER_COLLECT").value();
-            SHOULDER_DRIVING = configuration.variable("Robot", "Tuning", "SHOULDER_DRIVING").value();
-            ELBOW_DRIVING = configuration.variable("Robot", "Tuning", "ELBOW_DRIVING").value();
+        DEPOSITOR_SHOULDER_IN = configuration.variable("Robot", "Tuning", "DEPOSITOR_SHOULDER_IN").value();
+        DEPOSITOR_SHOULDER_OUT = configuration.variable("Robot", "Tuning", "DEPOSITOR_SHOULDER_OUT").value();
+        DEPOSITOR_ELBOW_IN = configuration.variable("Robot", "Tuning", "DEPOSITOR_ELBOW_IN").value();
+        DEPOSITOR_ELBOW_OUT = configuration.variable("Robot", "Tuning", "DEPOSITOR_ELBOW_OUT").value();
+        COLLECTOR_SHOULDER_IN = configuration.variable("Robot", "Tuning", "COLLECTOR_SHOULDER_IN").value();
+        COLLECTOR_SHOULDER_PASSIVE = configuration.variable("Robot", "Tuning", "COLLECTOR_SHOULDER_PASSIVE").value();
+        COLLECTOR_SHOULDER_OUT = configuration.variable("Robot", "Tuning", "COLLECTOR_SHOULDER_OUT").value();
+        COLLECTOR_ELBOW_IN = configuration.variable("Robot", "Tuning", "COLLECTOR_ELBOW_IN").value();
+        COLLECTOR_ELBOW_PASSIVE = configuration.variable("Robot", "Tuning", "COLLECTOR_ELBOW_PASSIVE").value();
+        COLLECTOR_ELBOW_OUT = configuration.variable("Robot", "Tuning", "COLLECTOR_ELBOW_OUT").value();
         }
 
     @Override
@@ -98,11 +106,11 @@ public class PrototypeRobot extends Robot {
         imu = engine.hardwareMap.get(IMU.class, "imu");
 
         //MOTORS
-        frontRight = new MotorEx(hardwareMap, "frontRight");
-        frontLeft = new MotorEx(hardwareMap, "frontLeft");
-        backRight = new MotorEx(hardwareMap, "backRight");
-        backLeft = new MotorEx(hardwareMap, "backLeft");
-        lift = new MotorEx(hardwareMap, "lift");
+        frontRight = new MotorEx(hardwareMap, "FrontRight");
+        frontLeft = new MotorEx(hardwareMap, "FrontLeft");
+        backRight = new MotorEx(hardwareMap, "BackRight");
+        backLeft = new MotorEx(hardwareMap, "BackLeft");
+        lift = new MotorEx(hardwareMap, "Lift");
 
         configuration = new TimeCraftersConfiguration("Blue Crab");
 
@@ -128,17 +136,17 @@ public class PrototypeRobot extends Robot {
 
         imu.initialize(parameters);
 
-        //SERVO
-        depositorShoulder = hardwareMap.servo.get("depositor_shoulder");
-        depositorElbow = hardwareMap.servo.get("depositor_elbow");
-        depositor = hardwareMap.servo.get("depositor");
+//        //SERVO
+//        depositorShoulder = hardwareMap.servo.get("depositor_shoulder");
+//        depositorElbow = hardwareMap.servo.get("depositor_elbow");
+//        depositor = hardwareMap.servo.get("depositor");
 
         // input motors exactly as shown below
         xDrive = new HDrive(frontLeft, frontRight,
                             backLeft, backRight);
 
-        depositorShoulder.setPosition(SHOULDER_COLLECT);
-        depositorElbow.setPosition(ELBOW_COLLECT);
+//        depositorShoulder.setPosition(COLLECTOR_SHOULDER_IN);
+//        depositorElbow.setPosition(COLLECTOR_ELBOW_IN);
 
     }
 
