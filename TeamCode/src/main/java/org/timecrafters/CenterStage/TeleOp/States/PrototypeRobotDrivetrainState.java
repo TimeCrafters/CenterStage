@@ -15,67 +15,6 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
     public PrototypeRobotDrivetrainState(PrototypeRobot robot) {
         this.robot = robot;
     }
-    private void depositorAutomation(){
-        // TODO: 10/7/2023 Workout Logic to move each limb step by step
-        
-//        lastCheckedTime = System.currentTimeMillis();
-//
-//        if (engine.gamepad2.a){
-//        // setting Servo Positions to do time Math
-//        robot.depositorShoulder.setPosition(robot.currentSetPosShoulder);
-//        // running math function to determine time
-//        robot.ShoulderServoWaitTime();
-//        // determining if the time is met to do the next action
-//        if (lastCheckedTime - System.currentTimeMillis() >= robot.servoWaitTime){
-//            robot.lastSetPosShoulder = robot.currentSetPosShoulder;
-//            // setting Servo Positions to do time Math
-//            robot.currentSetPosElbow = robot.ELBOW_COLLECT;
-//            robot.depositorElbow.setPosition(robot.currentSetPosElbow);
-//            robot.lastSetPosElbow = robot.currentSetPosElbow;
-//        }
-//    }
-//        if (engine.gamepad2.y){
-//            // setting Servo Positions to do time Math
-//            robot.currentSetPosShoulder = robot.SHOULDER_DEPOSIT;
-//            robot.depositorShoulder.setPosition(robot.currentSetPosShoulder);
-//            // running math function to determine time
-//            robot.ShoulderServoWaitTime();
-//            // determining if the time is met to do the next action
-//            if (lastCheckedTime - System.currentTimeMillis() >= robot.servoWaitTime){
-//                robot.lastSetPosShoulder = robot.currentSetPosShoulder;
-//                // setting Servo Positions to do time Math
-//                robot.currentSetPosElbow = robot.ELBOW_COLLECT;
-//                robot.depositorElbow.setPosition(robot.currentSetPosElbow);
-//                robot.lastSetPosElbow = robot.currentSetPosElbow;
-//
-//            }
-//        }
-//    }
-
-    // --------------------------------------------------------------------------------------------------------- Depositor control function
-//    private void depositorTeleOp(){
-//        // flip arms
-//        if (engine.gamepad1.x) {
-//            // shoulder deposit
-//            robot.depositorShoulder.setPosition(robot.SHOULDER_DEPOSIT);
-//            // shoulder collect
-//        } else if (engine.gamepad1.a) {
-//            robot.depositorShoulder.setPosition(robot.SHOULDER_COLLECT);
-//        }
-//        if (engine.gamepad1.y){
-//            // elbow deposit
-//            robot.depositorElbow.setPosition(robot.ELBOW_DEPOSIT);
-//            // elbow collect
-//        } else if (engine.gamepad1.b){
-//            robot.depositorElbow.setPosition(robot.ELBOW_COLLECT); // Collect / transfer = 0
-//        }
-
-//        // depositor
-//        if (engine.gamepad1.right_bumper) {
-//            robot.depositor.setPosition(0.8);
-//        } else if (engine.gamepad1.left_bumper) {
-//            robot.depositor.setPosition(0.2);
-        }
 
 //    }
     // --------------------------------------------------------------------------------------------------------- Slider control function
@@ -106,9 +45,6 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
     public void exec() {
         // drivetrain
         robot.driveTrainTeleOp();
-
-        // depositor
-//        depositorTeleOp();
 
         // lift
         sliderTeleOp();

@@ -40,7 +40,7 @@ public class PrototypeRobot extends Robot {
     public MotorEx frontLeft, frontRight, backLeft, backRight, lift;
     public DcMotor odometerR, odometerL, odometerA;
     public IMU imu;
-//    public Servo depositorShoulder, depositorElbow, depositor;
+    public Servo depositorShoulder, depositorElbow, collectorShoulder, collectorElbow, depositor;
     private HDrive xDrive;
     private String string;
     public double xMultiplier = 1;
@@ -106,10 +106,10 @@ public class PrototypeRobot extends Robot {
         imu = engine.hardwareMap.get(IMU.class, "imu");
 
         //MOTORS
-        frontRight = new MotorEx(hardwareMap, "FrontRight");
-        frontLeft = new MotorEx(hardwareMap, "FrontLeft");
-        backRight = new MotorEx(hardwareMap, "BackRight");
-        backLeft = new MotorEx(hardwareMap, "BackLeft");
+        frontRight = new MotorEx(hardwareMap, "frontRight");
+        frontLeft = new MotorEx(hardwareMap, "frontLeft");
+        backRight = new MotorEx(hardwareMap, "backRight");
+        backLeft = new MotorEx(hardwareMap, "backLeft");
         lift = new MotorEx(hardwareMap, "Lift");
 
         configuration = new TimeCraftersConfiguration("Blue Crab");
@@ -136,10 +136,12 @@ public class PrototypeRobot extends Robot {
 
         imu.initialize(parameters);
 
-//        //SERVO
-//        depositorShoulder = hardwareMap.servo.get("depositor_shoulder");
-//        depositorElbow = hardwareMap.servo.get("depositor_elbow");
-//        depositor = hardwareMap.servo.get("depositor");
+        //SERVO
+        depositorShoulder = hardwareMap.servo.get("depositor_shoulder");
+        depositorElbow = hardwareMap.servo.get("depositor_elbow");
+//        collectorShoulder = hardwareMap.servo.get("collector_shoulder");
+//        collectorElbow = hardwareMap.servo.get("collector_elbow");
+        depositor = hardwareMap.servo.get("depositor");
 
         // input motors exactly as shown below
         xDrive = new HDrive(frontLeft, frontRight,
