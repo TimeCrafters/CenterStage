@@ -60,7 +60,7 @@ public class YellowMinibotTeleOP extends CyberarmState {
     @Override
     public void exec() {
 
-        if (Math.abs(engine.gamepad1.right_stick_y) < 0.1 && Math.abs(engine.gamepad1.right_stick_x) < 0.1 && Math.abs(engine.gamepad1.left_stick_x) < 0.1) {
+        if (Math.abs(engine.gamepad1.left_stick_y) < 0.1 && Math.abs(engine.gamepad1.left_stick_x) < 0.1 && Math.abs(engine.gamepad1.right_stick_x) < 0.1) {
             drivePower = 0;
             robot.flDrive.motor.setPower(0);
             robot.frDrive.motor.setPower(0);
@@ -76,24 +76,24 @@ public class YellowMinibotTeleOP extends CyberarmState {
             robot.imu.resetYaw();
         }
 
-        if (Math.abs(engine.gamepad1.right_stick_y) > 0.1 && Math.abs(engine.gamepad1.right_stick_x) < 0.1) {
-            drivePower = engine.gamepad1.right_stick_y;
+        if (Math.abs(engine.gamepad1.left_stick_y) > 0.1 && Math.abs(engine.gamepad1.left_stick_x) < 0.1) {
+            drivePower = engine.gamepad1.left_stick_y;
             robot.flDrive.motor.setPower(drivePower);
             robot.frDrive.motor.setPower(drivePower);
             robot.blDrive.motor.setPower(drivePower);
             robot.brDrive.motor.setPower(drivePower);
         }
 
-        if (Math.abs(engine.gamepad1.right_stick_x) > 0.1) {
-            drivePower = engine.gamepad1.right_stick_x;
+        if (Math.abs(engine.gamepad1.left_stick_x) > 0.1) {
+            drivePower = engine.gamepad1.left_stick_x;
             robot.flDrive.motor.setPower(-drivePower);
             robot.frDrive.motor.setPower(drivePower);
             robot.blDrive.motor.setPower(drivePower);
             robot.brDrive.motor.setPower(-drivePower);
         }
 
-        if (Math.abs(engine.gamepad1.left_stick_x) > 0.1){
-            drivePower = engine.gamepad1.left_stick_x;
+        if (Math.abs(engine.gamepad1.right_stick_x) > 0.1){
+            drivePower = engine.gamepad1.right_stick_x;
             robot.flDrive.motor.setPower(-drivePower);
             robot.frDrive.motor.setPower(drivePower);
             robot.blDrive.motor.setPower(-drivePower);
