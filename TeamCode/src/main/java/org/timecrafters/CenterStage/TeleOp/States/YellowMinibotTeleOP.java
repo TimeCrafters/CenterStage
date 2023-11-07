@@ -14,6 +14,7 @@ import org.timecrafters.CenterStage.Common.MiniYTeleOPBot;
 public class YellowMinibotTeleOP extends CyberarmState {
     private final MiniYTeleOPBot robot;
     public float angleDelta, drivePower;
+    public double lastToldAngle /** <- The angle the bot was last told to stop at **/;
     YawPitchRollAngles imuInitAngle;
 
     public YellowMinibotTeleOP(MiniYTeleOPBot robot) {
@@ -52,6 +53,7 @@ public class YellowMinibotTeleOP extends CyberarmState {
 
         robot.imu.resetYaw();
         imuInitAngle = robot.imu.getRobotYawPitchRollAngles();
+        lastToldAngle = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
         GamepadChecker gamepad1Checker = new GamepadChecker(engine, engine.gamepad1);
         GamepadChecker gamepad2Checker = new GamepadChecker(engine, engine.gamepad2);
@@ -60,15 +62,40 @@ public class YellowMinibotTeleOP extends CyberarmState {
     @Override
     public void exec() {
 
-        if (Math.abs(engine.gamepad1.left_stick_y) < 0.1 && Math.abs(engine.gamepad1.left_stick_x) < 0.1 && Math.abs(engine.gamepad1.right_stick_x) < 0.1) {
+        if (Math.abs(engine.gamepad1.left_stick_y) < 0.1 &&
+            Math.abs(engine.gamepad1.left_stick_x) < 0.1 &&
+            Math.abs(engine.gamepad1.right_stick_x) < 0.1) {
+
             drivePower = 0;
-            robot.flDrive.motor.setPower(0);
-            robot.frDrive.motor.setPower(0);
-            robot.blDrive.motor.setPower(0);
-            robot.brDrive.motor.setPower(0);
+            robot.flDrive.motor.setPower(drivePower);
+            robot.frDrive.motor.setPower(drivePower);
+            robot.blDrive.motor.setPower(drivePower);
+            robot.brDrive.motor.setPower(drivePower);
+        }
+
+        if (robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > lastToldAngle + 0.5 &&
+            Math.abs(engine.gamepad1.left_stick_y) > 0.1) {
+
+            robot.frDrive.motor.setPower(robot.flDrive.motor.getPower() * 0.8);
+            robot.brDrive.motor.setPower(robot.blDrive.motor.getPower() * 0.8);
+
+        } else
+            if (robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < lastToldAngle - 0.5 &&
+            Math.abs(engine.gamepad1.left_stick_y) > 0.1) {
+
+            robot.flDrive.motor.setPower(robot.frDrive.motor.getPower() * 0.8);
+            robot.blDrive.motor.setPower(robot.brDrive.motor.getPower() * 0.8);
+
+        } else {
+
+            robot.flDrive.motor.setPower(drivePower);
+            robot.frDrive.motor.setPower(drivePower);
+            robot.blDrive.motor.setPower(drivePower);
+            robot.brDrive.motor.setPower(drivePower);
         }
 
         if (engine.gamepad1.start && !engine.gamepad1.a) {
+
             robot.flDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             robot.frDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             robot.blDrive.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -76,7 +103,10 @@ public class YellowMinibotTeleOP extends CyberarmState {
             robot.imu.resetYaw();
         }
 
-        if (Math.abs(engine.gamepad1.left_stick_y) > 0.1 && Math.abs(engine.gamepad1.left_stick_x) < 0.1) {
+        if (Math.abs(engine.gamepad1.left_stick_y) > 0.1 && Math.abs(engine.gamepad1.left_stick_x) < 0.1 &&
+                robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > lastToldAngle - 0.5 &&
+                robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < lastToldAngle + 0.5) {
+
             drivePower = engine.gamepad1.left_stick_y;
             robot.flDrive.motor.setPower(drivePower);
             robot.frDrive.motor.setPower(drivePower);
@@ -85,6 +115,7 @@ public class YellowMinibotTeleOP extends CyberarmState {
         }
 
         if (Math.abs(engine.gamepad1.left_stick_x) > 0.1) {
+
             drivePower = engine.gamepad1.left_stick_x;
             robot.flDrive.motor.setPower(-drivePower);
             robot.frDrive.motor.setPower(drivePower);
@@ -92,12 +123,14 @@ public class YellowMinibotTeleOP extends CyberarmState {
             robot.brDrive.motor.setPower(-drivePower);
         }
 
-        if (Math.abs(engine.gamepad1.right_stick_x) > 0.1){
+        if (Math.abs(engine.gamepad1.right_stick_x) > 0.1) {
+
             drivePower = engine.gamepad1.right_stick_x;
             robot.flDrive.motor.setPower(-drivePower);
             robot.frDrive.motor.setPower(drivePower);
             robot.blDrive.motor.setPower(-drivePower);
             robot.brDrive.motor.setPower(drivePower);
+            lastToldAngle = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         }
         
     }

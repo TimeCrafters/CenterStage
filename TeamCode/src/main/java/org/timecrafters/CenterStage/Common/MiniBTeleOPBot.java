@@ -3,6 +3,7 @@ package org.timecrafters.CenterStage.Common;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -17,8 +18,9 @@ public class MiniBTeleOPBot extends Robot {
 
 public HardwareMap hardwareMap;
 public MotorEx leftDrive, rightDrive;
-public Servo servLowLeft, servLowRight, servTop;
+public Servo servLeft, servLow, servTop;
 public IMU imu;
+public double wheelCircum = 28.888 /* <- Wheel circumference in cm, 11.37 inches */;
 
 public TimeCraftersConfiguration configuration;
 
@@ -49,9 +51,18 @@ public MiniBTeleOPBot() {
         leftDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        leftDrive.motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightDrive.motor.setDirection(DcMotorSimple.Direction.FORWARD);
+
         //Servos
-        servLowLeft = hardwareMap.servo.get("ServoLowLeft");
-        servLowRight = hardwareMap.servo.get("ServoLowRight");
+        servLeft = hardwareMap.servo.get("ServoLeft");
+        servLow = hardwareMap.servo.get("ServoLow");
         servTop = hardwareMap.servo.get("ServoTop");
+
+        servLeft.setDirection(Servo.Direction.FORWARD);
+        servLow.setDirection(Servo.Direction.FORWARD);
+        servTop.setDirection(Servo.Direction.FORWARD);
+
+
     }
 }

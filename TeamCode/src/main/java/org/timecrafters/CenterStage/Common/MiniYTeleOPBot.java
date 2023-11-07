@@ -18,6 +18,7 @@ public class MiniYTeleOPBot extends Robot {
     public MotorEx flDrive, frDrive, blDrive, brDrive;
     public IMU imu;
     private String string;
+    public double wheelCircum = 15.9/* <- Wheel circumference in cm, 6.26 inches, meaning it would take 3.83 wheel revolutions to move 2 feet */;
 
     public TimeCraftersConfiguration configuration;
 
@@ -37,6 +38,7 @@ public class MiniYTeleOPBot extends Robot {
                         RevHubOrientationOnRobot.UsbFacingDirection.UP));
 
         imu.initialize(parameters);
+        imu.resetYaw();
 
         //Motors
         frDrive = new MotorEx(hardwareMap, "FrontRight");

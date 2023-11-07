@@ -17,6 +17,6 @@ public class MiniBTeleOPEngine extends CyberarmEngine {
         this.robot = new MiniBTeleOPBot();
         this.robot.setup();
 
-        addState(new BlackMiniTeleOP());
+        addState(new BlackMiniTeleOP(robot));
     }
 }

@@ -41,7 +41,7 @@ public class ProtoBotSodi extends Robot {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
         CyberarmEngine engine = CyberarmEngine.instance;
 
-//        TimeCraftersConfiguration configuration = new TimeCraftersConfiguration();
+        configuration = new TimeCraftersConfiguration("Blue Crab");
 
         //Motors
         frDrive = new MotorEx(hardwareMap, "FrontRight");
