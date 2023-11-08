@@ -139,8 +139,8 @@ public class PrototypeRobot extends Robot {
         //SERVO
         depositorShoulder = hardwareMap.servo.get("depositor_shoulder");
         depositorElbow = hardwareMap.servo.get("depositor_elbow");
-//        collectorShoulder = hardwareMap.servo.get("collector_shoulder");
-//        collectorElbow = hardwareMap.servo.get("collector_elbow");
+        collectorShoulder = hardwareMap.servo.get("collector_shoulder");
+        collectorElbow = hardwareMap.servo.get("collector_elbow");
         depositor = hardwareMap.servo.get("depositor");
 
         // input motors exactly as shown below
