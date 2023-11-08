@@ -20,7 +20,7 @@ public class MiniYellowTeleOPv2 extends CyberarmState {
     public MotorEx flDrive, frDrive, blDrive, brDrive;
     public IMU imu;
     private double flPower, frPower, blPower, brPower;
-    private float lStickY, transitPercent;
+    private float lStickY, transitPercent, rotPercent;
 
     public TimeCraftersConfiguration configuration;
         @Override
@@ -28,7 +28,7 @@ public class MiniYellowTeleOPv2 extends CyberarmState {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
         CyberarmEngine engine = CyberarmEngine.instance;
 
-        configuration = new TimeCraftersConfiguration("Minibot Yellow");
+//        configuration = new TimeCraftersConfiguration("Minibot Yellow");
 
 
         imu = engine.hardwareMap.get(IMU.class, "imu");
@@ -65,9 +65,18 @@ public class MiniYellowTeleOPv2 extends CyberarmState {
     }
 
     @Override
+    public void telemetry() {
+        engine.telemetry.addData("FLPower", flPower);
+        engine.telemetry.addData("Transit %", transitPercent);
+        engine.telemetry.addData("L Stick Y", lStickY);
+        engine.telemetry.update();
+    }
+
+    @Override
     public void exec () {
-        transitPercent = -engine.gamepad1.left_stick_y * 100;
-        flPower = lStickY / 100;
+        transitPercent = engine.gamepad1.left_stick_y * 100;
+        rotPercent = engine.gamepad1.right_stick_x * -100;
+        flPower = ((transitPercent + rotPercent) / Math.abs(transitPercent + rotPercent));
         flDrive.motor.setPower(flPower);
 
     }
