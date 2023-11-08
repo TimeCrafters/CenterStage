@@ -15,9 +15,6 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 
     @Override
     public void setup() {
-        this.robot = new MiniYellowTeleOPv2();
-        this.robot.setup();
-
-        addState(new MiniYellowTeleOPv2(robot));
+        addState(new MiniYellowTeleOPv2());
     }
 }
