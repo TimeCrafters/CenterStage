@@ -27,16 +27,26 @@ public class ArmPosTest extends CyberarmState {
 
     @Override
     public void exec(){
+        robot.collectorElbow.setPosition(armPos);
 
         if (engine.gamepad1.a){
-            robot.depositorShoulder.setPosition(0);
-            robot.depositorElbow.setPosition(0);
+            robot.collectorShoulder.setPosition(0.75);
         } else if (engine.gamepad1.y){
+            robot.collectorShoulder.setPosition(0.65);
+        }else if (engine.gamepad1.x){
+            robot.collectorShoulder.setPosition(0.4);
+        }
 
-            robot.depositorShoulder.setPosition(0.9);
-            robot.depositorElbow.setPosition(0.22);
+        if (engine.gamepad2.y && System.currentTimeMillis() - lastMeasuredTime > 500){
+            lastMeasuredTime = System.currentTimeMillis();
+            armPos += 0.05;
+        } else if (engine.gamepad2.a && System.currentTimeMillis() - lastMeasuredTime > 500){
+            lastMeasuredTime = System.currentTimeMillis();
+            armPos -= 0.05;
         }
     }
+
+
 
     @Override
     public void telemetry() {
