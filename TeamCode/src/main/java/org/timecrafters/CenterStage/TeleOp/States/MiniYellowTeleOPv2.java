@@ -7,8 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.timecrafters.CenterStage.Common.MiniYTeleOPBot;
-import org.timecrafters.Library.Robot;
+import org.opencv.core.Mat;
 import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
@@ -20,11 +19,12 @@ public class MiniYellowTeleOPv2 extends CyberarmState {
     public MotorEx flDrive, frDrive, blDrive, brDrive;
     public IMU imu;
     private double flPower, frPower, blPower, brPower;
-    private float lStickY, transitPercent, rotPercent;
+    private float lStickY, yTransitPercent, xTransitPercent, rotPercent, percentDenom;
 
     public TimeCraftersConfiguration configuration;
         @Override
     public void init() {
+
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
         CyberarmEngine engine = CyberarmEngine.instance;
 
@@ -62,22 +62,60 @@ public class MiniYellowTeleOPv2 extends CyberarmState {
         blDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         brDrive.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        percentDenom = 0;
+        yTransitPercent = 0;
+        xTransitPercent = 0;
+        rotPercent = 0;
+
     }
 
     @Override
     public void telemetry() {
         engine.telemetry.addData("FLPower", flPower);
-        engine.telemetry.addData("Transit %", transitPercent);
-        engine.telemetry.addData("L Stick Y", lStickY);
+        engine.telemetry.addData("FRPower", frPower);
+        engine.telemetry.addData("BLPower", blPower);
+        engine.telemetry.addData("BRPower", brPower);
+        engine.telemetry.addData("Y Movement %", yTransitPercent);
+        engine.telemetry.addData("X Movement %", xTransitPercent);
+        engine.telemetry.addData("Percent Denominator", percentDenom);
         engine.telemetry.update();
     }
 
     @Override
     public void exec () {
-        transitPercent = engine.gamepad1.left_stick_y * 100;
+
+        if (Math.abs(yTransitPercent) > 0.01) {
+
+        percentDenom = 100;
+    } else {
+        percentDenom = 0;
+    }
+
+        if (Math.abs(xTransitPercent) > 0.01) {
+
+            percentDenom = percentDenom + 100;
+        }
+
+        if (Math.abs(rotPercent) > 0.01) {
+
+            percentDenom = percentDenom + 100;
+        }
+        yTransitPercent = engine.gamepad1.left_stick_y * 100;
+        xTransitPercent = engine.gamepad1.left_stick_x * 100;
         rotPercent = engine.gamepad1.right_stick_x * -100;
-        flPower = ((transitPercent + rotPercent) / Math.abs(transitPercent + rotPercent));
+
+        flPower = ((yTransitPercent + -xTransitPercent + rotPercent) / percentDenom);
         flDrive.motor.setPower(flPower);
+
+        frPower = ((yTransitPercent + xTransitPercent + -rotPercent) / percentDenom);
+        frDrive.motor.setPower(frPower);
+
+        blPower = ((yTransitPercent + xTransitPercent + rotPercent) / percentDenom);
+        blDrive.motor.setPower(blPower);
+
+        brPower = ((yTransitPercent + -xTransitPercent + -rotPercent) / percentDenom);
+        brDrive.motor.setPower(brPower);
+
 
     }
 }
