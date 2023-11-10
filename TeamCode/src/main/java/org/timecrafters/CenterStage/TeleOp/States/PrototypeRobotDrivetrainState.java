@@ -43,9 +43,20 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
 
     @Override
     public void exec() {
+        if (engine.gamepad2.a){
+            robot.armPosition = 0;
+        } else if (engine.gamepad2.x){
+            robot.armPosition = 1;
+        } else if (engine.gamepad2.b){
+            robot.armPosition = 2;
+        } else if (engine.gamepad2.y){
+            robot.armPosition = 3;
+        }
+
         // drivetrain
         robot.driveTrainTeleOp();
-
+        // arm sequencer
+        robot.ArmSequences();
         // lift
         sliderTeleOp();
 
