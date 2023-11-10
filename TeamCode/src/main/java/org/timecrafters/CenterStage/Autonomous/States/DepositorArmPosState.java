@@ -37,7 +37,7 @@ public class DepositorArmPosState extends CyberarmState {
                     case 0:
                         // transfer
                         break;
-                    case 10:
+                    case 1:
                         // driving
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
                         robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_PASSIVE, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
@@ -48,41 +48,29 @@ public class DepositorArmPosState extends CyberarmState {
                             robot.ServoWaitTime(robot.COLLECTOR_ELBOW_PASSIVE, robot.COLLECTOR_ELBOW_IN); // calculate time to move
                             totalWaitedTime += (long) robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= totalWaitedTime) {
-//                        setHasFinished(true);
+                        setHasFinished(true);
                             }
                         }
                         break;
-                    case 20:
+                    case 2:
                         // collect
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
-//            robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//            totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 750) { // wait to move till time is met
                             robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
-//                robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 1500) {
                                 setHasFinished(true);
                             }
                         }
                         break;
-                    case 30:
+                    case 3:
                         // deposit
                         robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_IN); // drive the shoulder to the transfer position
-//                robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_PASSIVE, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//                totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 800) { // wait to move till time is met
                             robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_IN);
-//                    robot.ServoWaitTime(robot.COLLECTOR_ELBOW_PASSIVE, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                    totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 1600) {
                                 robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
-//                      robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//                      totalWaitedTime = (long) robot.servoWaitTime;
                                 if (System.currentTimeMillis() - startOfSequencerTime >= 2300) { // wait to move till time is met
                                     robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
-//                           robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                              totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                                     if (System.currentTimeMillis() - startOfSequencerTime >= 3100) {
                                         setHasFinished(true);
                                     }
@@ -93,57 +81,41 @@ public class DepositorArmPosState extends CyberarmState {
                 }
                 break;
 
-            case 10:// ----------------------------------------------------------------------------------------------- drive to driving pos
+            case 1:// ----------------------------------------------------------------------------------------------- drive to driving pos
                 switch (oldArmPosition) {
                     case 0:
                         // transfer
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_ELBOW_PASSIVE); // drive the shoulder to the transfer position
-//            robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//            totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 750) { // wait to move till time is met
                             robot.collectorElbow.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE);
-//                robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 2000) {
                                 setHasFinished(true);
                             }
                         }
                         break;
-                    case 10:
+                    case 1:
                         // drive pos
                         setHasFinished(true);
                         break;
-                    case 20:
+                    case 2:
                         // collect
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_ELBOW_PASSIVE); // drive the shoulder to the transfer position
-//            robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//            totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 600) { // wait to move till time is met
                             robot.collectorElbow.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE);
-//                robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 2100) {
                                 setHasFinished(true);
                             }
                         }
                         break;
-                    case 30:
+                    case 3:
                         // deposit
                         robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_IN); // drive the shoulder to the transfer position
-//                robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_PASSIVE, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//                totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 800) { // wait to move till time is met
                             robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_IN);
-//                    robot.ServoWaitTime(robot.COLLECTOR_ELBOW_PASSIVE, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                    totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 1600) {
                                 robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE); // drive the shoulder to the transfer position
-//                      robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//                      totalWaitedTime = (long) robot.servoWaitTime;
                                 if (System.currentTimeMillis() - startOfSequencerTime >= 2300) { // wait to move till time is met
                                     robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_PASSIVE);
-//                           robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                              totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                                     if (System.currentTimeMillis() - startOfSequencerTime >= 3100) {
                                         setHasFinished(true);
                                     }
@@ -154,65 +126,46 @@ public class DepositorArmPosState extends CyberarmState {
                 }
                 break;
 
-            case 20:// ----------------------------------------------------------------------------------------------- drive to collect pos
+            case 2:// ----------------------------------------------------------------------------------------------- drive to collect pos
                 switch (oldArmPosition) {
                     case 0:
                         // transfer
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
-//            robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//            totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 750) { // wait to move till time is met
                             robot.collectorElbow.setPosition(robot.COLLECTOR_SHOULDER_OUT);
-//                robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 2000) {
                                 setHasFinished(true);
                             }
                         }
                         break;
-                    case 10:
+                    case 1:
                         // driving
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
-//            robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//            totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 750) { // wait to move till time is met
                             robot.collectorElbow.setPosition(robot.COLLECTOR_SHOULDER_OUT);
-//                robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 1500) {
                                 setHasFinished(true);
                             }
                         }
                         break;
-                    case 20:
+                    case 2:
                         // collect
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
-//            robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//            totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 750) { // wait to move till time is met
                             robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
-//                robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 1500) {
                                 setHasFinished(true);
                             }
                         }
                         break;
-                    case 30:
+                    case 3:
                         // deposit
                         robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_IN); // drive the shoulder to the transfer position
                         if (System.currentTimeMillis() - startOfSequencerTime >= 100) { // wait to move till time is met
                             robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_IN);
-//                    robot.ServoWaitTime(robot.COLLECTOR_ELBOW_PASSIVE, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                    totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 100) {
-                                robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT); // drive the shoulder to the transfer position
-//                      robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//                      totalWaitedTime = (long) robot.servoWaitTime;
                                 if (System.currentTimeMillis() - startOfSequencerTime >= 100) { // wait to move till time is met
                                     robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT);
-//                           robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                              totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                                     if (System.currentTimeMillis() - startOfSequencerTime >= 100) {
                                         setHasFinished(true);
                                     }
@@ -223,51 +176,39 @@ public class DepositorArmPosState extends CyberarmState {
                 }
                 break;
 
-            case 30:// ----------------------------------------------------------------------------------------------- drive to deposit pos
+            case 3:// ----------------------------------------------------------------------------------------------- drive to deposit pos
                 switch (oldArmPosition) {
                     case 0:
                         // transfer
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_ELBOW_PASSIVE); // drive the shoulder to the transfer position
-//            robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//            totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 750) { // wait to move till time is met
                             robot.collectorElbow.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE);
-//                robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 2000) {
                                 setHasFinished(true);
                             }
                         }
                         break;
-                    case 10:
+                    case 1:
                         // driving
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_ELBOW_PASSIVE); // drive the shoulder to the transfer position
-//            robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//            totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 700) { // wait to move till time is met
                             robot.collectorElbow.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE);
-//                robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 2000) {
                                 setHasFinished(true);
                             }
                         }
                         break;
-                    case 20:
+                    case 2:
                         // collect
                         robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
-//            robot.ServoWaitTime(robot.COLLECTOR_SHOULDER_OUT, robot.COLLECTOR_SHOULDER_IN); // calculate time to move
-//            totalWaitedTime = (long) robot.servoWaitTime;
                         if (System.currentTimeMillis() - startOfSequencerTime >= 750) { // wait to move till time is met
                             robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
-//                robot.ServoWaitTime(robot.COLLECTOR_ELBOW_OUT, robot.COLLECTOR_ELBOW_IN); // calculate time to move
-//                totalWaitedTime += robot.servoWaitTime; // add the time to the total time to wait
                             if (System.currentTimeMillis() - startOfSequencerTime >= 1500) {
                                 setHasFinished(true);
                             }
                         }
                         break;
-                    case 30:
+                    case 3:
                         // deposit
                         break;
                 }
