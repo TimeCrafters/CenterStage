@@ -72,10 +72,10 @@ public class DriveToCoordinatesState extends CyberarmState {
         targetVelocityBR = currentVelocityX - currentVelocityY + ((2 * (robot.L / 2) * robot.MaxRotationalVelocity));
         targetVelocityFR = currentVelocityX + currentVelocityY + ((2 * (robot.L / 2) * robot.MaxRotationalVelocity));
 
-        robot.frontLeft.setVelocity((targetVelocityFL / robot.R));
-        robot.backLeft.setVelocity((targetVelocityBL / robot.R));
-        robot.backRight.setVelocity((targetVelocityBR / robot.R));
-        robot.frontRight.setVelocity((targetVelocityFR / robot.R));
+//        robot.frontLeft.setVelocity((targetVelocityFL / robot.R));
+//        robot.backLeft.setVelocity((targetVelocityBL / robot.R));
+//        robot.backRight.setVelocity((targetVelocityBR / robot.R));
+//        robot.frontRight.setVelocity((targetVelocityFR / robot.R));
 
 //        setHasFinished(true)
     }

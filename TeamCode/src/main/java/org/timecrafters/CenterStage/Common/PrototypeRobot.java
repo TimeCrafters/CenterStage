@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.timecrafters.Library.Robot;
 import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
@@ -38,12 +39,14 @@ public class PrototypeRobot extends Robot {
     public float currentSetPosShoulder;
     public float currentSetPosElbow;
     private HardwareMap hardwareMap;
-    public MotorEx frontLeft, frontRight, backLeft, backRight, lift;
+    public DcMotor frontLeft, frontRight, backLeft, backRight, lift;
     public DcMotor odometerR, odometerL, odometerA;
     public IMU imu;
-    public Servo depositorShoulder, depositorElbow, collectorShoulder, collectorElbow, depositor;
+    public Servo depositorShoulder, depositorElbow, collectorShoulder, collectorElbow, depositor, collector;
     private HDrive xDrive;
     private String string;
+    private double drivePower = 1;
+
     public double xMultiplier = 1;
     public double yMultiplier = 1;
     public double positionX;
@@ -63,6 +66,7 @@ public class PrototypeRobot extends Robot {
     public double localPositionX;
     public double localPositionY;
     public double localPositionH;
+
     public final static double L = 23.425; // distance between left and right encoder in cm
     final static double B = 10; // distance between the midpoint of the left and right encoder from the auxillary encoder in cm
     public final static double R = 4.5; // wheel radius in cm
@@ -71,6 +75,12 @@ public class PrototypeRobot extends Robot {
     public final double MaxVelocityForward = 40;
     public final double MaxStrafeVelocity = 34;
     public final double MaxRotationalVelocity = 20;
+    private boolean lbsVar1;
+    private boolean lbsVar2;
+    private boolean rbsVar2;
+    public float depositorPos;
+    public float collectorPos;
+
 
 
 
@@ -107,28 +117,28 @@ public class PrototypeRobot extends Robot {
         imu = engine.hardwareMap.get(IMU.class, "imu");
 
         //MOTORS
-        frontRight = new MotorEx(hardwareMap, "frontRight");
-        frontLeft = new MotorEx(hardwareMap, "frontLeft");
-        backRight = new MotorEx(hardwareMap, "backRight");
-        backLeft = new MotorEx(hardwareMap, "backLeft");
-        lift = new MotorEx(hardwareMap, "Lift");
+        frontRight = engine.hardwareMap.dcMotor.get("frontRight");
+        frontLeft = engine.hardwareMap.dcMotor.get("frontLeft");
+        backRight = engine.hardwareMap.dcMotor.get("backRight");
+        backLeft = engine.hardwareMap.dcMotor.get("backLeft");
+        lift = engine.hardwareMap.dcMotor.get("Lift");
 
         configuration = new TimeCraftersConfiguration("Blue Crab");
 
         initConstants();
 
-        frontRight.motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        backRight.motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        backLeft.motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontLeft.motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        lift.motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        backRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        lift.setDirection(DcMotorSimple.Direction.FORWARD);
 
 
-        frontRight.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRight.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontLeft.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //IMU
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
@@ -143,10 +153,13 @@ public class PrototypeRobot extends Robot {
         collectorShoulder = hardwareMap.servo.get("collector_shoulder");
         collectorElbow = hardwareMap.servo.get("collector_elbow");
         depositor = hardwareMap.servo.get("depositor");
+        collector = hardwareMap.servo.get("collector");
 
-        // input motors exactly as shown below
-        xDrive = new HDrive(frontLeft, frontRight,
-                            backLeft, backRight);
+        depositorShoulder.setPosition(DEPOSITOR_SHOULDER_IN);
+        depositorElbow.setPosition(DEPOSITOR_ELBOW_IN);
+        collectorElbow.setPosition(COLLECTOR_ELBOW_IN);
+        collectorShoulder.setPosition(COLLECTOR_SHOULDER_IN);
+
 
 //        depositorShoulder.setPosition(COLLECTOR_SHOULDER_IN);
 //        depositorElbow.setPosition(COLLECTOR_ELBOW_IN);
@@ -154,7 +167,38 @@ public class PrototypeRobot extends Robot {
     }
 
     public void driveTrainTeleOp() {
-        xDrive.driveRobotCentric(-engine.gamepad1.left_stick_x, engine.gamepad1.left_stick_y, -engine.gamepad1.right_stick_x);
+        boolean lbs1 = engine.gamepad1.left_stick_button;
+        if (lbs1 && !lbsVar1) {
+            if (drivePower == 1) {
+                drivePower = 0.5;
+            } else {
+                drivePower = 1;
+            }
+        }
+        lbsVar1 = lbs1;
+
+        double y = -engine.gamepad1.left_stick_y;
+        double x = engine.gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+        double rx = engine.gamepad1.right_stick_x;
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+
+        // angle math to make things field oriented
+        double heading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double rotX = x * Math.cos(heading) - y * Math.sin(heading);
+        double rotY = x * Math.sin(heading) + y * Math.cos(heading);
+
+        // joystick math to find the approximate power across each wheel for a movement
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY + rotX - rx) / denominator;
+        double backRightPower = (rotY - rotX - rx) / denominator;
+
+        // setting each power determined previously from the math above
+        // as well as multiplying it by a drive power that can be changed.
+        backLeft.setPower(backLeftPower * drivePower);
+        backRight.setPower(backRightPower * drivePower);
+        frontLeft.setPower(frontLeftPower * drivePower);
+        frontRight.setPower(frontRightPower * drivePower);
     }
 
     public void ShoulderServoWaitTime(){
@@ -205,6 +249,28 @@ public class PrototypeRobot extends Robot {
 
     }
 
+    public void CollectorToggle(){
+        boolean lbs2 = engine.gamepad2.left_stick_button;
+        if (lbs2 && !lbsVar2) {
+            if (collectorPos == 1F) {
+                collectorPos = 0F;
+            } else {
+                collectorPos = 1F;
+            }
+        }
+        lbsVar2 = lbs2;
+    }
+    public void DepositorToggle(){
+        boolean rbs2 = engine.gamepad2.right_stick_button;
+        if (rbs2 && !rbsVar2) {
+            if (depositorPos == 1F) {
+                depositorPos = 0F;
+            } else {
+                depositorPos = 1F;
+            }
+        }
+        rbsVar2 = rbs2;
+    }
     public void ArmSequences(){
         switch (armPosition) {
             case 0: // ----------------------------------------------------------------------------------------------- drive to transfer pos
@@ -251,7 +317,7 @@ public class PrototypeRobot extends Robot {
                 }
                 break;
 
-            case 1:// ----------------------------------------------------------------------------------------------- drive to driving pos
+          case 1:// ----------------------------------------------------------------------------------------------- drive to driving pos
                 switch (oldArmPosition) {
                     case 0:
                         // transfer

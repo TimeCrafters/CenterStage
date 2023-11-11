@@ -21,23 +21,23 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
     private void sliderTeleOp(){
         if (engine.gamepad1.right_trigger != 0){
             if (robot.lift.getCurrentPosition() >= maxExtension){
-                robot.lift.motor.setPower(0);
+                robot.lift.setPower(0);
             } else if (robot.lift.getCurrentPosition() >= maxExtension - 200){
-                robot.lift.motor.setPower(0.35);
+                robot.lift.setPower(0.35);
             }else {
-                robot.lift.motor.setPower(engine.gamepad1.right_trigger);
+                robot.lift.setPower(engine.gamepad1.right_trigger);
             }
         } else if (engine.gamepad1.left_trigger != 0){
 
             if (robot.lift.getCurrentPosition() <= minExtension) {
-                robot.lift.motor.setPower(0);
+                robot.lift.setPower(0);
             } else if (robot.lift.getCurrentPosition() < 350){
-                robot.lift.motor.setPower(-0.3);
+                robot.lift.setPower(-0.3);
             }else {
-                robot.lift.motor.setPower(-engine.gamepad1.left_trigger);
+                robot.lift.setPower(-engine.gamepad1.left_trigger);
             }
         } else {
-            robot.lift.motor.setPower(0);
+            robot.lift.setPower(0);
         }
     }
 
@@ -53,23 +53,30 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
             robot.armPosition = 3;
         }
 
+        robot.depositor.setPosition(robot.depositorPos);
+        robot.collector.setPosition(robot.collectorPos);
+
         // drivetrain
         robot.driveTrainTeleOp();
         // arm sequencer
         robot.ArmSequences();
         // lift
         sliderTeleOp();
+        // collector depositor
+        robot.CollectorToggle();
+        // depositor toggle
+        robot.DepositorToggle();
 
     }
 
 
     @Override
     public void telemetry() {
-        engine.telemetry.addData("Lift Encoder Pos", robot.lift.motor.getCurrentPosition());
+        engine.telemetry.addData("Lift Encoder Pos", robot.lift.getCurrentPosition());
         engine.telemetry.addData("imu", robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-//        engine.telemetry.addData("Elbow Collect", robot.ELBOW_COLLECT);
-//        engine.telemetry.addData("Elbow Deposit", robot.ELBOW_DEPOSIT);
-//        engine.telemetry.addData("Shoulder Collect", robot.SHOULDER_COLLECT);
-//        engine.telemetry.addData("Shoulder Deposit", robot.SHOULDER_DEPOSIT);
+        engine.telemetry.addData("arm Pos", robot.armPosition);
+        engine.telemetry.addData("old arm pos", robot.oldArmPosition);
+        engine.telemetry.addData("depositor pos", robot.depositorPos);
+        engine.telemetry.addData("collector pos", robot.collectorPos);
     }
 }
