@@ -1,5 +1,6 @@
 package dev.cyberarm.minibots.pizza;
 
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -7,7 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
@@ -29,11 +32,18 @@ public class PizzaMinibot {
     public IMU imu;
     public Servo gripper, arm;
     public int armStackPosition = -1;
+    final public TimeCraftersConfiguration config;
+    final public double wheelCircumference, distancePerTick;
+
+    public final double imuAngleOffset, initialFacing;
 
     private CyberarmEngine engine;
 
     public PizzaMinibot(CyberarmEngine engine) {
         this.engine = engine;
+
+        this.config = new TimeCraftersConfiguration("Pizza_2023");
+
         leftFront = new MotorEx(engine.hardwareMap, "leftFront");
         rightFront = new MotorEx(engine.hardwareMap, "rightFront");
 
@@ -46,8 +56,15 @@ public class PizzaMinibot {
         leftFront.motorEx.setDirection(DcMotorSimple.Direction.REVERSE);
         leftBack.motorEx.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        double wheelRadius = 75.0 / 2; // mm
-        double distancePerTick = Math.PI * wheelRadius * wheelRadius;
+        leftFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
+        leftBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
+        wheelCircumference = Math.PI * (75.0 * 4); //wheelRadius * wheelRadius; //-- times 2 is a hack... --//
+        distancePerTick = (28 * 20) / wheelCircumference; // raw motor encoder * gear ratio
+
         leftFront.setDistancePerPulse(distancePerTick);
         rightFront.setDistancePerPulse(distancePerTick);
         leftBack.setDistancePerPulse(distancePerTick);
@@ -63,6 +80,9 @@ public class PizzaMinibot {
                         RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
 
         imu.initialize(parameters);
+
+        imuAngleOffset = 0;
+        initialFacing = facing();
 
         gripper = engine.hardwareMap.servo.get("gripper");
         arm = engine.hardwareMap.servo.get("arm");
@@ -113,5 +133,47 @@ public class PizzaMinibot {
         engine.telemetry.addLine();
 
         engine.telemetry.addLine();
+    }
+
+    public double distanceMM(int ticks) {
+        return distancePerTick * ticks;
+    }
+
+
+    public double initialFacing() {
+        return initialFacing;
+    }
+
+    public double facing() {
+        double imuDegrees = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+
+        return (((imuDegrees + 360.0) % 360.0) + imuAngleOffset) % 360.0;
+    }
+
+    public double heading() {
+        return AngleUnit.normalizeRadians(-facing() * Math.PI / 180.0);
+//        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+    }
+
+    public double turnRate() {
+        return imu.getRobotAngularVelocity(AngleUnit.DEGREES).yRotationRate; // NOTE: UNTESTED
+    }
+
+    public boolean isBetween(double value, double min, double max) {
+        return value >= min && value <= max;
+    }
+
+    // Adapted from: https://github.com/gosu/gosu/blob/980d64de2ce52e4b16fdd5cb9c9e11c8bbb80671/src/Math.cpp#L38
+    public double angleDiff(double from, double to) {
+        double value = (to - from + 180);
+
+        double fmod = (value - 0.0) % (360.0 - 0.0);
+
+        return (fmod < 0 ? fmod + 360.0 : fmod +  0.0) - 180;
+    }
+
+    public double lerp(double min, double max, double t)
+    {
+        return min + (max - min) * t;
     }
 }
