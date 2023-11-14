@@ -18,6 +18,13 @@ public class Pilot extends CyberarmState {
             robot.imu.resetYaw();
         }
 
+        /// --- DRONE --- ///
+        if (engine.gamepad1.y) {
+            robot.droneLauncher.setPower(1.0);
+        } else if (engine.gamepad1.a) {
+            robot.droneLauncher.setPower(0.0);
+        }
+
         /// --- DRIVE --- ///
 //        robot.left.set(engine.gamepad1.left_stick_y);
 //        robot.right.set(engine.gamepad1.right_stick_y);
