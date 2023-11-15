@@ -19,7 +19,7 @@ public class MiniYellowTeleOPv2 extends CyberarmState {
     public MotorEx flDrive, frDrive, blDrive, brDrive;
     public IMU imu;
     private double flPower, frPower, blPower, brPower;
-    private float lStickY, yTransitPercent, xTransitPercent, rotPercent, percentDenom;
+    private float yTransitPercent, xTransitPercent, rotPercent, percentDenom;
 
     public TimeCraftersConfiguration configuration;
         @Override
