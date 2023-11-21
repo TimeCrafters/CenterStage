@@ -1,6 +1,7 @@
 package org.timecrafters.CenterStage.Common;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -13,8 +14,8 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 public class SodiPizzaMinibotObject extends Robot {
 
     public HardwareMap hardwareMap;
-    public DcMotor flDrive, frDrive, blDrive, brDrive;
-    public Servo shoulder, hand;
+    public DcMotor leftFront, rightFront, leftBack, rightBack;
+    public Servo shoulder, gripper;
     public IMU imu;
     private String string;
 
@@ -42,14 +43,29 @@ public class SodiPizzaMinibotObject extends Robot {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
 
         //Motor defining
-        flDrive = engine.hardwareMap.dcMotor.get("FL Drive");
-        frDrive = engine.hardwareMap.dcMotor.get("FR Drive");
-        blDrive = engine.hardwareMap.dcMotor.get("BL Drive");
-        brDrive = engine.hardwareMap.dcMotor.get("BR Drive");
+        leftFront = engine.hardwareMap.dcMotor.get("leftFront");
+        rightFront = engine.hardwareMap.dcMotor.get("rightFront");
+        leftBack = engine.hardwareMap.dcMotor.get("leftBack");
+        rightBack = engine.hardwareMap.dcMotor.get("rightBack");
+
+        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //Servo Defining
-        shoulder = engine.hardwareMap.servo.get("Shoulder");
-        hand = engine.hardwareMap.servo.get("Hand");
+        shoulder = engine.hardwareMap.servo.get("arm");
+        gripper = engine.hardwareMap.servo.get("gripper");
 
     }
 }
