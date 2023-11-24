@@ -3,7 +3,8 @@ package org.timecrafters.CenterStage.Autonomous.Engines;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.timecrafters.CenterStage.Autonomous.States.SodiPizzaAutoArmState;
-import org.timecrafters.CenterStage.Autonomous.States.SodiPizzaAutoDriveState;
+import org.timecrafters.CenterStage.Autonomous.States.SodiPizzaAutoFirstDriveState;
+import org.timecrafters.CenterStage.Autonomous.States.SodiPizzaWheelTest;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
@@ -11,7 +12,8 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 public class SodiPizzaAutoRedRightEngine extends CyberarmEngine {
     @Override
     public void setup() {
-        addState(new SodiPizzaAutoDriveState());
-        addState(new SodiPizzaAutoArmState());
+//        addState(new SodiPizzaAutoFirstDriveState());
+//        addState(new SodiPizzaAutoArmState());
+        addState(new SodiPizzaWheelTest());
     }
 }
