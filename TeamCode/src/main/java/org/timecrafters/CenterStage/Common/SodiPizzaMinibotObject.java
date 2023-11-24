@@ -19,6 +19,8 @@ public class SodiPizzaMinibotObject extends Robot {
     public IMU imu;
     private String string;
 
+    public int readyToTurn;
+
     public static double GRIPPER_CLOSED = 0.333; // ~90 degrees
     public static double GRIPPER_OPEN = 0.75; // ~205 degrees
 
