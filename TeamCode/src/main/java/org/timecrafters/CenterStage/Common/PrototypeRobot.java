@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.timecrafters.Library.Robot;
@@ -15,8 +16,19 @@ import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfig
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
+
 public class PrototypeRobot extends Robot {
 
+//    public double integralSum = 0;
+//    double Kp = 0;
+//    double Ki = 0;
+//    double Kd = 0;
+//    public double lastError = 0;
+    public double PIDrx;
+    public double targetHeading;
+    public boolean headingLock = false;
+    public double backDropLock = Math.toRadians(90);
+    ElapsedTime timer = new ElapsedTime();
     public int armPosition = 0;
     public boolean stateFinished;
     public long startOfSequencerTime;
@@ -80,6 +92,7 @@ public class PrototypeRobot extends Robot {
     private boolean rbsVar2;
     public float depositorPos;
     public float collectorPos;
+    public double rx;
 
 
 
@@ -181,7 +194,12 @@ public class PrototypeRobot extends Robot {
 
         double y = -engine.gamepad1.left_stick_y;
         double x = engine.gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-        double rx = engine.gamepad1.right_stick_x;
+
+        if (headingLock){
+            ;
+        } else if (headingLock == false){
+            rx = engine.gamepad1.right_stick_x;
+        }
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
         // angle math to make things field oriented
@@ -250,6 +268,17 @@ public class PrototypeRobot extends Robot {
         positionH += dtheta;
 
     }
+
+//    public double PIDControl(double reference, double current){
+//        double error = reference - current;
+//        integralSum += error * timer.seconds();
+//        double derivative = (error - lastError) / timer.seconds();
+//
+//        timer.reset();
+//
+//        double output = (error * Kp) + (derivative * Kd) + (integralSum * Ki);
+//        return output;
+//    }
 
     public void CollectorToggle(){
         boolean lbs2 = engine.gamepad2.left_stick_button;

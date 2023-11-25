@@ -1,6 +1,7 @@
 package org.timecrafters.CenterStage.TeleOp.States;
 
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.timecrafters.CenterStage.Common.PrototypeRobot;
@@ -13,15 +14,18 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
     private int minExtension = 0;
     private PIDController HeadingPidController;
     private double targetHeading;
-    private final double p = 0, i = 0, d = 0;
-
+    public double integralSum = 0;
+    double Kp = 0;
+    double Ki = 0;
+    double Kd = 0;
+    private double lastError = 0;
+    ElapsedTime timer = new ElapsedTime();
 
 
     private long lastCheckedTime;
 
     public PrototypeRobotDrivetrainState(PrototypeRobot robot) {
         this.robot = robot;
-        HeadingPidController = new PIDController(p, i, d);
 
     }
 
@@ -60,16 +64,22 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
     }
 
     private void HeadingLock(){
-        HeadingPidController.setPID(p, i, d);
         double currentHeading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-        double pid = HeadingPidController.calculate(currentHeading, targetHeading);
-        double r = pid;
 
+    }
+    public double HeadingPIDControl(double reference, double current){
+        double error = angleWrap(reference - current);
+        integralSum += error * timer.seconds();
+        double derivative = (error - lastError) / timer.seconds();
+
+        timer.reset();
+
+        double output = (error * Kp) + (derivative * Kd) + (integralSum * Ki);
+        return output;
     }
 
     @Override
     public void init() {
-        HeadingPidController = new PIDController(p, i, d);
     }
 
     @Override
@@ -99,192 +109,197 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
 
         // arm sequencer
 //        robot.ArmSequences();
-        switch (robot.armPosition) {
-            case 0: // ----------------------------------------------------------------------------------------------- drive to transfer pos
-                switch (robot.oldArmPosition) {
-                    case 0:
-                        // transfer
-                        robot.oldArmPosition = 0;
-                        break;
-                    case 1:
-                        // driving
-                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 800) { // wait to move till time is met
-                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
-                            robot.oldArmPosition = 0;
-                        }
-                        break;
-                    case 2:
-                        // collect
-                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
-                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
-                                robot.oldArmPosition = 0;
-                            }
-                        }
-                        break;
-                    case 3:
-                        // deposit
-                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT); // drive the shoulder to the out position
-                        robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_IN);
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 800) { // wait to move till time is met
-                            robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_IN); // drive the shoulder to the transfer position
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1100) {
-                                robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
-                                if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) { // wait to move till time is met
-                                    robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
-                                    if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2000) {
-                                        robot.oldArmPosition = 0;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                }
-                break;
-            case 1:// ----------------------------------------------------------------------------------------------- drive to driving pos
-                switch (robot.oldArmPosition) {
-                    case 0:
-                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 800) { // wait to move till time is met
-                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_PASSIVE);
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
-                                robot.oldArmPosition = 1;
-                            }
-                        }
-                            break;
-                    case 1:
-                        // drive pos
-                        robot.oldArmPosition = 1;
+//        switch (robot.armPosition) {
+//            case 0: // ----------------------------------------------------------------------------------------------- drive to transfer pos
+//                switch (robot.oldArmPosition) {
+//                    case 0:
+//                        // transfer
+//                        robot.oldArmPosition = 0;
+//                        break;
+//                    case 1:
+//                        // driving
+//                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 800) { // wait to move till time is met
+//                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
+//                            robot.oldArmPosition = 0;
+//                        }
+//                        break;
+//                    case 2:
+//                        // collect
+//                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
+//                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
+//                                robot.oldArmPosition = 0;
+//                            }
+//                        }
+//                        break;
+//                    case 3:
+//                        // deposit
+//                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT); // drive the shoulder to the out position
+//                        robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_IN);
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 800) { // wait to move till time is met
+//                            robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_IN); // drive the shoulder to the transfer position
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1100) {
+//                                robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
+//                                if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) { // wait to move till time is met
+//                                    robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
+//                                    if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2000) {
+//                                        robot.oldArmPosition = 0;
+//                                    }
+//                                }
+//                            }
+//                        }
+//                        break;
+//                }
+//                break;
+//            case 1:// ----------------------------------------------------------------------------------------------- drive to driving pos
+//                switch (robot.oldArmPosition) {
+//                    case 0:
+//                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 800) { // wait to move till time is met
+//                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_PASSIVE);
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
+//                                robot.oldArmPosition = 1;
+//                            }
+//                        }
+//                            break;
+//                    case 1:
+//                        // drive pos
+//                        robot.oldArmPosition = 1;
+//
+//                        break;
+//                    case 2:
+//                        // collect
+//                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 900) { // wait to move till time is met
+//                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_PASSIVE);
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
+//                                robot.oldArmPosition = 1;
+//                            }
+//                        }
+//                        break;
+//                    case 3:
+//                        // deposit
+//                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT - 0.1); // drive the shoulder to the out position
+//                        robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_IN);
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 800) { // wait to move till time is met
+//                            robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_IN); // drive the shoulder to the transfer position
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1100) {
+//                                robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
+//                                robot.oldArmPosition = 1;
+//                            }
+//                        }
+//                        break;
+//                }
+//                break;
+//
+//            case 2:// ----------------------------------------------------------------------------------------------- drive to collect pos
+//                switch (robot.oldArmPosition) {
+//                    case 0:
+//                        // transfer
+//                        robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
+//                            robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT);
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2000) {
+//                                robot.oldArmPosition = 2;
+//                            }
+//                        }
+//                        break;
+//                    case 1:
+//                        // driving
+//                        robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
+//                            robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT);
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
+//                                robot.oldArmPosition = 2;
+//                            }
+//                        }
+//                        break;
+//                    case 2:
+//                        // collect
+//                        break;
+//                    case 3:
+//                        // deposit
+//                        robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_IN); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 100) { // wait to move till time is met
+//                            robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_IN);
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 100) {
+//                                if (System.currentTimeMillis() - robot.startOfSequencerTime >= 100) { // wait to move till time is met
+//                                    robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT);
+//                                    if (System.currentTimeMillis() - robot.startOfSequencerTime >= 700) {
+//                                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT);
+//                                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1000) {
+//                                            robot.oldArmPosition = 2;
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                }
+//                        break;
+//                    case 3:// ----------------------------------------------------------------------------------------------- drive to deposit pos
+//                switch (robot.oldArmPosition) {
+//                    case 0:
+//                        // transfer
+//                        robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
+//                            robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE);
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1200) {
+//                                if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500){
+//                                    robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_OUT);
+//                                    if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2000){
+//                                        robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_OUT);
+//                                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2300){
+//                                            robot.oldArmPosition = 3;
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                        break;
+//                    case 1:
+//                        robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 760) { // wait to move till time is met
+//                            robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE);
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1200) {
+//                                if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500){
+//                                    robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_OUT);
+//                                    if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2000){
+//                                        robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_OUT);
+//                                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2300){
+//                                            robot.oldArmPosition = 3;
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                        break;
+//                    case 2:
+//                        // collect
+//                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
+//                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
+//                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
+//                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
+//                                robot.oldArmPosition = 3;
+//                            }
+//                        }
+//                        break;
+//                    case 3:
+//                        // deposit
+//                        break;
+//                }
+//                break;
 
-                        break;
-                    case 2:
-                        // collect
-                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 900) { // wait to move till time is met
-                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_PASSIVE);
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
-                                robot.oldArmPosition = 1;
-                            }
-                        }
-                        break;
-                    case 3:
-                        // deposit
-                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT - 0.1); // drive the shoulder to the out position
-                        robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_IN);
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 800) { // wait to move till time is met
-                            robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_IN); // drive the shoulder to the transfer position
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1100) {
-                                robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
-                                robot.oldArmPosition = 1;
-                            }
-                        }
-                        break;
-                }
-                break;
-
-            case 2:// ----------------------------------------------------------------------------------------------- drive to collect pos
-                switch (robot.oldArmPosition) {
-                    case 0:
-                        // transfer
-                        robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
-                            robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT);
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2000) {
-                                robot.oldArmPosition = 2;
-                            }
-                        }
-                        break;
-                    case 1:
-                        // driving
-                        robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
-                            robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT);
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
-                                robot.oldArmPosition = 2;
-                            }
-                        }
-                        break;
-                    case 2:
-                        // collect
-                        break;
-                    case 3:
-                        // deposit
-                        robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_IN); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 100) { // wait to move till time is met
-                            robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_IN);
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 100) {
-                                if (System.currentTimeMillis() - robot.startOfSequencerTime >= 100) { // wait to move till time is met
-                                    robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT);
-                                    if (System.currentTimeMillis() - robot.startOfSequencerTime >= 700) {
-                                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_OUT);
-                                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1000) {
-                                            robot.oldArmPosition = 2;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                }
-                        break;
-                    case 3:// ----------------------------------------------------------------------------------------------- drive to deposit pos
-                switch (robot.oldArmPosition) {
-                    case 0:
-                        // transfer
-                        robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
-                            robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE);
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1200) {
-                                if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500){
-                                    robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_OUT);
-                                    if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2000){
-                                        robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_OUT);
-                                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2300){
-                                            robot.oldArmPosition = 3;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 1:
-                        robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_OUT); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 760) { // wait to move till time is met
-                            robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_PASSIVE);
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1200) {
-                                if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500){
-                                    robot.depositorShoulder.setPosition(robot.DEPOSITOR_SHOULDER_OUT);
-                                    if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2000){
-                                        robot.depositorElbow.setPosition(robot.DEPOSITOR_ELBOW_OUT);
-                                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 2300){
-                                            robot.oldArmPosition = 3;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 2:
-                        // collect
-                        robot.collectorShoulder.setPosition(robot.COLLECTOR_SHOULDER_IN); // drive the shoulder to the transfer position
-                        if (System.currentTimeMillis() - robot.startOfSequencerTime >= 750) { // wait to move till time is met
-                            robot.collectorElbow.setPosition(robot.COLLECTOR_ELBOW_IN);
-                            if (System.currentTimeMillis() - robot.startOfSequencerTime >= 1500) {
-                                robot.oldArmPosition = 3;
-                            }
-                        }
-                        break;
-                    case 3:
-                        // deposit
-                        break;
-                }
-                break;
-
-        }
+//        }
 
             // drivetrain
             robot.driveTrainTeleOp();
+
+            if (engine.gamepad1.b){
+                targetHeading = robot.backDropLock;
+
+            }
             // lift
             SliderTeleOp();
             // collector depositor
