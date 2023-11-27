@@ -12,7 +12,6 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
     private long lastMoveTime;
     private int targetPos = 2500;
     private double drivePower;
-    private boolean lastHalf;
 
     public SodiPizzaAutoFirstDriveState() {
         groupName = " ";
@@ -26,7 +25,6 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
     @Override
     public void start() {
 
-        lastHalf = false;
         lastMoveTime = System.currentTimeMillis();
         robot.readyToTurn = 0;
 
@@ -43,8 +41,8 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
     @Override
     public void exec() {
         // Move forward from 0 to targetPos
-        if (robot.leftFront.getCurrentPosition() <= 10 && robot.leftFront.getCurrentPosition() >= -10
-                && !lastHalf) {
+        if (robot.leftFront.getCurrentPosition() <= 10 && robot.leftFront.getCurrentPosition() >= -10) {
+
             robot.leftFront.setTargetPosition(targetPos);
             robot.leftBack.setTargetPosition(targetPos);
             robot.rightFront.setTargetPosition(targetPos);

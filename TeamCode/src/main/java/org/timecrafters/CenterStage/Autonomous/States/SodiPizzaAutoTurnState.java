@@ -7,13 +7,13 @@ import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
 import dev.cyberarm.engine.V2.CyberarmState;
 
 public class SodiPizzaAutoTurnState extends CyberarmState {
-    final private SodiPizzaMinibotObject robot = new SodiPizzaMinibotObject();
+    final private SodiPizzaMinibotObject robot = SodiPizzaMinibotObject();
     final private String groupName, actionName;
     private long lastMoveTime;
     private double turnSpeedRaw, turnSpeed;
     private int startPos;
     private double targetRot;
-    private double currentRot = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+    private double currentRot;
     private double neededRot = targetRot - currentRot;
   /** Rot = rotation **/
 
@@ -21,6 +21,13 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
         groupName = " ";
         actionName = " ";
         robot.setup();
+    }
+
+    public SodiPizzaAutoTurnState(int readyToTurnParm) {
+        groupName = " ";
+        actionName = " ";
+        robot.setup();
+        robot.readyToTurn = readyToTurnParm;
     }
 
     private double getTurnSpeed() {
@@ -48,6 +55,8 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
     @Override
     public void exec() {
 
+        currentRot = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+
         if (robot.readyToTurn == 1 && robot.leftFront.getCurrentPosition() == startPos && Math.abs(neededRot) > 10) {
 
             targetRot = currentRot + 90;
@@ -59,12 +68,14 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
             robot.rightFront.setPower(-turnSpeed);
             robot.rightBack.setPower(-turnSpeed);
 
-        } else if (robot.readyToTurn == 1 && Math.abs(neededRot) < 10) {
+        } else if (robot.readyToTurn == 1 && Math.abs(neededRot) < 5) {
             turnSpeedRaw = 0;
             robot.leftFront.setPower(turnSpeed);
             robot.leftBack.setPower(turnSpeed);
             robot.rightFront.setPower(turnSpeed);
             robot.rightBack.setPower(turnSpeed);
+
+            robot.readyToTurn = 0;
         }
 
     }
