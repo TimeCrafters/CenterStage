@@ -9,18 +9,18 @@ import org.timecrafters.CenterStage.Autonomous.States.SodiPizzaAutoTurnState;
 import org.timecrafters.CenterStage.Autonomous.States.SodiPizzaWheelTest;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
+import dev.cyberarm.engine.V2.CyberarmState;
 
 @Autonomous(name = "Sodi's Pizza Box Bot Auto", group = "")
 public class SodiPizzaAutoRedRightEngine extends CyberarmEngine {
+
     @Override
     public void setup() {
 
-        addState(new SodiPizzaAutoFirstDriveState());
         addState(new SodiPizzaAutoTurnState());
+        if (blackboardGetInt("readyToTurn") == 0) {
+            addTask(new SodiPizzaAutoFirstDriveState());
+        }
 
-//        addState(new SodiPizzaAutoSecDriveState());
-
-//        addState(new SodiPizzaAutoArmState());
-//        addState(new SodiPizzaWheelTest());
     }
 }

@@ -15,6 +15,12 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
     private double targetRot;
     private double currentRot;
     private double neededRot = targetRot - currentRot;
+
+    private double rightTurnCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + 90;
+    private double rightTurnCCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - 90;
+    private double backTurnCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + 180;
+    private double backTurnCCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - 180;
+
   /** Rot = rotation **/
 
     public SodiPizzaAutoTurnState() {
