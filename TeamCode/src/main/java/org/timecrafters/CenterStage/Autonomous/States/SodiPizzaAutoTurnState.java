@@ -7,7 +7,7 @@ import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
 import dev.cyberarm.engine.V2.CyberarmState;
 
 public class SodiPizzaAutoTurnState extends CyberarmState {
-    final private SodiPizzaMinibotObject robot = SodiPizzaMinibotObject();
+    final private SodiPizzaMinibotObject robot = new SodiPizzaMinibotObject();
     final private String groupName, actionName;
     private long lastMoveTime;
     private double turnSpeedRaw, turnSpeed;

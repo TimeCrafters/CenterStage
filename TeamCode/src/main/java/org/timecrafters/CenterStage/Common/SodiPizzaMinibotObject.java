@@ -69,5 +69,6 @@ public class SodiPizzaMinibotObject extends Robot {
         shoulder = engine.hardwareMap.servo.get("arm");
         gripper = engine.hardwareMap.servo.get("gripper");
 
+        //readyToTurn
     }
 }

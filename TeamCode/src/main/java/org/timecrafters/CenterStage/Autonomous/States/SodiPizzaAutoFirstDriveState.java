@@ -70,51 +70,5 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
 
             setHasFinished(true);
         }
-
-/*        //Stop moving and update lastMoveTime
-        if (robot.leftFront.getCurrentPosition() >= targetPos && drivePower > 0) {
-
-            lastHalf = true;
-
-            drivePower = 0;
-
-            robot.leftFront.setPower(drivePower);
-            robot.leftBack.setPower(drivePower);
-            robot.rightFront.setPower(drivePower);
-            robot.rightBack.setPower(drivePower);
-
-            lastMoveTime = System.currentTimeMillis();
-        }
-
-        //Move backwards from targetPos to 0
-        if (robot.leftFront.getCurrentPosition() >= targetPos && drivePower == 0
-            && System.currentTimeMillis() - lastMoveTime >= 500 && lastHalf) {
-
-            robot.leftFront.setTargetPosition(0);
-            robot.leftBack.setTargetPosition(0);
-            robot.rightFront.setTargetPosition(0);
-            robot.rightBack.setTargetPosition(0);
-
-            drivePower = -0.5;
-
-            robot.leftFront.setPower(drivePower);
-            robot.leftBack.setPower(drivePower);
-            robot.rightFront.setPower(drivePower);
-            robot.rightBack.setPower(drivePower);
-        } */
-        
-        /*        if (robot.leftFront.getCurrentPosition() < 1250 && robot.leftFront.getCurrentPosition() >= targetPos &&
-            robot.rightBack.getCurrentPosition() > 750) {
-            robot.leftFront.setPower(0.5);
-            robot.leftBack.setPower(0.5);
-            robot.rightFront.setPower(-0.5);
-            robot.rightBack.setPower(-0.5);
-
-            robot.leftFront.setTargetPosition(1250);
-            robot.leftBack.setTargetPosition(1250);
-            robot.rightFront.setTargetPosition(750);
-            robot.rightBack.setTargetPosition(750);
-        }
-*/
     }
 }
