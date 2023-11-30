@@ -12,6 +12,7 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
     private long lastMoveTime;
     private int targetPos = 2500;
     private double drivePower;
+    public int readyToTurn;
 
     public SodiPizzaAutoFirstDriveState() {
         groupName = " ";
@@ -26,7 +27,7 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
     public void start() {
 
         lastMoveTime = System.currentTimeMillis();
-        robot.readyToTurn = 0;
+        readyToTurn = engine.blackboardGetInt("readyToTurn");
 
     }
 
@@ -36,12 +37,18 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
         engine.telemetry.addData("Current Ticks?", robot.leftFront.getCurrentPosition());
         engine.telemetry.addData("Ticks Needed?", robot.leftFront.getTargetPosition() -
         robot.leftFront.getCurrentPosition());
+        engine.telemetry.addLine();
+        engine.telemetry.addData("Internal Ready To Turn Value", readyToTurn);
+
     }
 
     @Override
     public void exec() {
+
+        readyToTurn = engine.blackboardGet("readyToTurn");
+
         // Move forward from 0 to targetPos
-        if (robot.leftFront.getCurrentPosition() <= 10 && robot.leftFront.getCurrentPosition() >= -10) {
+        if (robot.leftFront.getCurrentPosition() <= 10 && robot.leftFront.getCurrentPosition() >= -10 && readyToTurn == 0) {
 
             robot.leftFront.setTargetPosition(targetPos);
             robot.leftBack.setTargetPosition(targetPos);
@@ -66,7 +73,7 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
             robot.rightFront.setPower(drivePower);
             robot.rightBack.setPower(drivePower);
 
-            robot.readyToTurn = 1;
+            engine.blackboardSet("readyToTurn", 1);
 
             setHasFinished(true);
         }

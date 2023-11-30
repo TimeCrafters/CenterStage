@@ -3,6 +3,7 @@ package org.timecrafters.CenterStage.Autonomous.States;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
+import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
 import dev.cyberarm.engine.V2.CyberarmState;
 
@@ -14,12 +15,13 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
     private int startPos;
     private double targetRot;
     private double currentRot;
-    private double neededRot = targetRot - currentRot;
-
-    private double rightTurnCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + 90;
-    private double rightTurnCCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - 90;
-    private double backTurnCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + 180;
-    private double backTurnCCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - 180;
+    private double neededRot;
+    public int readyToTurn;
+    
+//    private double rightTurnCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + 90;
+//    private double rightTurnCCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - 90;
+//    private double backTurnCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + 180;
+//    private double backTurnCCW = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - 180;
 
   /** Rot = rotation **/
 
@@ -29,18 +31,17 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
         robot.setup();
     }
 
-    public SodiPizzaAutoTurnState(int readyToTurnParm) {
-        groupName = " ";
-        actionName = " ";
-        robot.setup();
-        robot.readyToTurn = readyToTurnParm;
-    }
-
     private double getTurnSpeed() {
         if (Math.abs(neededRot) > 5) {
-            turnSpeed = turnSpeedRaw * neededRot / 10;
+            turnSpeed = (turnSpeedRaw * neededRot) / 10;
         }
             return turnSpeed;
+    }
+
+    @Override
+    public void telemetry() {
+        engine.telemetry.addData("Target Pos", robot.leftFront.getTargetPosition());
+        engine.telemetry.addData("Power", robot.leftFront.getPower());
     }
 
     @Override
@@ -54,18 +55,21 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
         robot.rightFront.setPower(turnSpeed);
         robot.rightBack.setPower(turnSpeed);
 
-        robot.imu.resetYaw();
+        neededRot = (targetRot - robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+//        robot.imu.resetYaw();
     }
 
 
     @Override
     public void exec() {
 
+        readyToTurn = engine.blackboardGet("readyToTurn");
+
         currentRot = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
-        if (robot.readyToTurn == 1 && robot.leftFront.getCurrentPosition() == startPos && Math.abs(neededRot) > 10) {
+        if (readyToTurn == 1 && robot.leftFront.getCurrentPosition() == startPos && Math.abs(neededRot) > 10) {
 
-            targetRot = currentRot + 90;
+            targetRot = -90;
 
             turnSpeedRaw = 0.3;
 
@@ -74,14 +78,14 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
             robot.rightFront.setPower(-turnSpeed);
             robot.rightBack.setPower(-turnSpeed);
 
-        } else if (robot.readyToTurn == 1 && Math.abs(neededRot) < 5) {
+        } else if (readyToTurn == 1 && Math.abs(neededRot) < 5) {
             turnSpeedRaw = 0;
             robot.leftFront.setPower(turnSpeed);
             robot.leftBack.setPower(turnSpeed);
             robot.rightFront.setPower(turnSpeed);
             robot.rightBack.setPower(turnSpeed);
 
-            robot.readyToTurn = 0;
+            engine.blackboardSet("readyToTurn", 0);
         }
 
     }

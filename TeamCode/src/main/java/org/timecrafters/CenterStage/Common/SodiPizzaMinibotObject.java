@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.timecrafters.Library.Robot;
 import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
@@ -18,8 +19,6 @@ public class SodiPizzaMinibotObject extends Robot {
     public Servo shoulder, gripper;
     public IMU imu;
     private String string;
-
-    public int readyToTurn;
 
     public static double GRIPPER_CLOSED = 0.333; // ~90 degrees
     public static double GRIPPER_OPEN = 0.75; // ~205 degrees
@@ -43,6 +42,7 @@ public class SodiPizzaMinibotObject extends Robot {
 
         this.engine = CyberarmEngine.instance;
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
+        this.imu = CyberarmEngine.instance.hardwareMap.get(IMU.class, "imu");
 
         //Motor defining
         leftFront = engine.hardwareMap.dcMotor.get("leftFront");

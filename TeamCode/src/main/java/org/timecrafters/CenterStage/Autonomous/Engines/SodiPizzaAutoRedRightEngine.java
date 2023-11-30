@@ -16,11 +16,9 @@ public class SodiPizzaAutoRedRightEngine extends CyberarmEngine {
 
     @Override
     public void setup() {
-
+        blackboardSet("readyToTurn", 0);
         addState(new SodiPizzaAutoTurnState());
-        if (blackboardGetInt("readyToTurn") == 0) {
-            addTask(new SodiPizzaAutoFirstDriveState());
-        }
+        addParallelStateToLastState(new SodiPizzaAutoFirstDriveState());
 
     }
 }
