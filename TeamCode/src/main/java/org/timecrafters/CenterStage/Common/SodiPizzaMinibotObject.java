@@ -1,9 +1,12 @@
 package org.timecrafters.CenterStage.Common;
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -18,6 +21,7 @@ public class SodiPizzaMinibotObject extends Robot {
     public DcMotor leftFront, rightFront, leftBack, rightBack;
     public Servo shoulder, gripper;
     public IMU imu;
+    public Rev2mDistanceSensor distSensor;
     private String string;
 
     public static double GRIPPER_CLOSED = 0.333; // ~90 degrees
@@ -69,8 +73,9 @@ public class SodiPizzaMinibotObject extends Robot {
         shoulder = engine.hardwareMap.servo.get("arm");
         gripper = engine.hardwareMap.servo.get("gripper");
 
-        //readyToTurn
+        //Distance Sensor
 
+        distSensor = engine.hardwareMap.get(Rev2mDistanceSensor.class, "distSensor");
 
     }
 }

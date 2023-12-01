@@ -2,6 +2,7 @@ package org.timecrafters.CenterStage.Autonomous.States;
 
 import android.annotation.SuppressLint;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
 
 import dev.cyberarm.engine.V2.CyberarmState;
@@ -39,6 +40,7 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
         robot.leftFront.getCurrentPosition());
         engine.telemetry.addLine();
         engine.telemetry.addData("Internal Ready To Turn Value", readyToTurn);
+        engine.telemetry.addData("Distance Sensor Reading", robot.distSensor.getDistance(DistanceUnit.MM));
 
     }
 

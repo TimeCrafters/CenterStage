@@ -1,6 +1,7 @@
 package org.timecrafters.CenterStage.Autonomous.States;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
 import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
@@ -40,8 +41,14 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
 
     @Override
     public void telemetry() {
-        engine.telemetry.addData("Target Pos", robot.leftFront.getTargetPosition());
+        engine.telemetry.addData("Target Rotation", targetRot);
         engine.telemetry.addData("Power", robot.leftFront.getPower());
+        engine.telemetry.addData("Distance Sensor Reading", robot.distSensor.getDistance(DistanceUnit.MM));
+        engine.telemetry.addLine();
+        engine.telemetry.addData("Internal Ready To Turn Value", readyToTurn);
+        engine.telemetry.addData("Engine Ready To Turn Value", engine.blackboardGetInt("readyToTurn"));
+
+
     }
 
     @Override
@@ -56,7 +63,8 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
         robot.rightBack.setPower(turnSpeed);
 
         neededRot = (targetRot - robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-//        robot.imu.resetYaw();
+        engine.blackboardSet("readyToTurn", 0);
+
     }
 
 
@@ -67,7 +75,7 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
 
         currentRot = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
-        if (readyToTurn == 1 && robot.leftFront.getCurrentPosition() == startPos && Math.abs(neededRot) > 10) {
+        if (readyToTurn == 1 && Math.abs(neededRot) > 10) {
 
             targetRot = -90;
 
