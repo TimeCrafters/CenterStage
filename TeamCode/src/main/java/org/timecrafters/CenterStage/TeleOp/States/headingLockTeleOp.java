@@ -15,7 +15,7 @@ public class headingLockTeleOp extends CyberarmState {
     private PrototypeRobot robot;
     private PIDController HeadingPidController;
     public double integralSum = 0;
-    public static double Kp = 0;
+    public static double Kp = 1;
     public static double Ki = 0;
     public static double Kd = 0;
     private double lastError = 0;
@@ -36,17 +36,6 @@ public class headingLockTeleOp extends CyberarmState {
             radians += 2 * Math.PI;
         }
         return radians;
-    }
-
-    public double headingPIDControl(double reference, double current){
-        double error = angleWrap(reference - current);
-        integralSum += error * timer.seconds();
-        double derivative = (error - lastError) / timer.seconds();
-
-        timer.reset();
-
-        double output = (error * Kp) + (derivative * Kd) + (integralSum * Ki);
-        return output;
     }
 
     @Override
