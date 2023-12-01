@@ -12,8 +12,6 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
     private PrototypeRobot robot;
     private int maxExtension = 2000;
     private int minExtension = 0;
-    private PIDController HeadingPidController;
-    private double targetHeading;
     public double integralSum = 0;
     double Kp = 0;
     double Ki = 0;
@@ -111,7 +109,7 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
             robot.driveTrainTeleOp();
 
             if (engine.gamepad1.b){
-                targetHeading = robot.backDropLock;
+//                targetHeading = robot.backDropLock;
 
             }
             // lift

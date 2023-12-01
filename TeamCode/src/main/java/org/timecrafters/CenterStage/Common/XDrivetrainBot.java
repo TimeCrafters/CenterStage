@@ -17,10 +17,9 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 
 
 public class XDrivetrainBot extends Robot {
-    public double PIDrx;
-    public double targetHeading;
     public boolean headingLock = false;
     public double backDropLock = Math.toRadians(90);
+    public double collectLock = Math.toRadians(-90);
     ElapsedTime timer = new ElapsedTime();
     public int armPosition = 0;
     public boolean stateFinished;
@@ -28,7 +27,7 @@ public class XDrivetrainBot extends Robot {
     public int oldArmPosition = 0;
     public long waitTime;
     private HardwareMap hardwareMap;
-    public DcMotor frontLeft, frontRight, backLeft, backRight;
+    public DcMotor frontLeft, frontRight, backLeft, backRight, armMotor;
     public DcMotor odometerR, odometerL, odometerA;
     public IMU imu;
     private String string;
@@ -69,9 +68,6 @@ public class XDrivetrainBot extends Robot {
     public float collectorPos;
     public double rx;
 
-
-
-
     public final double cm_per_tick = (2 * Math.PI * R) / N;
     private CyberarmEngine engine;
 
@@ -96,6 +92,7 @@ public class XDrivetrainBot extends Robot {
         frontLeft = engine.hardwareMap.dcMotor.get("frontLeft");
         backRight = engine.hardwareMap.dcMotor.get("backRight");
         backLeft = engine.hardwareMap.dcMotor.get("backLeft");
+        armMotor = engine.hardwareMap.dcMotor.get("arm");
 
 
 //        configuration = new TimeCraftersConfiguration("Blue Crab");
@@ -105,6 +102,7 @@ public class XDrivetrainBot extends Robot {
         backRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
 
 
@@ -113,6 +111,7 @@ public class XDrivetrainBot extends Robot {
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //IMU
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
@@ -193,19 +192,4 @@ public class XDrivetrainBot extends Robot {
         positionH += dtheta;
 
     }
-
-//    public double PIDControl(double reference, double current){
-//        double error = reference - current;
-//        integralSum += error * timer.seconds();
-//        double derivative = (error - lastError) / timer.seconds();
-//
-//        timer.reset();
-//
-//        double output = (error * Kp) + (derivative * Kd) + (integralSum * Ki);
-//        return output;
-//    }
-
-
-
-
         }

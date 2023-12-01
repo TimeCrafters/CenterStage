@@ -12,11 +12,12 @@ import dev.cyberarm.engine.V2.CyberarmState;
 @Config
 public class XDrivetrainRobotState extends CyberarmState {
     private XDrivetrainBot robot;
-    private PIDController HeadingPidController;
+    private PIDController ArmPidController;
+    public static double ArmP, ArmI, ArmD;
     private double targetHeading;
     private double currentHeading;
     public double integralSum = 0;
-    public static double Kp = 0;
+    public static double Kp = 1;
     public static double Ki = 0;
     public static double Kd = 0;
     ElapsedTime timer = new ElapsedTime();
@@ -27,6 +28,8 @@ public class XDrivetrainRobotState extends CyberarmState {
 
     public XDrivetrainRobotState(XDrivetrainBot robot) {
         this.robot = robot;
+        ArmPidController = new PIDController(ArmP, ArmI, ArmD);
+
 
     }
 
@@ -42,8 +45,12 @@ public class XDrivetrainRobotState extends CyberarmState {
         return radians;
     }
 
+    public void ArmControl(){
+
+    }
+
     public double HeadingPIDControl(double reference, double current){
-        double error = angleWrap(reference - current);
+        double error = angleWrap(current - reference);
         integralSum += error * timer.seconds();
         double derivative = (error - lastError) / timer.seconds();
 
@@ -77,6 +84,14 @@ public class XDrivetrainRobotState extends CyberarmState {
             if (engine.gamepad1.b){
                 headingLock = true;
                 targetHeading = robot.backDropLock;
+            }
+            if (engine.gamepad1.x){
+                headingLock = true;
+                targetHeading = robot.collectLock;
+            }
+            if (engine.gamepad1.a){
+                headingLock = true;
+                targetHeading = currentHeading;
             }
             if (engine.gamepad1.right_stick_x != 0){
                 headingLock = false;
