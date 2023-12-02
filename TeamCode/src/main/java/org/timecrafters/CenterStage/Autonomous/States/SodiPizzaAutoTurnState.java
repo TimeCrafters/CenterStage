@@ -85,15 +85,44 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
 
         readyToTurn = engine.blackboardGet("readyToTurn");
 
-        targetRot = -90;
-
         currentRot = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
         CalculateNeededRot();
 
-        if (readyToTurn == 1 && Math.abs(neededRot) > 10) {
+        if (readyToTurn == 0) {
+            targetRot = 0;
+
+            if (currentRot < targetRot - 1) {
+
+                turnSpeedRaw = 0.5;
+                getTurnSpeed();
+
+                robot.rightFront.setPower(robot.leftFront.getPower() + turnSpeed);
+                robot.rightBack.setPower(robot.leftBack.getPower() + turnSpeed);
+            }
+
+        }
+
+        if (readyToTurn == 1 && targetRot != -90) {
+
+            targetRot = -90;
+            CalculateNeededRot();
+
+        }
+
+        if (currentRot >= -88) {
 
             turnSpeedRaw = 0.3;
+            getTurnSpeed();
+
+            robot.leftFront.setPower(-turnSpeed);
+            robot.leftBack.setPower(-turnSpeed);
+            robot.rightFront.setPower(turnSpeed);
+            robot.rightBack.setPower(turnSpeed);
+
+        } else if (currentRot <= -92) {
+
+            turnSpeedRaw = 0.2;
             getTurnSpeed();
 
             robot.leftFront.setPower(turnSpeed);
