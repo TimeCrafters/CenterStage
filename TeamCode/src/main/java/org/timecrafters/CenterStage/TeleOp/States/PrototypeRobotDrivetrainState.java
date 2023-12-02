@@ -107,11 +107,6 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
 
             // drivetrain
             robot.driveTrainTeleOp();
-
-            if (engine.gamepad1.b){
-//                targetHeading = robot.backDropLock;
-
-            }
             // lift
             SliderTeleOp();
             // collector depositor

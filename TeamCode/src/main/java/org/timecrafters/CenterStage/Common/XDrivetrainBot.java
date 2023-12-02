@@ -27,9 +27,10 @@ public class XDrivetrainBot extends Robot {
     public int oldArmPosition = 0;
     public long waitTime;
     private HardwareMap hardwareMap;
-    public DcMotor frontLeft, frontRight, backLeft, backRight, armMotor;
+    public DcMotor frontLeft, frontRight, backLeft, backRight, armMotor, chinUpMotor;
     public DcMotor odometerR, odometerL, odometerA;
     public IMU imu;
+    public Servo liftServo;
     private String string;
     private double drivePower = 1;
 
@@ -93,6 +94,10 @@ public class XDrivetrainBot extends Robot {
         backRight = engine.hardwareMap.dcMotor.get("backRight");
         backLeft = engine.hardwareMap.dcMotor.get("backLeft");
         armMotor = engine.hardwareMap.dcMotor.get("arm");
+        chinUpMotor = engine.hardwareMap.dcMotor.get("chinUpMotor");
+
+        //SERVOS
+        liftServo = engine.hardwareMap.servo.get("lift");
 
 
 //        configuration = new TimeCraftersConfiguration("Blue Crab");
@@ -103,6 +108,7 @@ public class XDrivetrainBot extends Robot {
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        chinUpMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
 
@@ -112,6 +118,7 @@ public class XDrivetrainBot extends Robot {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        chinUpMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //IMU
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(

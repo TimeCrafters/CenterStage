@@ -2,6 +2,7 @@ package org.timecrafters.CenterStage.TeleOp.States;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -13,23 +14,29 @@ import dev.cyberarm.engine.V2.CyberarmState;
 public class XDrivetrainRobotState extends CyberarmState {
     private XDrivetrainBot robot;
     private PIDController ArmPidController;
-    public static double ArmP, ArmI, ArmD;
+    private float ticksInDegree = 144 / 180;
+
+    public static double ArmP = 0, ArmI = 0, ArmD = 0, ArmF = 0;
     private double targetHeading;
+
+    public double power;
     private double currentHeading;
     public double integralSum = 0;
+    public double ArmintegralSum = 0;
+    public static double liftServoPos = 0.5;
     public static double Kp = 1;
     public static double Ki = 0;
     public static double Kd = 0;
+    public static double target;
     ElapsedTime timer = new ElapsedTime();
     private double lastError = 0;
+    private double ArmlastError = 0;
     private boolean headingLock = false;
 
     private long lastCheckedTime;
 
     public XDrivetrainRobotState(XDrivetrainBot robot) {
         this.robot = robot;
-        ArmPidController = new PIDController(ArmP, ArmI, ArmD);
-
 
     }
 
@@ -45,9 +52,29 @@ public class XDrivetrainRobotState extends CyberarmState {
         return radians;
     }
 
-    public void ArmControl(){
+    public double ArmControlPower(double reference, double current){
+        double error = (current - reference);
+        ArmintegralSum += error * timer.seconds();
+        double derivative = (error - ArmlastError) / timer.seconds();
+
+        timer.reset();
+
+        double output = (error * ArmP) + (derivative * ArmD) + (integralSum * ArmI);
+        return output;
 
     }
+
+    public void chinUpControl(){
+        if(engine.gamepad1.left_bumper){
+            robot.chinUpMotor.setPower(-1);
+        } else if(engine.gamepad1.right_bumper){
+            robot.chinUpMotor.setPower(1);
+        } else {
+            robot.chinUpMotor.setPower(0);
+        }
+
+    }
+
 
     public double HeadingPIDControl(double reference, double current){
         double error = angleWrap(current - reference);
@@ -66,6 +93,10 @@ public class XDrivetrainRobotState extends CyberarmState {
 
     @Override
     public void exec() {
+
+        if (engine.gamepad2.right_stick_button){
+            robot.armMotor.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        }
         currentHeading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         if (engine.gamepad1.right_stick_button) {
@@ -78,6 +109,11 @@ public class XDrivetrainRobotState extends CyberarmState {
             robot.rx = engine.gamepad1.right_stick_x;
 
         }
+
+        robot.armMotor.setPower(ArmControlPower(target, robot.armMotor.getCurrentPosition()));
+
+        robot.liftServo.setPosition(liftServoPos);
+
             // drivetrain
             robot.driveTrainTeleOp();
 
@@ -97,6 +133,9 @@ public class XDrivetrainRobotState extends CyberarmState {
                 headingLock = false;
             }
 
+            chinUpControl();
+
+
     }
 
         @Override
@@ -109,6 +148,12 @@ public class XDrivetrainRobotState extends CyberarmState {
             engine.telemetry.addData("time", System.currentTimeMillis() - robot.startOfSequencerTime);
             engine.telemetry.addData("heading lock?", headingLock);
             engine.telemetry.addData("pid heading power", HeadingPIDControl(targetHeading, currentHeading));
+            engine.telemetry.addData("robot arm current pos ", robot.armMotor.getCurrentPosition());
+            engine.telemetry.addData("arm pid power ", power);
+            engine.telemetry.addData("p", ArmP);
+            engine.telemetry.addData("i", ArmI);
+            engine.telemetry.addData("d", ArmD);
+            engine.telemetry.addData("f", ArmF);
         }
     }
 
