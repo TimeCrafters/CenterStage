@@ -39,9 +39,22 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
             return turnSpeed;
     }
 
+    public void CalculateNeededRot() {
+        if (targetRot >= 0 && currentRot >= 0) {
+            neededRot = Math.abs(targetRot - currentRot);
+        } else if (targetRot <= 0 && currentRot <= 0) {
+            neededRot = Math.abs(targetRot - currentRot);
+        } else if (targetRot >= 0 && currentRot <= 0) {
+            neededRot = (targetRot + Math.abs(currentRot));
+        } else if (targetRot <= 0 && currentRot >= 0) {
+            neededRot = (currentRot + Math.abs(targetRot));
+        }
+    }
+
     @Override
     public void telemetry() {
         engine.telemetry.addData("Target Rotation", targetRot);
+        engine.telemetry.addData("Current Rotation", currentRot);
         engine.telemetry.addData("Power", robot.leftFront.getPower());
         engine.telemetry.addData("Distance Sensor Reading", robot.distSensor.getDistance(DistanceUnit.MM));
         engine.telemetry.addLine();
@@ -54,15 +67,14 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
     @Override
     public void start() {
 
-        startPos = robot.leftFront.getCurrentPosition();
         turnSpeedRaw = 0;
+        getTurnSpeed();
 
         robot.leftFront.setPower(turnSpeed);
         robot.leftBack.setPower(turnSpeed);
         robot.rightFront.setPower(turnSpeed);
         robot.rightBack.setPower(turnSpeed);
 
-        neededRot = (targetRot - robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         engine.blackboardSet("readyToTurn", 0);
 
     }
@@ -73,21 +85,27 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
 
         readyToTurn = engine.blackboardGet("readyToTurn");
 
+        targetRot = -90;
+
         currentRot = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+
+        CalculateNeededRot();
 
         if (readyToTurn == 1 && Math.abs(neededRot) > 10) {
 
-            targetRot = -90;
-
             turnSpeedRaw = 0.3;
+            getTurnSpeed();
 
             robot.leftFront.setPower(turnSpeed);
             robot.leftBack.setPower(turnSpeed);
             robot.rightFront.setPower(-turnSpeed);
             robot.rightBack.setPower(-turnSpeed);
 
-        } else if (readyToTurn == 1 && Math.abs(neededRot) < 5) {
+        } else if (readyToTurn == 1 && Math.abs(neededRot) < 3) {
+
             turnSpeedRaw = 0;
+            getTurnSpeed();
+
             robot.leftFront.setPower(turnSpeed);
             robot.leftBack.setPower(turnSpeed);
             robot.rightFront.setPower(turnSpeed);
