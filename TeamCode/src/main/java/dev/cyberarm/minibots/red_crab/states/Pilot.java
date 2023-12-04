@@ -148,6 +148,8 @@ public class Pilot extends CyberarmState {
                 break;
 
         }
+
+        robot.clawArm.set(RedCrabMinibot.CLAW_ARM_MAX_SPEED);
     }
 
     private void clawController() {

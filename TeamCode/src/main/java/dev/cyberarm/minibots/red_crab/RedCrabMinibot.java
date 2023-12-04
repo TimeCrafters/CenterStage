@@ -19,8 +19,8 @@ public class RedCrabMinibot {
 
     /// TUNING CONSTANTS ///
     public static final double DRIVETRAIN_MAX_SPEED = 0.5;
+    public static final double CLAW_ARM_MAX_SPEED = 0.5;
     public static final double WINCH_MAX_SPEED = 0.5;
-
     public static final double CLAW_ARM_STOW_ANGLE = 0.0;
     public static final double CLAW_ARM_DEPOSIT_ANGLE = 120.0;
     public static final double CLAW_ARM_COLLECT_ANGLE = 150.0;
@@ -116,6 +116,9 @@ public class RedCrabMinibot {
         /// --- --- BRAKING
         /// --- --- NOTE: This won't hold back much, if anything, but its a small help, maybe? 😃
         clawArm.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        /// --- --- Run Mode
+        clawArm.setRunMode(Motor.RunMode.PositionControl);
+        clawArm.setTargetPosition(0);
 
         /// --- Claws
         /// --- --- Wrist
