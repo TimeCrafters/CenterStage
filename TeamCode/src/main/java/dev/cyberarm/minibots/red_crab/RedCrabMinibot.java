@@ -18,7 +18,7 @@ public class RedCrabMinibot {
     public static final int ClawArm_COLLECT = 2;
 
     /// TUNING CONSTANTS ///
-    public static final double DRIVETRAIN_MAX_SPEED = 0.5;
+    public static final double DRIVETRAIN_MAX_SPEED = 1.0;
     public static final double CLAW_ARM_MAX_SPEED = 0.5;
     public static final double WINCH_MAX_SPEED = 0.5;
     public static final double CLAW_ARM_STOW_ANGLE = 0.0;
@@ -38,8 +38,8 @@ public class RedCrabMinibot {
     public static final double DRONE_LATCH_LAUNCH_POSITION = 0.5;
     public static final int DRONE_LAUNCH_CONFIRMATION_TIME_MS = 1_000;
 
-    public static final double HOOK_ARM_STOW_POSITION = 0.0;
-    public static final double HOOK_ARM_UP_POSITION = 0.5;
+    public static final double HOOK_ARM_STOW_POSITION = 0.8; // just off of airplane 0.8
+    public static final double HOOK_ARM_UP_POSITION = 0.4; // streight up4.0
 
     /// MOTOR CONSTANTS ///
     public static final int CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION = 4;
@@ -78,10 +78,10 @@ public class RedCrabMinibot {
         backRight.resetEncoder();
 
         /// --- MOTOR DIRECTIONS
-        frontLeft.motorEx.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontRight.motorEx.setDirection(DcMotorSimple.Direction.REVERSE);
-        backLeft.motorEx.setDirection(DcMotorSimple.Direction.FORWARD);
-        backRight.motorEx.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeft.motorEx.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontRight.motorEx.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeft.motorEx.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.motorEx.setDirection(DcMotorSimple.Direction.FORWARD);
 
         /// --- MOTOR BRAKING MODE
         /// --- NOTE: Having BRAKE mode set for drivetrain helps with consistently of control

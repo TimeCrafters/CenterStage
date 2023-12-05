@@ -27,10 +27,10 @@ public class Pilot extends CyberarmState {
     public void exec() {
         drivetrain();
 
-//        clawArmAndWristController();
+        clawArmAndWristController();
 //        clawController();
 //        droneLatchController();
-//        hookArmController();
+//        hookArmController(); // disabled for swrist debug
 //        winchController();
     }
 
@@ -149,7 +149,7 @@ public class Pilot extends CyberarmState {
 
         }
 
-        robot.clawArm.set(RedCrabMinibot.CLAW_ARM_MAX_SPEED);
+        robot.clawArm.set(RedCrabMinibot.  CLAW_ARM_MAX_SPEED);
     }
 
     private void clawController() {
