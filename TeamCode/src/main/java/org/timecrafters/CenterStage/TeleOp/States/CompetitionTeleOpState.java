@@ -1,24 +1,21 @@
 package org.timecrafters.CenterStage.TeleOp.States;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.timecrafters.CenterStage.Common.PrototypeRobot;
 
 import dev.cyberarm.engine.V2.CyberarmState;
+
 @Config
 
-public class PrototypeRobotDrivetrainState extends CyberarmState {
+public class CompetitionTeleOpState extends CyberarmState {
     private PrototypeRobot robot;
     private int maxExtension = 2000;
     private int minExtension = 0;
     public double integralSum = 0;
     private double targetHeading;
-
-    private double lastError = 0;
-    ElapsedTime timer = new ElapsedTime();
 
     public double power;
     private double currentHeading;
@@ -27,11 +24,13 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
     public static double Kp = 0;
     public static double Ki = 0;
     public static double Kd = 0;
+    private double lastError = 0;
+    ElapsedTime timer = new ElapsedTime();
 
 
     private long lastCheckedTime;
 
-    public PrototypeRobotDrivetrainState(PrototypeRobot robot) {
+    public CompetitionTeleOpState(PrototypeRobot robot) {
         this.robot = robot;
 
     }
@@ -159,14 +158,11 @@ public class PrototypeRobotDrivetrainState extends CyberarmState {
             engine.telemetry.addData("depositor pos", robot.depositorPos);
             engine.telemetry.addData("collector pos", robot.collectorPos);
             engine.telemetry.addData("time", System.currentTimeMillis() - robot.startOfSequencerTime);
+            engine.telemetry.addData("pid power", power);
             engine.telemetry.addData("heading Lock?", headingLock);
             engine.telemetry.addData("Kp", Kp);
             engine.telemetry.addData("Ki", Ki);
             engine.telemetry.addData("Kd", Kd);
-            engine.telemetry.addData("front left motor", robot.frontLeft.getCurrentPosition());
-            engine.telemetry.addData("front right motor", robot.frontRight.getCurrentPosition());
-            engine.telemetry.addData("back left motor", robot.backLeft.getCurrentPosition());
-            engine.telemetry.addData("back right motor", robot.backRight.getCurrentPosition());
         }
     }
 

@@ -1,11 +1,8 @@
-package org.timecrafters.CenterStage.Autonomous.States;
+package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
 /**BEGAN WITH 43 LINES**/
 
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-
 import org.timecrafters.CenterStage.Common.ProtoBotSodi;
-import org.timecrafters.CenterStage.Common.PrototypeRobot;
 
 import dev.cyberarm.engine.V2.CyberarmState;
 

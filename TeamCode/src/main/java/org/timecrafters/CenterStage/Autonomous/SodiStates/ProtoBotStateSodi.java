@@ -1,9 +1,4 @@
-package org.timecrafters.CenterStage.Autonomous.States;
-
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
+package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
 import dev.cyberarm.engine.V2.CyberarmState;
 import org.timecrafters.CenterStage.Common.ProtoBotSodi;
