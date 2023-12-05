@@ -22,7 +22,7 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
     }
 
     private double getDrivePower() {
-        if (Math.abs(neededTicks) > 1) {
+        if (Math.abs(neededTicks) > 250) {
             drivePower = (drivePowerRaw * neededTicks) / 10;
         }
         return drivePower;
@@ -47,6 +47,8 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
 
         lastMoveTime = System.currentTimeMillis();
         readyToTurn = engine.blackboardGetInt("readyToTurn");
+
+        robot.imu.resetYaw();
 
     }
 
