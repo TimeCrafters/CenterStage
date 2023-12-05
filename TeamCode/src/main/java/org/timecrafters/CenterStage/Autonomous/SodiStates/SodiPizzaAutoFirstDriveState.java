@@ -11,15 +11,33 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
     final private SodiPizzaMinibotObject robot;
     final private String groupName, actionName;
     private long lastMoveTime;
-    private int targetPos = 2500;
-    private double drivePower;
-    public int readyToTurn;
+    private double drivePower, drivePowerRaw;
+    public int readyToTurn, neededTicks, currentTicks, targetTicks = 1500;
 
     public SodiPizzaAutoFirstDriveState() {
         groupName = " ";
         actionName = " ";
         robot = new SodiPizzaMinibotObject();
         robot.setup();
+    }
+
+    private double getDrivePower() {
+        if (Math.abs(neededTicks) > 1) {
+            drivePower = (drivePowerRaw * neededTicks) / 10;
+        }
+        return drivePower;
+    }
+
+    public void CalculateNeededTicks() {
+        if (targetTicks >= 0 && currentTicks >= 0) {
+            neededTicks = Math.abs(targetTicks - currentTicks);
+        } else if (targetTicks < 0 && currentTicks < 0) {
+            neededTicks = Math.abs(targetTicks - currentTicks);
+        } else if (targetTicks > 0 && currentTicks < 0) {
+            neededTicks = (targetTicks + Math.abs(currentTicks));
+        } else if (targetTicks < 0 && currentTicks > 0) {
+            neededTicks = (currentTicks + Math.abs(targetTicks));
+        }
     }
     
     @SuppressLint("SuspiciousIndentation")
@@ -34,10 +52,9 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
 
     @Override
     public void telemetry() {
-        engine.telemetry.addData("Target Ticks?", robot.leftFront.getTargetPosition());
-        engine.telemetry.addData("Current Ticks?", robot.leftFront.getCurrentPosition());
-        engine.telemetry.addData("Ticks Needed?", robot.leftFront.getTargetPosition() -
-        robot.leftFront.getCurrentPosition());
+        engine.telemetry.addData("Target Ticks?", targetTicks);
+        engine.telemetry.addData("Current Ticks?", currentTicks);
+        engine.telemetry.addData("Ticks Needed?", neededTicks);
         engine.telemetry.addLine();
         engine.telemetry.addData("Internal Ready To Turn Value", readyToTurn);
         engine.telemetry.addData("Distance Sensor Reading", robot.distSensor.getDistance(DistanceUnit.MM));
@@ -49,15 +66,20 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
 
         readyToTurn = engine.blackboardGet("readyToTurn");
 
-        // Move forward from 0 to targetPos
+        currentTicks = robot.leftFront.getCurrentPosition();
+
+        CalculateNeededTicks();
+
+        // Move forward from 0 to targetTicks
         if (robot.leftFront.getCurrentPosition() <= 10 && robot.leftFront.getCurrentPosition() >= -10 && readyToTurn == 0) {
 
-            robot.leftFront.setTargetPosition(targetPos);
-            robot.leftBack.setTargetPosition(targetPos);
-            robot.rightFront.setTargetPosition(targetPos);
-            robot.rightBack.setTargetPosition(targetPos);
+            robot.leftFront.setTargetPosition(targetTicks);
+            robot.leftBack.setTargetPosition(targetTicks);
+            robot.rightFront.setTargetPosition(targetTicks);
+            robot.rightBack.setTargetPosition(targetTicks);
 
-            drivePower = 0.5;
+            drivePowerRaw = 0.5;
+            getDrivePower();
 
             robot.leftFront.setPower(drivePower);
             robot.leftBack.setPower(drivePower);
@@ -66,9 +88,10 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
 
         }
         //Stop and finish set after return to 0
-        else if (robot.leftFront.getCurrentPosition() >= targetPos - 10 && robot.leftFront.getCurrentPosition() <= targetPos + 10) {
+        else if (robot.leftFront.getCurrentPosition() >= targetTicks - 10 && robot.leftFront.getCurrentPosition() <= targetTicks + 10) {
 
-            drivePower = 0;
+            drivePowerRaw = 0;
+            getDrivePower();
 
             robot.leftFront.setPower(drivePower);
             robot.leftBack.setPower(drivePower);

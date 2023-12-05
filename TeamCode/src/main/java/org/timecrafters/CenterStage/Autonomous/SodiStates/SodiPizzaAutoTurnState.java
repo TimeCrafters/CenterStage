@@ -1,5 +1,7 @@
 package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
+import android.annotation.SuppressLint;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
@@ -7,7 +9,7 @@ import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
 import dev.cyberarm.engine.V2.CyberarmState;
 
 public class SodiPizzaAutoTurnState extends CyberarmState {
-    final private SodiPizzaMinibotObject robot = new SodiPizzaMinibotObject();
+    final private SodiPizzaMinibotObject robot;
     final private String groupName, actionName;
     private long lastMoveTime;
     private double turnSpeedRaw, turnSpeed;
@@ -27,11 +29,12 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
     public SodiPizzaAutoTurnState() {
         groupName = " ";
         actionName = " ";
+        robot = new SodiPizzaMinibotObject();
         robot.setup();
     }
 
     private double getTurnSpeed() {
-        if (Math.abs(neededRot) > 5) {
+        if (Math.abs(neededRot) > 1) {
             turnSpeed = (turnSpeedRaw * neededRot) / 10;
         }
             return turnSpeed;
@@ -77,6 +80,7 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
 
     }
 
+    @SuppressLint("SuspiciousIndentation")
 
     @Override
     public void exec() {
@@ -90,14 +94,20 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
         if (readyToTurn == 0) {
             targetRot = 0;
 
-            if (currentRot < targetRot - 1) {
+            if (currentRot <= targetRot - 1) {
 
                 turnSpeedRaw = 0.5;
                 getTurnSpeed();
 
                 robot.rightFront.setPower(robot.leftFront.getPower() + turnSpeed);
                 robot.rightBack.setPower(robot.leftBack.getPower() + turnSpeed);
-            }
+
+            } else if (currentRot >= targetRot + 1)
+
+                turnSpeedRaw = 0.5;
+                getTurnSpeed();
+
+                robot.leftFront.setPower(robot.rightFront.getPower() + turnSpeed);
 
         }
 
@@ -128,7 +138,7 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
             robot.rightFront.setPower(-turnSpeed);
             robot.rightBack.setPower(-turnSpeed);
 
-        } else if (readyToTurn == 1 && Math.abs(neededRot) < 3) {
+        } else if (readyToTurn == 1 && Math.abs(neededRot) < 2) {
 
             turnSpeedRaw = 0;
             getTurnSpeed();
@@ -138,7 +148,7 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
             robot.rightFront.setPower(turnSpeed);
             robot.rightBack.setPower(turnSpeed);
 
-            engine.blackboardSet("readyToTurn", 0);
+            engine.blackboardSet("readyToTurn", 2);
         }
 
     }
