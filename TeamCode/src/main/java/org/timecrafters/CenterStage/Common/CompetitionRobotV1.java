@@ -20,7 +20,7 @@ public class CompetitionRobotV1 extends Robot {
 
     public TimeCraftersConfiguration configuration;
 
-    // HardwareMap setup
+    // ------------------------------------------------------------------------------------------------------------------ HardwareMap setup:
 
     public DcMotor frontLeft, frontRight, backLeft, backRight, lift;
     public DcMotor odometerR, odometerL, odometerA;
@@ -28,7 +28,7 @@ public class CompetitionRobotV1 extends Robot {
     public IMU imu;
     public Servo shoulder, elbow, leftClaw, rightClaw;
 
-    // ---------------------------------------------------------------------------------------------------- odometry variables:
+    // ----------------------------------------------------------------------------------------------------------------- odometry variables:
     public static double Hp = 0, Hi = 0, Hd = 0;
     public static double Xp = 0, Xi = 0, Xd = 0;
     public static double Yp = 0, Yi = 0, Yd = 0;
@@ -61,13 +61,6 @@ public class CompetitionRobotV1 extends Robot {
     public final double cm_per_tick = (2 * Math.PI * R) / N;
     private double lastError = 0;
     ElapsedTime timer = new ElapsedTime();
-
-    // ---------------------------------------------------------------------------------------------------- collector / depositor variables:
-
-    public float depositorPos;
-    public float collectorPos;
-    public boolean lbsVar2;
-    public boolean rbsVar2;
 
     //-------------------------------------------------------------------------------------------------------------- arm sequence variables:
     public int armPosition = 0;
@@ -114,7 +107,7 @@ public class CompetitionRobotV1 extends Robot {
 
         imu = engine.hardwareMap.get(IMU.class, "imu");
 
-        //----------------------------------------------------------------------------------------------------------------------------MOTORS
+        //-------------------------------------------------------------------------------------------------------------------------- MOTORS:
         frontRight = engine.hardwareMap.dcMotor.get("frontRight");
         frontLeft = engine.hardwareMap.dcMotor.get("frontLeft");
         backRight = engine.hardwareMap.dcMotor.get("backRight");
@@ -149,7 +142,7 @@ public class CompetitionRobotV1 extends Robot {
         initConstants();
 
 
-        //-----------------------------------------------------------------------------------------------------------------------------SERVO
+        //--------------------------------------------------------------------------------------------------------------------------- SERVO:
         shoulder = hardwareMap.servo.get("shoulder");
         elbow = hardwareMap.servo.get("elbow");
         leftClaw = hardwareMap.servo.get("leftClaw");
@@ -159,33 +152,9 @@ public class CompetitionRobotV1 extends Robot {
 
     }
 
-    public void CollectorToggle() {
-        boolean lbs2 = engine.gamepad2.left_stick_button;
-        if (lbs2 && !lbsVar2) {
-            if (collectorPos == 1F) {
-                collectorPos = 0F;
-            } else {
-                collectorPos = 1F;
-            }
-        }
-        lbsVar2 = lbs2;
-    }
+    // -------------------------------------------------------------------------------------------------------------------------- Functions:
 
-
-    public void DepositorToggle() {
-        boolean rbs2 = engine.gamepad2.right_stick_button;
-        if (rbs2 && !rbsVar2) {
-            if (depositorPos == 0.6F) {
-                depositorPos = 0F;
-            } else {
-                depositorPos = 0.6F;
-            }
-        }
-        rbsVar2 = rbs2;
-    }
-
-    public void OdometryLocalizer() {
-
+    public void OdometryLocalizer() { // ------------------------------------------------------------------------------- Odometry Localizer:
         // update positions
         oldRightPosition = currentRightPosition;
         oldLeftPosition = currentLeftPosition;
