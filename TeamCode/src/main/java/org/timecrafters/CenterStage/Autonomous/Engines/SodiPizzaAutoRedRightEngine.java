@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.timecrafters.CenterStage.Autonomous.SodiStates.SodiPizzaAutoFirstDriveState;
 import org.timecrafters.CenterStage.Autonomous.SodiStates.SodiPizzaAutoTurnState;
+import org.timecrafters.CenterStage.Autonomous.SodiStates.SodiPizzaAutoSecDriveState;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
