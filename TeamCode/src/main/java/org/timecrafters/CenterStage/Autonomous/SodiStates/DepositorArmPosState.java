@@ -1,6 +1,5 @@
-package org.timecrafters.CenterStage.Autonomous.States;
+package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
-import org.timecrafters.CenterStage.Common.PrototypeRobot;
 import org.timecrafters.CenterStage.Common.ServoTestRobot;
 
 import dev.cyberarm.engine.V2.CyberarmState;

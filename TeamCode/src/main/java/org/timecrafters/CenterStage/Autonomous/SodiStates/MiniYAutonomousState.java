@@ -1,4 +1,4 @@
-package org.timecrafters.CenterStage.Autonomous.States;
+package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
 import dev.cyberarm.engine.V2.CyberarmState;
 

@@ -1,12 +1,10 @@
-package org.timecrafters.CenterStage.Autonomous.States;
+package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
 import android.annotation.SuppressLint;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
-import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
 import dev.cyberarm.engine.V2.CyberarmState;
 

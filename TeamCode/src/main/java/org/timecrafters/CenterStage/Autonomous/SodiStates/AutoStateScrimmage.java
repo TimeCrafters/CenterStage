@@ -1,4 +1,4 @@
-package org.timecrafters.CenterStage.Autonomous.States;
+package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 

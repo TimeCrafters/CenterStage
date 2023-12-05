@@ -3,7 +3,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 //import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.timecrafters.CenterStage.Common.ProtoBotSodi;
-import org.timecrafters.CenterStage.Autonomous.States.ProtoBotStateSodi;
+import org.timecrafters.CenterStage.Autonomous.SodiStates.ProtoBotStateSodi;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 

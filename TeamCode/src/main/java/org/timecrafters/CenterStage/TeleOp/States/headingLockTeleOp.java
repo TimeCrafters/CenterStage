@@ -54,7 +54,7 @@ public class headingLockTeleOp extends CyberarmState {
             timer.reset();
 
             double output = (error * Kp) + (derivative * Kd) + (integralSum * Ki);
-            robot.PIDrx = output;
+//            robot.PIDrx = output;
         }
 
         // drivetrain
@@ -82,7 +82,7 @@ public class headingLockTeleOp extends CyberarmState {
         public void telemetry () {
             engine.telemetry.addData("imu", robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             engine.telemetry.addData("rx", robot.rx);
-            engine.telemetry.addData("PIDrx", robot.PIDrx);
+//            engine.telemetry.addData("PIDrx", robot.PIDrx);
         }
     }
 

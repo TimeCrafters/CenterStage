@@ -33,13 +33,10 @@ public class XDrivetrainRobotState extends CyberarmState {
     private double ArmlastError = 0;
     private boolean headingLock = false;
 
-    private long lastCheckedTime;
-
     public XDrivetrainRobotState(XDrivetrainBot robot) {
         this.robot = robot;
 
     }
-
     //    }
     // --------------------------------------------------------------------------------------------------------- Slider control function
     public double angleWrap(double radians) {
@@ -149,7 +146,7 @@ public class XDrivetrainRobotState extends CyberarmState {
             engine.telemetry.addData("heading lock?", headingLock);
             engine.telemetry.addData("pid heading power", HeadingPIDControl(targetHeading, currentHeading));
             engine.telemetry.addData("robot arm current pos ", robot.armMotor.getCurrentPosition());
-            engine.telemetry.addData("arm pid power ", power);
+            engine.telemetry.addData("arm pid power ", HeadingPIDControl(targetHeading, currentHeading));
             engine.telemetry.addData("p", ArmP);
             engine.telemetry.addData("i", ArmI);
             engine.telemetry.addData("d", ArmD);
