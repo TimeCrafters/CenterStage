@@ -2,6 +2,8 @@ package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
 import android.annotation.SuppressLint;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
@@ -124,9 +126,10 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
 
         }
 
-        if (currentRot >= -88) {
+        if (neededRot >= 2) {
 
-            turnSpeedRaw = 0.3;
+            turnSpeedRaw = 0.2;
+            CalculateNeededRot();
             getTurnSpeed();
 
             robot.leftFront.setPower(-turnSpeed);
@@ -134,9 +137,10 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
             robot.rightFront.setPower(turnSpeed);
             robot.rightBack.setPower(turnSpeed);
 
-        } else if (currentRot <= -92) {
+        } else if (neededRot <= -2) {
 
             turnSpeedRaw = 0.2;
+            CalculateNeededRot();
             getTurnSpeed();
 
             robot.leftFront.setPower(turnSpeed);
@@ -147,12 +151,18 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
         } else if (readyToTurn == 1 && Math.abs(neededRot) < 2) {
 
             turnSpeedRaw = 0;
+            CalculateNeededRot();
             getTurnSpeed();
 
             robot.leftFront.setPower(turnSpeed);
             robot.leftBack.setPower(turnSpeed);
             robot.rightFront.setPower(turnSpeed);
             robot.rightBack.setPower(turnSpeed);
+
+            robot.leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             engine.blackboardSet("readyToTurn", 2);
 

@@ -2,6 +2,8 @@ package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
 import android.annotation.SuppressLint;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
 
@@ -12,7 +14,7 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
     final private String groupName, actionName;
     private long lastMoveTime;
     private double drivePower, drivePowerRaw;
-    public int readyToTurn, neededTicks, currentTicks, targetTicks = 1500;
+    public int readyToTurn, neededTicks, currentTicks, targetTicks = 1000;
 
     public SodiPizzaAutoFirstDriveState() {
         groupName = " ";
@@ -73,23 +75,43 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
         CalculateNeededTicks();
 
         // Move forward from 0 to targetTicks
-        if (robot.leftFront.getCurrentPosition() <= 10 && robot.leftFront.getCurrentPosition() >= -10 && readyToTurn == 0) {
+        if (robot.leftFront.getCurrentPosition() <= 10 && robot.leftFront.getCurrentPosition() >= -10/* && robot.distSensor.getDistance(DistanceUnit.MM) >= 100*/) {
+            if (readyToTurn == 0) {
+                targetTicks = 1000;
 
-            robot.leftFront.setTargetPosition(targetTicks);
-            robot.leftBack.setTargetPosition(targetTicks);
-            robot.rightFront.setTargetPosition(targetTicks);
-            robot.rightBack.setTargetPosition(targetTicks);
+                robot.leftFront.setTargetPosition(targetTicks);
+                robot.leftBack.setTargetPosition(targetTicks);
+                robot.rightFront.setTargetPosition(targetTicks);
+                robot.rightBack.setTargetPosition(targetTicks);
 
-            drivePowerRaw = 0.5;
-            getDrivePower();
+                drivePowerRaw = 0.5;
+                getDrivePower();
 
-            robot.leftFront.setPower(drivePower);
-            robot.leftBack.setPower(drivePower);
-            robot.rightFront.setPower(drivePower);
-            robot.rightBack.setPower(drivePower);
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
+            } else if (readyToTurn == 2) {
+
+                targetTicks = 500;
+
+                robot.leftFront.setTargetPosition(targetTicks);
+                robot.leftBack.setTargetPosition(targetTicks);
+                robot.rightFront.setTargetPosition(targetTicks);
+                robot.rightBack.setTargetPosition(targetTicks);
+
+                drivePowerRaw = 0.5;
+                getDrivePower();
+
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
+            }
 
         }
-        //Stop and finish set after return to 0
+
+        //Stop and finish set after reached targetTicks within tolerance of 2
         else if (robot.leftFront.getCurrentPosition() >= targetTicks - 10 && robot.leftFront.getCurrentPosition() <= targetTicks + 10) {
 
             drivePowerRaw = 0;
@@ -100,7 +122,7 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
             robot.rightFront.setPower(drivePower);
             robot.rightBack.setPower(drivePower);
 
-            engine.blackboardSet("readyToTurn", 1);
+            engine.blackboardSet("readyToTurn", readyToTurn + 1);
 
             setHasFinished(true);
         }

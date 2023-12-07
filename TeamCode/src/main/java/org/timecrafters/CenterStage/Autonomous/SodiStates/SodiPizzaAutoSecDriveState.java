@@ -2,6 +2,7 @@ package org.timecrafters.CenterStage.Autonomous.SodiStates;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
 
 import dev.cyberarm.engine.V2.CyberarmState;
@@ -65,7 +66,7 @@ public class SodiPizzaAutoSecDriveState extends CyberarmState {
         CalculateNeededTicks();
 
         // Move forward from 0 to targetPos
-        if (robot.leftFront.getCurrentPosition() <= 10 && readyToTurn == 2) {
+        if (robot.leftFront.getCurrentPosition() <= 10 && readyToTurn == 2 && robot.distSensor.getDistance(DistanceUnit.MM) >= 100) {
 
             robot.leftFront.setTargetPosition(targetTicks);
             robot.leftBack.setTargetPosition(targetTicks);
