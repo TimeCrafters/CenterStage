@@ -24,19 +24,19 @@ public class CompetitionTeleOpState extends CyberarmState {
     private double currentHeading;
     private boolean headingLock = false;
 
-    public static double Kp = 0;
+    public static double Kp = 1;
     public static double Ki = 0;
     public static double Kd = 0;
     private double lastError = 0;
     ElapsedTime timer = new ElapsedTime();
 
     // ---------------------------------------------------------------------------------------------------- collector / depositor variables:
-    public static float leftOpen = 0;
-    public static float leftClose = 0;
-    public static float rightOpen = 0;
-    public static float rightClose = 0;
-    public float collectorPosLeft;
-    public float collectorPosRight;
+    public static double leftOpen = 0;
+    public static double leftClose = 0;
+    public static double rightOpen = 0.6;
+    public static double rightClose = 0.25;
+    public double collectorPosLeft = leftClose;
+    public double collectorPosRight = rightClose;
     public boolean lbsVar2;
     public boolean rbsVar2;
     public boolean bVar2;
@@ -52,13 +52,7 @@ public class CompetitionTeleOpState extends CyberarmState {
     public boolean depositMode = false;
 
     // ---------------------------------------------------------------------------------------------------------------Arm control Variables:
-    public String armPos = "collect";
-    public static float shoulderCollect = 0;
-    public static float shoulderDeposit = 0;
-    public static float shoulderPassive = 0;
-    public static float elbowCollect = 0;
-    public static float elbowDeposit = 0;
-    public static float elbowPassive = 0;
+    public String armPos = "passive";
 
 
 
@@ -105,6 +99,7 @@ public class CompetitionTeleOpState extends CyberarmState {
             robot.rx = engine.gamepad1.right_stick_x;
 
         }
+
         boolean lbs1 = engine.gamepad1.left_stick_button;
         if (lbs1 && !lbsVar1) {
             if (drivePower == 1) {
@@ -115,8 +110,8 @@ public class CompetitionTeleOpState extends CyberarmState {
         }
         lbsVar1 = lbs1;
 
-        double y = -engine.gamepad1.left_stick_y;
-        double x = engine.gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+        double y = engine.gamepad1.left_stick_y;
+        double x = -engine.gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
 
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
@@ -126,10 +121,10 @@ public class CompetitionTeleOpState extends CyberarmState {
         double rotY = x * Math.sin(heading) + y * Math.cos(heading);
 
         // joystick math to find the approximate power across each wheel for a movement
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY + rotX - rx) / denominator;
-        double backRightPower = (rotY - rotX - rx) / denominator;
+        double frontLeftPower = (rotY + rotX + robot.rx) / denominator;
+        double backLeftPower = (rotY - rotX + robot.rx) / denominator;
+        double frontRightPower = (rotY - rotX - robot.rx) / denominator;
+        double backRightPower = (rotY + rotX - robot.rx) / denominator;
 
         // setting each power determined previously from the math above
         // as well as multiplying it by a drive power that can be changed.
@@ -208,25 +203,25 @@ public class CompetitionTeleOpState extends CyberarmState {
 
         if (armPos == "collect"){
             if (robot.lift.getCurrentPosition() >= 1){
-                robot.lift.setPower(-0.3);
+                robot.lift.setPower(-0.6);
             } else {
                 robot.lift.setPower(0);
-                robot.shoulder.setPosition(shoulderCollect);
-                robot.elbow.setPosition(elbowCollect);
+                robot.shoulder.setPosition(robot.shoulderCollect);
+                robot.elbow.setPosition(robot.elbowCollect);
             }
         }
         if (armPos == "passive"){
             if (robot.lift.getCurrentPosition() >= 1){
-                robot.lift.setPower(-0.3);
+                robot.lift.setPower(-0.6);
             } else {
                 robot.lift.setPower(0);
-                robot.shoulder.setPosition(shoulderPassive);
-                robot.elbow.setPosition(elbowPassive);
+                robot.shoulder.setPosition(robot.shoulderPassive);
+                robot.elbow.setPosition(robot.elbowPassive);
             }
         }
         if (armPos == "deposit"){
-                robot.shoulder.setPosition(shoulderDeposit);
-                robot.elbow.setPosition(elbowDeposit);
+                robot.shoulder.setPosition(robot.shoulderDeposit);
+                robot.elbow.setPosition(robot.elbowDeposit);
             }
         }
 
@@ -237,9 +232,6 @@ public class CompetitionTeleOpState extends CyberarmState {
     @Override
     public void exec() {
         // ---------------------------------------------------------------------------------------------------------- Game Pad 1, drivetrain
-
-        currentHeading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
         if (engine.gamepad1.right_stick_button) {
             robot.imu.resetYaw();
         }
@@ -250,6 +242,8 @@ public class CompetitionTeleOpState extends CyberarmState {
             robot.rx = engine.gamepad1.right_stick_x;
 
         }
+
+        currentHeading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // drivetrain
         DriveTrainTeleOp();
@@ -274,7 +268,30 @@ public class CompetitionTeleOpState extends CyberarmState {
 
         // ------------------------------------------------------------------------------------------------------------------- Lift Control:
         SliderTeleOp();
-        ClawControlTeleOp();
+
+        robot.leftClaw.setPosition(collectorPosLeft);
+        robot.rightClaw.setPosition(collectorPosRight);
+
+        boolean lbs2 = engine.gamepad2.left_stick_button;
+        if (lbs2 && !lbsVar2) {
+            if (collectorPosLeft == leftClose) {
+                collectorPosLeft = leftOpen;
+            } else {
+                collectorPosLeft = leftClose;
+            }
+        }
+        lbsVar2 = lbs2;
+
+        boolean rbs2 = engine.gamepad2.right_stick_button;
+        if (rbs2 && !rbsVar2) {
+            if (collectorPosRight == rightClose) {
+                collectorPosRight = rightOpen;
+            } else {
+                collectorPosRight = rightClose;
+            }
+        }
+        rbsVar2 = rbs2;
+
         ArmPosControl();
 
     }
@@ -282,14 +299,15 @@ public class CompetitionTeleOpState extends CyberarmState {
         @Override
         public void telemetry () {
             engine.telemetry.addData("Lift Encoder Pos", robot.lift.getCurrentPosition());
-            engine.telemetry.addData("imu", robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-            engine.telemetry.addData("arm Pos", robot.armPosition);
-            engine.telemetry.addData("old arm pos", robot.oldArmPosition);
+            engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
+            engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getRoll(AngleUnit.DEGREES));
             engine.telemetry.addData("pid power", power);
             engine.telemetry.addData("heading Lock?", headingLock);
             engine.telemetry.addData("Kp", Kp);
             engine.telemetry.addData("Ki", Ki);
             engine.telemetry.addData("Kd", Kd);
+            engine.telemetry.addData("arm pos", armPos);
         }
     }
 
