@@ -22,7 +22,7 @@ public class SodiPizzaAutoSecDriveState extends CyberarmState {
     }
     
     private double getDrivePower() {
-            if (Math.abs(neededTicks) > 1) {
+            if (Math.abs(neededTicks) > 250) {
                 drivePower = (drivePowerRaw * neededTicks) / 10;
             }
             return drivePower;
@@ -72,7 +72,7 @@ public class SodiPizzaAutoSecDriveState extends CyberarmState {
             robot.rightFront.setTargetPosition(targetTicks);
             robot.rightBack.setTargetPosition(targetTicks);
 
-            drivePowerRaw = 0.5;
+            drivePowerRaw = 0.3;
             getDrivePower();
 
             robot.leftFront.setPower(drivePower);

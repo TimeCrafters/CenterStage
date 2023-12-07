@@ -76,8 +76,6 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
         robot.rightFront.setPower(turnSpeed);
         robot.rightBack.setPower(turnSpeed);
 
-        engine.blackboardSet("readyToTurn", 0);
-
     }
 
     @SuppressLint("SuspiciousIndentation")
@@ -91,25 +89,33 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
 
         CalculateNeededRot();
 
-        if (readyToTurn == 0) {
-            targetRot = 0;
-
-            if (currentRot <= targetRot - 1) {
-
-                turnSpeedRaw = 0.5;
-                getTurnSpeed();
-
-                robot.rightFront.setPower(robot.leftFront.getPower() + turnSpeed);
-                robot.rightBack.setPower(robot.leftBack.getPower() + turnSpeed);
-
-            } else if (currentRot >= targetRot + 1)
-
-                turnSpeedRaw = 0.5;
-                getTurnSpeed();
-
-                robot.leftFront.setPower(robot.rightFront.getPower() + turnSpeed);
-
-        }
+//        if (readyToTurn == 0) {
+//            targetRot = 0;
+//
+//            if (currentRot <= targetRot - 1) {
+//
+//                turnSpeedRaw = 0.5;
+//                getTurnSpeed();
+//
+//                robot.rightFront.setPower(robot.leftFront.getPower() + turnSpeed);
+//                robot.rightBack.setPower(robot.leftBack.getPower() + turnSpeed);
+//
+//            } else if (currentRot >= targetRot + 1) {
+//
+//                turnSpeedRaw = 0.5;
+//                getTurnSpeed();
+//
+//                robot.leftFront.setPower(robot.rightFront.getPower() + turnSpeed);
+//            } else {
+//
+//                robot.leftFront.setPower(robot.rightFront.getPower());
+//                robot.leftBack.setPower(robot.rightBack.getPower());
+//                robot.rightFront.setPower(robot.leftFront.getPower());
+//                robot.rightBack.setPower(robot.leftBack.getPower());
+//
+//            }
+//
+//        }
 
         if (readyToTurn == 1 && targetRot != -90) {
 
@@ -149,6 +155,8 @@ public class SodiPizzaAutoTurnState extends CyberarmState {
             robot.rightBack.setPower(turnSpeed);
 
             engine.blackboardSet("readyToTurn", 2);
+
+            setHasFinished(true);
         }
 
     }
