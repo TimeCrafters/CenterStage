@@ -28,10 +28,10 @@ public class Pilot extends CyberarmState {
         drivetrain();
 
         clawArmAndWristController();
-//        clawController();
-//        droneLatchController();
-//        hookArmController(); // disabled for swrist debug
-//        winchController();
+        clawController();
+        droneLatchController();
+        hookArmController(); // disabled for swrist debug
+        winchController();
     }
 
     @Override
@@ -123,11 +123,11 @@ public class Pilot extends CyberarmState {
     private void clawArmAndWristController() {
         switch (clawArmPosition) {
             case RedCrabMinibot.ClawArm_STOW:
-                robot.clawArm.setTargetPosition(Utilities.motorAngle(
-                        RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
-                        RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
-                        RedCrabMinibot.CLAW_ARM_STOW_ANGLE));
-
+//                robot.clawArm.setTargetPosition(Utilities.motorAngle(
+//                        RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
+//                        RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
+//                        RedCrabMinibot.CLAW_ARM_STOW_ANGLE));
+//
                 robot.clawWrist.setPosition(RedCrabMinibot.CLAW_WRIST_STOW_POSITION);
                 break;
             case RedCrabMinibot.ClawArm_DEPOSIT:
@@ -149,7 +149,15 @@ public class Pilot extends CyberarmState {
 
         }
 
-        robot.clawArm.set(RedCrabMinibot.  CLAW_ARM_MAX_SPEED);
+        if (clawArmPosition == RedCrabMinibot.ClawArm_COLLECT &&
+                robot.clawArm.getCurrentPosition() >= Utilities.motorAngle(
+                RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
+                RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
+                RedCrabMinibot.CLAW_ARM_COLLECT_ANGLE) - 25.0) {
+            robot.clawArm.set(0);
+        } else {
+            robot.clawArm.set(RedCrabMinibot.CLAW_ARM_MAX_SPEED);
+        }
     }
 
     private void clawController() {
@@ -174,7 +182,7 @@ public class Pilot extends CyberarmState {
         if (engine.gamepad1.right_trigger > 0) {
             robot.winch.motorEx.setPower(engine.gamepad1.right_trigger * RedCrabMinibot.WINCH_MAX_SPEED);
         } else if (engine.gamepad1.left_trigger > 0) {
-            robot.winch.motorEx.setPower(engine.gamepad1.left_trigger * RedCrabMinibot.WINCH_MAX_SPEED);
+            robot.winch.motorEx.setPower(-engine.gamepad1.left_trigger * RedCrabMinibot.WINCH_MAX_SPEED);
         } else {
             robot.winch.motorEx.setPower(0);
         }

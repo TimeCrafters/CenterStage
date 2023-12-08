@@ -7,9 +7,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
+import dev.cyberarm.engine.V2.Utilities;
 
 public class RedCrabMinibot {
     /// CLAW ARM ///
@@ -18,24 +20,26 @@ public class RedCrabMinibot {
     public static final int ClawArm_COLLECT = 2;
 
     /// TUNING CONSTANTS ///
-    public static final double DRIVETRAIN_MAX_SPEED = 1.0;
+    public static final double DRIVETRAIN_MAX_SPEED = 0.5;
     public static final double CLAW_ARM_MAX_SPEED = 0.5;
+    public static final double CLAW_ARM_kP = 0.025;
+    public static final double CLAW_ARM_POSITION_TOLERANCE = 3.3;
     public static final double WINCH_MAX_SPEED = 0.5;
-    public static final double CLAW_ARM_STOW_ANGLE = 0.0;
-    public static final double CLAW_ARM_DEPOSIT_ANGLE = 120.0;
-    public static final double CLAW_ARM_COLLECT_ANGLE = 150.0;
+    public static final double CLAW_ARM_STOW_ANGLE = 45.0;
+    public static final double CLAW_ARM_DEPOSIT_ANGLE = 110.0; // 130.0
+    public static final double CLAW_ARM_COLLECT_ANGLE = 200.0;
 
     public static final double CLAW_WRIST_STOW_POSITION = 0.5;
-    public static final double CLAW_WRIST_DEPOSIT_POSITION = 0.5;
-    public static final double CLAW_WRIST_COLLECT_POSITION = 0.5;
+    public static final double CLAW_WRIST_DEPOSIT_POSITION = 0.64;
+    public static final double CLAW_WRIST_COLLECT_POSITION = 0.64;
 
-    public static final double CLAW_LEFT_CLOSED_POSITION = 0.5;
+    public static final double CLAW_LEFT_CLOSED_POSITION = 0.2;
     public static final double CLAW_LEFT_OPEN_POSITION = 0.5;
-    public static final double CLAW_RIGHT_CLOSED_POSITION = 0.5;
+    public static final double CLAW_RIGHT_CLOSED_POSITION = 0.77;
     public static final double CLAW_RIGHT_OPEN_POSITION = 0.5;
 
     public static final double DRONE_LATCH_INITIAL_POSITION = 0.5;
-    public static final double DRONE_LATCH_LAUNCH_POSITION = 0.5;
+    public static final double DRONE_LATCH_LAUNCH_POSITION = 0.7;
     public static final int DRONE_LAUNCH_CONFIRMATION_TIME_MS = 1_000;
 
     public static final double HOOK_ARM_STOW_POSITION = 0.8; // just off of airplane 0.8
@@ -60,7 +64,7 @@ public class RedCrabMinibot {
         imu = engine.hardwareMap.get(IMU.class, "imu"); // | Ctrl Hub, I2C Port: 0
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                         RevHubOrientationOnRobot.UsbFacingDirection.UP));
         imu.initialize(parameters);
 
@@ -118,28 +122,30 @@ public class RedCrabMinibot {
         clawArm.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         /// --- --- Run Mode
         clawArm.setRunMode(Motor.RunMode.PositionControl);
+        clawArm.setPositionCoefficient(CLAW_ARM_kP);
+        clawArm.setPositionTolerance(CLAW_ARM_POSITION_TOLERANCE);
         clawArm.setTargetPosition(0);
 
         /// --- Claws
         /// --- --- Wrist
         clawWrist.setDirection(Servo.Direction.FORWARD);
-//        clawWrist.setPosition(CLAW_WRIST_INITIAL_POSITION);
+        clawWrist.setPosition(CLAW_WRIST_STOW_POSITION);
         /// --- --- Left
         leftClaw.setDirection(Servo.Direction.FORWARD);
-//        leftClaw.setPosition((CLAW_LEFT_CLOSED_POSITION));
+        leftClaw.setPosition((CLAW_LEFT_CLOSED_POSITION));
         /// --- --- Right
-        leftClaw.setDirection(Servo.Direction.FORWARD);
-//        leftClaw.setPosition((CLAW_RIGHT_CLOSED_POSITION));
+        rightClaw.setDirection(Servo.Direction.FORWARD);
+        rightClaw.setPosition((CLAW_RIGHT_CLOSED_POSITION));
 
         /// DRONE LATCH ///
         droneLatch = engine.hardwareMap.servo.get("droneLatch");
         droneLatch.setDirection(Servo.Direction.FORWARD);
-//        droneLatch.setPosition(DRONE_LATCH_INITIAL_POSITION);
+        droneLatch.setPosition(DRONE_LATCH_INITIAL_POSITION);
 
         /// HOOK ARM ///
         hookArm = engine.hardwareMap.servo.get("hookArm");
         hookArm.setDirection(Servo.Direction.FORWARD);
-//        hookArm.setPosition(HOOK_ARM_STOW_POSITION);
+//        hookArm.setPosition(HOOK_ARM_STOW_POSITION); // LEAVE OFF:
     }
 
     public void standardTelemetry() {
@@ -196,6 +202,9 @@ public class RedCrabMinibot {
         engine.telemetry.addData("Drone Latch", droneLatch.getPosition());
         engine.telemetry.addLine();
         engine.telemetry.addData("Hook Arm", hookArm.getPosition());
+        engine.telemetry.addLine();
+        engine.telemetry.addData("IMU RAW Heading", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        engine.telemetry.addData("IMU Facing Degree", Utilities.facing(imu));
 
         engine.telemetry.addLine();
     }
