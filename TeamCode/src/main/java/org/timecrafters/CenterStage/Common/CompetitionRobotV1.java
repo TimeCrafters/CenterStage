@@ -1,9 +1,12 @@
 package org.timecrafters.CenterStage.Common;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -22,25 +25,27 @@ public class CompetitionRobotV1 extends Robot {
     private CyberarmEngine engine;
 
     public TimeCraftersConfiguration configuration;
+    public String objectPos;
 
     // ------------------------------------------------------------------------------------------------------------------ HardwareMap setup:
 
-    public DcMotor frontLeft, frontRight, backLeft, backRight, lift;
+    public DcMotor frontLeft, frontRight, backLeft, backRight, lift, clawArm, chinUp;
     public DcMotor odometerR, odometerL, odometerA;
 
     public IMU imu;
     public Servo shoulder, elbow, leftClaw, rightClaw;
+    public DistanceSensor customObject;
 
     // ----------------------------------------------------------------------------------------------------------------- odometry variables:
-    public static double Hp = 0, Hi = 0, Hd = 0;
-    public static double Xp = 0, Xi = 0, Xd = 0;
-    public static double Yp = 0, Yi = 0, Yd = 0;
+    public static double Hp = 0.8, Hi = 0, Hd = 0;
+    public static double Xp = -0.03, Xi = 0, Xd = 0;
+    public static double Yp = 0.03, Yi = 0, Yd = 0.0013;
     private double drivePower = 1;
     public double rx;
     public double xMultiplier = 1;
     public double yMultiplier = 1;
-    public double positionX = 0;
-    public double positionY = 0;
+    public double positionX = 1000;
+    public double positionY = 1000;
     public double positionH = 0;
     public double xTarget;
     public double yTarget;
@@ -53,7 +58,7 @@ public class CompetitionRobotV1 extends Robot {
     public int oldLeftPosition = 0;
     public int oldAuxPosition = 0;
     public final static double L = 22.5; // distance between left and right encoder in cm
-    final static double B = 11.5; // distance between the midpoint of the left and right encoder from the auxillary encoder in cm
+    final static double B = 15; // distance between the midpoint of the left and right encoder from the auxillary encoder in cm
     public final static double R = 3; // wheel radius in cm
     final static double N = 8192; // encoder ticks per revolution (REV encoder)
 
@@ -75,12 +80,17 @@ public class CompetitionRobotV1 extends Robot {
     public double backRightPower;
 
     //-------------------------------------------------------------------------------------------------------------- arm sequence variables:
+    PIDController pidController;
+    public String armPos;
+    public int target;
+    public static double p = 0.0015, i = 0,  d = 0, f = 0;
     public static double shoulderCollect = 0.25;
-    public static double shoulderDeposit = 0.55;
-    public static double shoulderPassive = 1;
-    public static double elbowCollect = 0.7;
-    public static double elbowDeposit = 0.8;
-    public static double elbowPassive = 0.28;
+    public static double shoulderDeposit = 0.32;
+    public static double shoulderPassive = 0.8;
+    public static double elbowCollect = 0;
+    public static double elbowDeposit = 0;
+    public static double elbowPassive = 0;
+
 
     private HardwareMap hardwareMap;
 
@@ -90,6 +100,8 @@ public class CompetitionRobotV1 extends Robot {
         this.engine = engine;
         setup();
         this.string = string;
+        pidController = new PIDController(p, i, d);
+
     }
 
     public void initConstants() {
@@ -109,24 +121,38 @@ public class CompetitionRobotV1 extends Robot {
         frontLeft = engine.hardwareMap.dcMotor.get("frontLeft");
         backRight = engine.hardwareMap.dcMotor.get("backRight");
         backLeft = engine.hardwareMap.dcMotor.get("backLeft");
+        chinUp = engine.hardwareMap.dcMotor.get("chinUp");
         lift = engine.hardwareMap.dcMotor.get("Lift");
+        clawArm = engine.hardwareMap.dcMotor.get("clawArm");
 
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        clawArm.setDirection(DcMotorSimple.Direction.REVERSE);
         lift.setDirection(DcMotorSimple.Direction.FORWARD);
+        chinUp.setDirection(DcMotorSimple.Direction.FORWARD);
 
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        chinUp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        clawArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
 
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        chinUp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //IMU
         IMU.Parameters parameters = new IMU.Parameters(
@@ -142,15 +168,20 @@ public class CompetitionRobotV1 extends Robot {
 
         initConstants();
 
+        pidController = new PIDController(p, i, d);
+
+        customObject = engine.hardwareMap.get(Rev2mDistanceSensor.class, "customObject");
 
         //--------------------------------------------------------------------------------------------------------------------------- SERVO:
         shoulder = hardwareMap.servo.get("shoulder");
         elbow = hardwareMap.servo.get("elbow");
         leftClaw = hardwareMap.servo.get("leftClaw");
-        rightClaw = hardwareMap.servo.get("leftClaw");
+        rightClaw = hardwareMap.servo.get("rightClaw");
 
-        shoulder.setPosition(shoulderPassive);
-        elbow.setPosition(elbowPassive);
+        elbow.setDirection(Servo.Direction.REVERSE);
+
+//        shoulder.setPosition(shoulderPassive);
+//        elbow.setPosition(elbowPassive);
 
 
 
@@ -160,11 +191,12 @@ public class CompetitionRobotV1 extends Robot {
 
     public void OdometryLocalizer() { // ------------------------------------------------------------------------------- Odometry Localizer:
         // update positions
+
         oldRightPosition = currentRightPosition;
         oldLeftPosition = currentLeftPosition;
         oldAuxPosition = currentAuxPosition;
 
-        currentRightPosition = -frontLeft.getCurrentPosition();
+        currentRightPosition = frontLeft.getCurrentPosition();
         currentLeftPosition = -backRight.getCurrentPosition();
         currentAuxPosition = backLeft.getCurrentPosition();
 
@@ -205,7 +237,7 @@ public class CompetitionRobotV1 extends Robot {
     }
 
     public double XPIDControl ( double reference, double current){
-        double error = (current - reference);
+        double error = (reference - current);
         xIntegralSum += error * xTimer.seconds();
         double derivative = (error - xLastError) / xTimer.seconds();
 
@@ -216,7 +248,7 @@ public class CompetitionRobotV1 extends Robot {
     }
 
     public double YPIDControl ( double reference, double current){
-        double error = (current - reference);
+        double error = (reference - current);
         yIntegralSum += error * yTimer.seconds();
         double derivative = (error - yLastError) / yTimer.seconds();
 
@@ -232,8 +264,9 @@ public class CompetitionRobotV1 extends Robot {
         // this uses PID to adjust needed Power for robot to move to target
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double rx = HeadingPIDControl(Math.toRadians(hTarget), heading);
-        double pidX = XPIDControl(xTarget, positionX);
-        double pidY = YPIDControl(yTarget, positionY);
+
+        double pidX = YPIDControl(yTarget, positionY);
+        double pidY = XPIDControl(xTarget, positionX);
 
         double denominator = Math.max(Math.abs(pidX) + Math.abs(pidY) + Math.abs(rx), 1);
 
@@ -246,12 +279,24 @@ public class CompetitionRobotV1 extends Robot {
         frontLeftPower = (rotY + rotX + rx) / denominator;
         backLeftPower = (rotY - rotX + rx) / denominator;
         frontRightPower = (rotY - rotX - rx) / denominator;
-        backRightPower = (rotY - rotX + rx) / denominator;
+        backRightPower = (rotY + rotX - rx) / denominator;
 
         // apply my powers
         frontLeft.setPower(frontLeftPower);
         backLeft.setPower(backLeftPower);
-        backRight.setPower(backRightPower);
+        backRight.setPower(-backRightPower);
         frontRight.setPower(frontRightPower);
+    }
+
+    public void clawArmControl(){
+
+        pidController.setPID(p, i, d);
+        int armPos = clawArm.getCurrentPosition();
+        double pid = pidController.calculate(armPos, target);
+
+        double power = pid;
+
+        clawArm.setPower(power);
+
     }
 }

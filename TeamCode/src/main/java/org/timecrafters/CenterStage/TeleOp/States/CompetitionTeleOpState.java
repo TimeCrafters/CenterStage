@@ -1,6 +1,8 @@
 package org.timecrafters.CenterStage.TeleOp.States;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -14,6 +16,11 @@ import dev.cyberarm.engine.V2.CyberarmState;
 public class CompetitionTeleOpState extends CyberarmState {
     // ------------------------------------------------------------------------------------------------------------- State and engine setup:
     private CompetitionRobotV1 robot;
+    // ------------------------------------------------------------------------------------------------------------robot claw arm variables:
+    private PIDController pidController;
+    public static double p = 0.0015, i = 0,  d = 0, f = 0;
+    public static int target = 0;
+
     // ------------------------------------------------------------------------------------------------------------- Heading lock variables:
     public double integralSum = 0;
     private double targetHeading;
@@ -31,8 +38,8 @@ public class CompetitionTeleOpState extends CyberarmState {
     ElapsedTime timer = new ElapsedTime();
 
     // ---------------------------------------------------------------------------------------------------- collector / depositor variables:
-    public static double leftOpen = 0;
-    public static double leftClose = 0;
+    public static double leftOpen = 0.25;
+    public static double leftClose = 0.6;
     public static double rightOpen = 0.6;
     public static double rightClose = 0.25;
     public double collectorPosLeft = leftClose;
@@ -58,7 +65,7 @@ public class CompetitionTeleOpState extends CyberarmState {
 
     public CompetitionTeleOpState(CompetitionRobotV1 robot) {
         this.robot = robot;
-
+        pidController = new PIDController(p, i, d);
     }
 
     //    }
@@ -129,7 +136,7 @@ public class CompetitionTeleOpState extends CyberarmState {
         // setting each power determined previously from the math above
         // as well as multiplying it by a drive power that can be changed.
         robot.backLeft.setPower(backLeftPower * drivePower);
-        robot.backRight.setPower(backRightPower * drivePower);
+        robot.backRight.setPower(-backRightPower * drivePower);
         robot.frontLeft.setPower(frontLeftPower * drivePower);
         robot.frontRight.setPower(frontRightPower * drivePower);
     }
@@ -155,7 +162,7 @@ public class CompetitionTeleOpState extends CyberarmState {
         return output;
     }
     public void ClawControlTeleOp() {
-        boolean b2 = engine.gamepad2.b;
+        boolean b2 = engine.gamepad1.y;
         if (b2 && !bVar2) {
             if (collectorPosLeft == leftClose && collectorPosRight == rightClose) {
                 collectorPosLeft = leftOpen;
@@ -167,7 +174,7 @@ public class CompetitionTeleOpState extends CyberarmState {
         }
         bVar2 = b2;
 
-        boolean lbs2 = engine.gamepad2.left_stick_button;
+        boolean lbs2 = engine.gamepad1.left_bumper;
         if (lbs2 && !lbsVar2) {
             if (collectorPosLeft == leftClose) {
                 collectorPosLeft = leftOpen;
@@ -177,7 +184,7 @@ public class CompetitionTeleOpState extends CyberarmState {
         }
         lbsVar2 = lbs2;
 
-        boolean rbs2 = engine.gamepad2.right_stick_button;
+        boolean rbs2 = engine.gamepad1.right_bumper;
         if (rbs2 && !rbsVar2) {
             if (collectorPosRight == rightClose) {
                 collectorPosRight = rightOpen;
@@ -200,6 +207,10 @@ public class CompetitionTeleOpState extends CyberarmState {
             armPos = "deposit";
             depositMode = true;
         }
+        else if (engine.gamepad2.b){
+            armPos = "hover";
+            depositMode = true;
+        }
 
         if (armPos == "collect"){
             if (robot.lift.getCurrentPosition() >= 1){
@@ -208,6 +219,8 @@ public class CompetitionTeleOpState extends CyberarmState {
                 robot.lift.setPower(0);
                 robot.shoulder.setPosition(robot.shoulderCollect);
                 robot.elbow.setPosition(robot.elbowCollect);
+                target = 10;
+
             }
         }
         if (armPos == "passive"){
@@ -217,20 +230,42 @@ public class CompetitionTeleOpState extends CyberarmState {
                 robot.lift.setPower(0);
                 robot.shoulder.setPosition(robot.shoulderPassive);
                 robot.elbow.setPosition(robot.elbowPassive);
+                target = 850;
             }
         }
         if (armPos == "deposit"){
                 robot.shoulder.setPosition(robot.shoulderDeposit);
                 robot.elbow.setPosition(robot.elbowDeposit);
-            }
+                target = 370;
+
+        }
+        if (armPos == "hover"){
+
+            robot.shoulder.setPosition(robot.shoulderCollect);
+            robot.elbow.setPosition(robot.elbowCollect);
+            target = 120;
+
+
+        }
         }
 
     @Override
     public void init() {
+        robot.clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.clawArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        pidController = new PIDController(p, i, d);
+
     }
 
     @Override
     public void exec() {
+        if (engine.gamepad2.dpad_up) {
+            robot.chinUp.setPower(1);
+        } else if (engine.gamepad2.dpad_down){
+            robot.chinUp.setPower(-1);
+        } else {
+            robot.chinUp.setPower(0);
+        }
         // ---------------------------------------------------------------------------------------------------------- Game Pad 1, drivetrain
         if (engine.gamepad1.right_stick_button) {
             robot.imu.resetYaw();
@@ -265,34 +300,24 @@ public class CompetitionTeleOpState extends CyberarmState {
         }
 
         // ---------------------------------------------------------------------------------------- Game Pad 2, arms, claw, drone, and lift:
+        pidController.setPID(p, i, d);
+        int armPos = robot.clawArm.getCurrentPosition();
+        double pid = pidController.calculate(armPos, target);
+//        double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+
+        double power = pid;
+//        double power = pid + ff;
+
+        robot.clawArm.setPower(power);
 
         // ------------------------------------------------------------------------------------------------------------------- Lift Control:
         SliderTeleOp();
 
         robot.leftClaw.setPosition(collectorPosLeft);
         robot.rightClaw.setPosition(collectorPosRight);
-
-        boolean lbs2 = engine.gamepad2.left_stick_button;
-        if (lbs2 && !lbsVar2) {
-            if (collectorPosLeft == leftClose) {
-                collectorPosLeft = leftOpen;
-            } else {
-                collectorPosLeft = leftClose;
-            }
-        }
-        lbsVar2 = lbs2;
-
-        boolean rbs2 = engine.gamepad2.right_stick_button;
-        if (rbs2 && !rbsVar2) {
-            if (collectorPosRight == rightClose) {
-                collectorPosRight = rightOpen;
-            } else {
-                collectorPosRight = rightClose;
-            }
-        }
-        rbsVar2 = rbs2;
-
         ArmPosControl();
+
+        ClawControlTeleOp();
 
     }
 
@@ -308,6 +333,7 @@ public class CompetitionTeleOpState extends CyberarmState {
             engine.telemetry.addData("Ki", Ki);
             engine.telemetry.addData("Kd", Kd);
             engine.telemetry.addData("arm pos", armPos);
+            engine.telemetry.addData("arm pos ticks", robot.clawArm.getCurrentPosition());
         }
     }
 

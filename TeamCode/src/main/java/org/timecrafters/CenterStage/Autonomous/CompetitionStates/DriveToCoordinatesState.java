@@ -16,12 +16,14 @@ public class DriveToCoordinatesState extends CyberarmState {
     public static double yTarget = 0;
     public static double hTarget= 0;
     public boolean posAchieved = false;
+    public boolean armDrive;
 
-    public DriveToCoordinatesState(CompetitionRobotV1 robot/*, String groupName, String actionName*/) {
+    public DriveToCoordinatesState(CompetitionRobotV1 robot, String groupName, String actionName) {
         this.robot = robot;
-//        this.xTarget = robot.configuration.variable(groupName, actionName, "xTarget").value();
-//        this.yTarget = robot.configuration.variable(groupName, actionName, "yTarget").value();
-//        this.hTarget = robot.configuration.variable(groupName, actionName, "hTarget").value();
+        this.xTarget = robot.configuration.variable(groupName, actionName, "xTarget").value();
+        this.yTarget = robot.configuration.variable(groupName, actionName, "yTarget").value();
+        this.hTarget = robot.configuration.variable(groupName, actionName, "hTarget").value();
+        this.armDrive = robot.configuration.variable(groupName, actionName, "armDrive").value();
     }
 
     @Override
@@ -32,13 +34,19 @@ public class DriveToCoordinatesState extends CyberarmState {
         robot.DriveToCoordinates();
         robot.OdometryLocalizer();
 
+
+        if (armDrive){
+            robot.clawArmControl();
+        }
+
         if (posAchieved){
-//            setHasFinished(true);
+            setHasFinished(true);
         } else {
-            if (((robot.positionX > xTarget - 1) && (robot.positionX < xTarget + 1)) &&
-            ((robot.positionH > hTarget - 1) && (robot.positionH < hTarget + 1)) &&
-            ((robot.positionY > yTarget - 1) && (robot.positionY < yTarget + 1))){
-//                posAchieved = true;
+            if (Math.abs(robot.backLeftPower) < 0.15 &&
+                    Math.abs(robot.backRightPower) < 0.15 &&
+                    Math.abs(robot.frontLeftPower) < 0.15 &&
+                    Math.abs(robot.frontRightPower) < 0.15){
+                posAchieved = true;
             }
         }
     }
@@ -48,7 +56,7 @@ public class DriveToCoordinatesState extends CyberarmState {
     public void telemetry() {
         engine.telemetry.addData("x pos", robot.positionX);
         engine.telemetry.addData("y pos", robot.positionY);
-        engine.telemetry.addData("h pos odo", robot.positionH);
+        engine.telemetry.addData("h pos odo", Math.toDegrees(robot.positionH));
         engine.telemetry.addData("aux encoder", robot.currentAuxPosition);
         engine.telemetry.addData("left encoder", robot.currentLeftPosition);
         engine.telemetry.addData("right encoder", robot.currentRightPosition);

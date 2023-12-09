@@ -3,9 +3,7 @@ package org.timecrafters.CenterStage.TeleOp.Engines;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
-import org.timecrafters.CenterStage.Common.PrototypeRobot;
 import org.timecrafters.CenterStage.TeleOp.States.CompetitionTeleOpState;
-import org.timecrafters.CenterStage.TeleOp.States.PrototypeRobotDrivetrainState;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
