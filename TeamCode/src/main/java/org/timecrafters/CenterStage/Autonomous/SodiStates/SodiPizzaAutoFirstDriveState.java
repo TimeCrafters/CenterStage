@@ -14,7 +14,7 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
     final private String groupName, actionName;
     private long lastMoveTime;
     private double drivePower, drivePowerRaw;
-    public int readyToTurn, neededTicks, currentTicks, targetTicks = 1000;
+    public int readyToTurn, neededTicks, currentTicks, targetTicks;
 
     public SodiPizzaAutoFirstDriveState() {
         groupName = " ";
@@ -51,6 +51,16 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
         readyToTurn = engine.blackboardGetInt("readyToTurn");
 
         robot.imu.resetYaw();
+
+        robot.leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        robot.leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
 
@@ -111,8 +121,8 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
 
         }
 
-        //Stop and finish set after reached targetTicks within tolerance of 2
-        else if (robot.leftFront.getCurrentPosition() >= targetTicks - 10 && robot.leftFront.getCurrentPosition() <= targetTicks + 10) {
+        //Stop and finish set after reached targetTicks within tolerance of 10
+        else if (Math.abs(neededTicks) < 10) {
 
             drivePowerRaw = 0;
             getDrivePower();
@@ -121,6 +131,8 @@ public class SodiPizzaAutoFirstDriveState extends CyberarmState{
             robot.leftBack.setPower(drivePower);
             robot.rightFront.setPower(drivePower);
             robot.rightBack.setPower(drivePower);
+
+
 
             engine.blackboardSet("readyToTurn", readyToTurn + 1);
 
