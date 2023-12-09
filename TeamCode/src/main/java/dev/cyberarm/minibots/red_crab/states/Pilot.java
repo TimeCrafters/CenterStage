@@ -13,7 +13,7 @@ public class Pilot extends CyberarmState {
 
     private boolean leftClawOpen = false;
     private boolean rightClawOpen = false;
-    private int clawArmPosition = RedCrabMinibot.ClawArm_STOW;
+    private int clawArmPosition = RedCrabMinibot.ClawArm_INITIAL;
     private boolean hookArmUp = false;
     private boolean droneLaunchAuthorized = false;
     private boolean droneLaunchRequested = false;
@@ -61,11 +61,13 @@ public class Pilot extends CyberarmState {
                     clawArmPosition = RedCrabMinibot.ClawArm_COLLECT;
                     break;
                 case "dpad_down":
-                    clawArmPosition = RedCrabMinibot.ClawArm_DEPOSIT;
+                    clawArmPosition = RedCrabMinibot.ClawArm_STOW;
                     break;
                 case "dpad_left":
+                    clawArmPosition = RedCrabMinibot.ClawArm_DEPOSIT;
+                    break;
                 case "dpad_right":
-                    clawArmPosition = RedCrabMinibot.ClawArm_STOW;
+                    clawArmPosition = RedCrabMinibot.ClawArm_COLLECT_FLOAT;
                     break;
             }
         }
@@ -123,11 +125,11 @@ public class Pilot extends CyberarmState {
     private void clawArmAndWristController() {
         switch (clawArmPosition) {
             case RedCrabMinibot.ClawArm_STOW:
-//                robot.clawArm.setTargetPosition(Utilities.motorAngle(
-//                        RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
-//                        RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
-//                        RedCrabMinibot.CLAW_ARM_STOW_ANGLE));
-//
+                robot.clawArm.setTargetPosition(Utilities.motorAngle(
+                        RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
+                        RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
+                        RedCrabMinibot.CLAW_ARM_STOW_ANGLE));
+
                 robot.clawWrist.setPosition(RedCrabMinibot.CLAW_WRIST_STOW_POSITION);
                 break;
             case RedCrabMinibot.ClawArm_DEPOSIT:
@@ -137,6 +139,14 @@ public class Pilot extends CyberarmState {
                         RedCrabMinibot.CLAW_ARM_DEPOSIT_ANGLE));
 
                 robot.clawWrist.setPosition(RedCrabMinibot.CLAW_WRIST_DEPOSIT_POSITION);
+                break;
+            case RedCrabMinibot.ClawArm_COLLECT_FLOAT:
+                robot.clawArm.setTargetPosition(Utilities.motorAngle(
+                        RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
+                        RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
+                        RedCrabMinibot.CLAW_ARM_COLLECT_FLOAT_ANGLE));
+
+                robot.clawWrist.setPosition(RedCrabMinibot.CLAW_WRIST_COLLECT_FLOAT_POSITION);
                 break;
             case RedCrabMinibot.ClawArm_COLLECT:
                 robot.clawArm.setTargetPosition(Utilities.motorAngle(

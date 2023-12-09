@@ -15,9 +15,11 @@ import dev.cyberarm.engine.V2.Utilities;
 
 public class RedCrabMinibot {
     /// CLAW ARM ///
+    public static final int ClawArm_INITIAL = -1; // NO OP match starting position
     public static final int ClawArm_STOW = 0;
     public static final int ClawArm_DEPOSIT = 1;
-    public static final int ClawArm_COLLECT = 2;
+    public static final int ClawArm_COLLECT_FLOAT = 2;
+    public static final int ClawArm_COLLECT = 3;
 
     /// TUNING CONSTANTS ///
     public static final double DRIVETRAIN_MAX_SPEED = 0.5;
@@ -25,12 +27,14 @@ public class RedCrabMinibot {
     public static final double CLAW_ARM_kP = 0.025;
     public static final double CLAW_ARM_POSITION_TOLERANCE = 3.3;
     public static final double WINCH_MAX_SPEED = 0.5;
-    public static final double CLAW_ARM_STOW_ANGLE = 45.0;
-    public static final double CLAW_ARM_DEPOSIT_ANGLE = 110.0; // 130.0
+    public static final double CLAW_ARM_STOW_ANGLE = 45.0; // 45.0
+    public static final double CLAW_ARM_DEPOSIT_ANGLE = 130.0; // 110.0
+    public static final double CLAW_ARM_COLLECT_FLOAT_ANGLE = 180.0;
     public static final double CLAW_ARM_COLLECT_ANGLE = 200.0;
 
     public static final double CLAW_WRIST_STOW_POSITION = 0.5;
     public static final double CLAW_WRIST_DEPOSIT_POSITION = 0.64;
+    public static final double CLAW_WRIST_COLLECT_FLOAT_POSITION = 0.64;
     public static final double CLAW_WRIST_COLLECT_POSITION = 0.64;
 
     public static final double CLAW_LEFT_CLOSED_POSITION = 0.2;
