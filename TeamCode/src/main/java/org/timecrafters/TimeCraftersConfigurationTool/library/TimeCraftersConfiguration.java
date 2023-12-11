@@ -1,5 +1,9 @@
 package org.timecrafters.TimeCraftersConfigurationTool.library;
 
+import android.os.FileObserver;
+
+import androidx.annotation.Nullable;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -33,6 +37,8 @@ import java.io.FileReader;
 public class TimeCraftersConfiguration {
     private static final String TAG = "TCT|TCConfig";
     private Config config;
+    private boolean liveReload = false;
+    private FileObserver fileObserver;
 
     public TimeCraftersConfiguration() {
         Settings settings = loadSettings();
@@ -45,6 +51,10 @@ public class TimeCraftersConfiguration {
 
     public Config getConfig() {
         return config;
+    }
+
+    public void enableLiveReload(boolean b) {
+        liveReload = b;
     }
 
     public Group group(String groupName) {
@@ -108,6 +118,21 @@ public class TimeCraftersConfiguration {
             try {
                 Config config = gsonForConfig().fromJson(new FileReader(configFile), Config.class);
                 config.setName(name);
+
+                final TimeCraftersConfiguration self = this;
+                if (fileObserver == null) {
+                    fileObserver = new FileObserver(configFile) {
+                        @Override
+                        public void onEvent(int event, @Nullable String filePath) {
+                            if (self.liveReload && event == CLOSE_WRITE) {
+                                Config newConfig = loadConfig(path);
+
+                                self.config.syncVariables(newConfig);
+                            }
+                        }
+                    };
+                    fileObserver.startWatching();
+                }
 
                 return config;
             } catch (FileNotFoundException e) {
