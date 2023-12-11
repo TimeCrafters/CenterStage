@@ -26,6 +26,8 @@ public class Move extends CyberarmState {
         this.maxPower = robot.config.variable(groupName, actionName, "maxPower").value();
         this.minPower = robot.config.variable(groupName, actionName, "minPower").value();
 
+        this.strafe = robot.config.variable(groupName, actionName, "strafe").value();
+
         this.timeoutMS = robot.config.variable(groupName, actionName, "timeoutMS").value();
 
         // Validate distance and lerp distances
@@ -82,6 +84,18 @@ public class Move extends CyberarmState {
         } else {
             tankMove();
         }
+    }
+
+    @Override
+    public void telemetry() {
+        engine.telemetry.addLine();
+        engine.telemetry.addData("Strafing", strafe);
+        engine.telemetry.addData("lerp MM UP", lerpMM_UP);
+        engine.telemetry.addData("lerp MM DOWN", lerpMM_DOWN);
+        engine.telemetry.addData("Distance MM", distanceMM);
+        engine.telemetry.addData("Distance Travelled MM", (strafe ? robot.left.getDistance() : robot.frontLeft.getDistance()));
+        engine.telemetry.addData("Timeout MS", timeoutMS);
+        progressBar(20, runTime() / timeoutMS);
     }
 
     private void tankMove(){
