@@ -173,6 +173,13 @@ public abstract class CyberarmState implements Runnable {
   }
 
   /**
+   * Sets state as finished
+   */
+  public void finished() {
+    hasFinished = true;
+  }
+
+  /**
    *
    * @return Get value of isRunning
    */

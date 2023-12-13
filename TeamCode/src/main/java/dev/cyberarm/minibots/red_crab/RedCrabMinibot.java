@@ -2,6 +2,7 @@ package dev.cyberarm.minibots.red_crab;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -9,6 +10,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
+
+import java.sql.Time;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 import dev.cyberarm.engine.V2.Utilities;
@@ -58,10 +62,16 @@ public class RedCrabMinibot {
     public final MotorEx frontLeft, frontRight, backLeft, backRight, winch, clawArm;
     public final Servo leftClaw, rightClaw, clawWrist, droneLatch, hookArm;
 
+    public final MotorGroup left, right;
+
     final CyberarmEngine engine;
+
+    public final TimeCraftersConfiguration config;
 
     public RedCrabMinibot() {
         engine = CyberarmEngine.instance;
+
+        config = new TimeCraftersConfiguration("cyberarm_RedCrab");
 
         /// IMU ///
         /// ------------------------------------------------------------------------------------ ///
@@ -97,6 +107,10 @@ public class RedCrabMinibot {
         frontRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior((Motor.ZeroPowerBehavior.BRAKE));
+
+        /// --- MOTOR GROUPS
+        left = new MotorGroup(frontLeft, backLeft);
+        right = new MotorGroup(frontRight, backRight);
 
         /// WINCH ///
         /// ------------------------------------------------------------------------------------ ///
