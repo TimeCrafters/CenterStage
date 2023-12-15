@@ -8,8 +8,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
 import java.sql.Time;
@@ -68,10 +72,28 @@ public class RedCrabMinibot {
 
     public final TimeCraftersConfiguration config;
 
-    public RedCrabMinibot() {
+    public enum Path {
+        LEFT,
+        CENTER,
+        RIGHT
+    }
+
+    public final TfodProcessor tfod;
+    public final VisionPortal visionPortal;
+
+    public RedCrabMinibot(boolean autonomous) {
         engine = CyberarmEngine.instance;
 
         config = new TimeCraftersConfiguration("cyberarm_RedCrab");
+
+        if (autonomous) {
+            tfod = TfodProcessor.easyCreateWithDefaults();
+            visionPortal = VisionPortal.easyCreateWithDefaults(
+                    engine.hardwareMap.get(WebcamName.class, "Webcam 1"), tfod);
+        } else {
+            tfod = null;
+            visionPortal = null;
+        }
 
         /// IMU ///
         /// ------------------------------------------------------------------------------------ ///

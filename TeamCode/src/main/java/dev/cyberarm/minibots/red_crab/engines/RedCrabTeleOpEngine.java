@@ -10,6 +10,6 @@ import dev.cyberarm.minibots.red_crab.states.Pilot;
 public class RedCrabTeleOpEngine extends CyberarmEngine {
     @Override
     public void setup() {
-        addState(new Pilot(new RedCrabMinibot()));
+        addState(new Pilot(new RedCrabMinibot(false)));
     }
 }

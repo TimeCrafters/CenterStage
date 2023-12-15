@@ -14,7 +14,7 @@ public class RedCrabAutonomousBlueAudienceEngine extends CyberarmEngine {
         setupFromConfig(
                 new TimeCraftersConfiguration("cyberarm_RedCrab"),
                 "dev.cyberarm.minibots.red_crab.states",
-                new RedCrabMinibot(),
+                new RedCrabMinibot(true),
                 RedCrabMinibot.class,
                 "Autonomous_BLUE_Audience"
         );

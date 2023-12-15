@@ -416,6 +416,21 @@ public abstract class CyberarmEngine extends OpMode {
    * @param groupName Group name
    */
   public void setupFromConfig(TimeCraftersConfiguration configuration, String packageName, Object object, Class<?> objectClass, String groupName) {
+    setupFromConfig(configuration, packageName, object, objectClass, groupName, null);
+  }
+
+  /**
+   * Automatically populates states from a TimeCraftersConfiguration Group actions
+   * requires action comments to start with an @ character followed by the class name
+   * state must have a construction that takes 3 arguments: object, groupName, and actionName
+   * @param configuration TimeCraftersConfiguration
+   * @param packageName Package name where states are defined
+   * @param object Object to pass as first argument to states constructor
+   * @param objectClass Class to cast object to
+   * @param groupName Group name
+   * @param insertAfterState state to insert states AFTER
+   */
+  public void setupFromConfig(TimeCraftersConfiguration configuration, String packageName, Object object, Class<?> objectClass, String groupName, CyberarmState insertAfterState) {
     CyberarmState lastState = null;
     String lastActionName = null;
     String[] lastActionNameSplit = new String[0];
@@ -446,7 +461,11 @@ public abstract class CyberarmEngine extends OpMode {
           {
             lastState.addParallelState(state);
           } else {
-            addState(state);
+            if (insertAfterState != null) {
+              insertAfterState.addState(state);
+            } else {
+              addState(state);
+            }
             lastState = state;
           }
 
