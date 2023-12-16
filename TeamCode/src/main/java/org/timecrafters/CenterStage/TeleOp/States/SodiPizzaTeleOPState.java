@@ -14,6 +14,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     final private SodiPizzaMinibotObject robot;
     private long lastMoveTime;
     public float drivePower;
+    public final double minInput = 0.1 /** <- Minimum input from stick to send command **/;
     public double lastToldAngle /** <- The angle the bot was last told to stop at **/;
     YawPitchRollAngles imuInitAngle;
 
@@ -43,9 +44,9 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     public void exec() {
         
 
-        if (Math.abs(engine.gamepad1.left_stick_y) < 0.1 &&
-                Math.abs(engine.gamepad1.left_stick_x) < 0.1 &&
-                Math.abs(engine.gamepad1.right_stick_x) < 0.1) {
+        if (Math.abs(engine.gamepad1.left_stick_y) < minInput &&
+                Math.abs(engine.gamepad1.left_stick_x) < minInput &&
+                Math.abs(engine.gamepad1.right_stick_x) < minInput) /** <- input from ONLY left stick y means to move forward or backward **/{
 
             drivePower = 0;
             robot.leftFront.setPower(drivePower);
@@ -54,15 +55,15 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.rightBack.setPower(drivePower);
         }
 
-        if (robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > lastToldAngle + 0.5 &&
-                Math.abs(engine.gamepad1.left_stick_y) > 0.1) {
-
+        if (robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > lastToldAngle + 0.5) {
+            if (Math.abs(engine.gamepad1.right_stick_x) > minInput &&
+            Math.abs(engine.gamepad1.left_stick_y) > minInput)
             robot.rightFront.setPower(robot.leftFront.getPower() * 0.8);
             robot.rightBack.setPower(robot.leftBack.getPower() * 0.8);
 
         } else
         if (robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < lastToldAngle - 0.5 &&
-                Math.abs(engine.gamepad1.left_stick_y) > 0.1) {
+                Math.abs(engine.gamepad1.left_stick_y) > minInput) {
 
             robot.leftFront.setPower(robot.rightFront.getPower() * 0.8);
             robot.leftBack.setPower(robot.rightBack.getPower() * 0.8);
@@ -84,9 +85,9 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.imu.resetYaw();
         }
 
-        if (Math.abs(engine.gamepad1.left_stick_y) > 0.1 && Math.abs(engine.gamepad1.left_stick_x) < 0.1 &&
+        if (Math.abs(engine.gamepad1.left_stick_y) > minInput && Math.abs(engine.gamepad1.left_stick_x) < minInput/* &&
                 robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > lastToldAngle - 0.5 &&
-                robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < lastToldAngle + 0.5) {
+                robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < lastToldAngle + 0.5*/) {
 
             drivePower = engine.gamepad1.left_stick_y;
             robot.leftFront.setPower(drivePower);
@@ -95,7 +96,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.rightBack.setPower(drivePower);
         }
 
-        if (Math.abs(engine.gamepad1.left_stick_x) > 0.1) {
+        if (Math.abs(engine.gamepad1.left_stick_x) > minInput) {
 
             drivePower = engine.gamepad1.left_stick_x;
             robot.leftFront.setPower(-drivePower);
@@ -104,7 +105,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.rightBack.setPower(-drivePower);
         }
 
-        if (Math.abs(engine.gamepad1.right_stick_x) > 0.1) {
+        if (Math.abs(engine.gamepad1.right_stick_x) > minInput) {
 
             drivePower = engine.gamepad1.right_stick_x;
             robot.leftFront.setPower(-drivePower);
@@ -112,6 +113,10 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.leftBack.setPower(-drivePower);
             robot.rightBack.setPower(drivePower);
             lastToldAngle = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        }
+
+        if (engine.gamepad2.a && !engine.gamepad2.start) {
+
         }
     }
 }
