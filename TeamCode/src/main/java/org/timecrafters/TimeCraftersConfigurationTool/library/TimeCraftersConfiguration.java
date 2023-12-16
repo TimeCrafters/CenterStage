@@ -1,5 +1,6 @@
 package org.timecrafters.TimeCraftersConfigurationTool.library;
 
+import android.os.Environment;
 import android.os.FileObserver;
 
 import androidx.annotation.Nullable;
@@ -64,7 +65,7 @@ public class TimeCraftersConfiguration {
             }
         }
 
-        throw(new RuntimeException("Failed to find a group named:\"" + groupName.trim() + "\" in config \"" + config.getName() + "\""));
+        throw(new TimeCraftersConfigurationError("Failed to find a group named:\"" + groupName.trim() + "\" in config \"" + config.getName() + "\""));
     }
 
     public Action action(String groupName, String actionName) {
@@ -76,7 +77,7 @@ public class TimeCraftersConfiguration {
             }
         }
 
-        throw(new RuntimeException("Failed to find an action named:\"" + actionName.trim() + "\" in group \"" + groupName.trim() + "\" in config \"" + config.getName() + "\""));
+        throw(new TimeCraftersConfigurationError("Failed to find an action named:\"" + actionName.trim() + "\" in group \"" + groupName.trim() + "\" in config \"" + config.getName() + "\""));
     }
 
     public Variable variable(String groupName, String actionName, String variableName) {
@@ -88,38 +89,61 @@ public class TimeCraftersConfiguration {
             }
         }
 
-        throw(new RuntimeException("Failed to find a variable named \"" + variableName.trim() + "\" in action:\"" + actionName.trim() +
+        throw(new TimeCraftersConfigurationError("Failed to find a variable named \"" + variableName.trim() + "\" in action:\"" + actionName.trim() +
                 "\" in group \"" + groupName.trim() + "\" in config \"" + config.getName() + "\""));
+    }
+
+    public String getRootPath() {
+        //                             Ducktape :|
+        return String.format("%s%s", Environment.getExternalStorageDirectory() + "/Android/data/org.timecrafters.TimeCraftersConfigurationTool/files", File.separator + "TimeCrafters_Configuration_Tool");
+    }
+
+    public String getConfigsPath() {
+        return String.format("%s%s", getRootPath(),  File.separator + "/configs");
+    }
+
+    public String getSettingsPath() {
+        return String.format("%s%s", getRootPath(),  File.separator + "settings.json");
     }
 
     private Settings loadSettings() {
         File settingsFile = new File(TAC.SETTINGS_PATH);
 
         if (!settingsFile.exists()) {
-            throw( new RuntimeException("Unable to load settings.json, file does not exist!") );
+            settingsFile = new File(getSettingsPath());
+
+            if (!settingsFile.exists()) {
+                throw( new TimeCraftersConfigurationError("Unable to load settings.json, file does not exist!") );
+            }
         }
 
         try {
             return gsonForSettings().fromJson(new FileReader(settingsFile), Settings.class);
         } catch (FileNotFoundException e) {
-            throw( new RuntimeException("Unable to load settings.json") );
+            throw( new TimeCraftersConfigurationError("Unable to load settings.json") );
         }
     }
 
     private Config loadConfig(String name) {
         if (name.equals("")) {
-            throw(new RuntimeException("Cannot load a config with an empty name!"));
+            throw(new TimeCraftersConfigurationError("Cannot load a config with an empty name!"));
         }
 
         String path = TAC.CONFIGS_PATH + File.separator + name + ".json";
         File configFile = new File(path);
+
+        // Try looking in "new" location for config files
+        if (!configFile.exists()) {
+            configFile = new File(getConfigsPath() + File.separator + name + ".json");
+        }
 
         if (configFile.exists() && configFile.isFile()) {
             try {
                 Config config = gsonForConfig().fromJson(new FileReader(configFile), Config.class);
                 config.setName(name);
 
-                final TimeCraftersConfiguration self = this;
+                // Needs debugging...
+                /* final TimeCraftersConfiguration self = this;
                 if (fileObserver == null) {
                     fileObserver = new FileObserver(configFile) {
                         @Override
@@ -132,15 +156,15 @@ public class TimeCraftersConfiguration {
                         }
                     };
                     fileObserver.startWatching();
-                }
+                } */
 
                 return config;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-                throw(new RuntimeException("Unable to find a config file named \"" + name + "\""));
+                throw(new TimeCraftersConfigurationError("Unable to find a config file named \"" + name + "\""));
             }
         } else {
-            throw(new RuntimeException("Unable to find a config file named \"" + name + "\""));
+            throw(new TimeCraftersConfigurationError("Unable to find a config file named \"" + name + "\""));
         }
     }
 
