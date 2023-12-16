@@ -39,6 +39,7 @@ public abstract class CyberarmEngine extends OpMode {
   public boolean showStateChildrenListInTelemetry = false;
 
   private GamepadChecker gamepadCheckerGamepad1, gamepadCheckerGamepad2;
+  private boolean useThreads = true;
 
   /**
    * Called when INIT button on Driver Station is pushed
@@ -481,5 +482,12 @@ public abstract class CyberarmEngine extends OpMode {
         throw(exception);
       }
     }
+  }
+
+  /**
+   * NO OP
+   */
+  public void threadless() {
+    useThreads = false;
   }
 }

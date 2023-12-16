@@ -32,15 +32,15 @@ public class RedCrabMinibot {
     /// TUNING CONSTANTS ///
     public static final double DRIVETRAIN_MAX_SPEED = 0.5;
     public static final double CLAW_ARM_MAX_SPEED = 0.5;
-    public static final double CLAW_ARM_kP = 0.025;
-    public static final double CLAW_ARM_POSITION_TOLERANCE = 3.3;
+    public static final double CLAW_ARM_kP = 0.1;
+    public static final double CLAW_ARM_POSITION_TOLERANCE = 1.5;
     public static final double WINCH_MAX_SPEED = 0.5;
     public static final double CLAW_ARM_STOW_ANGLE = 45.0; // 45.0
     public static final double CLAW_ARM_DEPOSIT_ANGLE = 130.0; // 110.0
     public static final double CLAW_ARM_COLLECT_FLOAT_ANGLE = 180.0;
     public static final double CLAW_ARM_COLLECT_ANGLE = 200.0;
 
-    public static final double CLAW_WRIST_STOW_POSITION = 0.5;
+    public static final double CLAW_WRIST_STOW_POSITION = 0.7;
     public static final double CLAW_WRIST_DEPOSIT_POSITION = 0.64;
     public static final double CLAW_WRIST_COLLECT_FLOAT_POSITION = 0.64;
     public static final double CLAW_WRIST_COLLECT_POSITION = 0.64;
@@ -59,7 +59,7 @@ public class RedCrabMinibot {
 
     /// MOTOR CONSTANTS ///
     public static final int CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION = 4;
-    public static final double CLAW_ARM_MOTOR_GEAR_RATIO = 72;
+    public static final double CLAW_ARM_MOTOR_GEAR_RATIO = 80; // Technically 72, but there is a lot of slop
 
     /// HARDWARE ///
     public final IMU imu;
@@ -104,6 +104,10 @@ public class RedCrabMinibot {
                         RevHubOrientationOnRobot.UsbFacingDirection.UP));
         imu.initialize(parameters);
 
+        if (autonomous) {
+            imu.resetYaw();
+        }
+
         /// DRIVE TRAIN ///
         /// ------------------------------------------------------------------------------------ ///
         frontLeft = new MotorEx(engine.hardwareMap, "frontLeft"); // | Ctrl|Ex Hub, Port: ??
@@ -133,6 +137,19 @@ public class RedCrabMinibot {
         /// --- MOTOR GROUPS
         left = new MotorGroup(frontLeft, backLeft);
         right = new MotorGroup(frontRight, backRight);
+
+        /// --- MOTOR DISTANCE PER TICK
+        double gearRatio = config.variable("Robot", "Drivetrain_Tuning", "gear_ratio").value();
+        double motorTicks = config.variable("Robot", "Drivetrain_Tuning", "motor_ticks").value();
+        double wheelDiameterMM = config.variable("Robot", "Drivetrain_Tuning", "wheel_diameter_mm").value();
+
+        double wheelCircumference = Math.PI * wheelDiameterMM;
+        double distancePerTick = (motorTicks * gearRatio) / wheelCircumference; // raw motor encoder * gear ratio
+
+        frontLeft.setDistancePerPulse(distancePerTick);
+        frontRight.setDistancePerPulse(distancePerTick);
+        backLeft.setDistancePerPulse(distancePerTick);
+        backRight.setDistancePerPulse(distancePerTick);
 
         /// WINCH ///
         /// ------------------------------------------------------------------------------------ ///

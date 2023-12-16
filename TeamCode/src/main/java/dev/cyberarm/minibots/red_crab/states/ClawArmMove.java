@@ -27,7 +27,8 @@ public class ClawArmMove extends CyberarmState {
     public void start() {
         robot.clawArm.setPositionTolerance(Utilities.motorAngle(motorTicks, gearRatio, toleranceAngle));
         robot.clawArm.setTargetPosition(Utilities.motorAngle(motorTicks, gearRatio, targetAngle));
-        robot.clawArm.set(power);
+
+        engine.blackboardSet("clawArmPower", power);
     }
 
     @Override
@@ -40,8 +41,11 @@ public class ClawArmMove extends CyberarmState {
     @Override
     public void telemetry() {
         engine.telemetry.addLine();
+        engine.telemetry.addData("Motor Power", robot.clawArm.get());
         engine.telemetry.addData("Motor Position", robot.clawArm.getCurrentPosition());
         engine.telemetry.addData("Motor Angle", Utilities.motorAngle(motorTicks, gearRatio, robot.clawArm.getCurrentPosition()));
+        engine.telemetry.addData("Motor Target Position", Utilities.motorAngle(motorTicks, gearRatio, targetAngle));
+        engine.telemetry.addData("Motor Target Angle", targetAngle);
         engine.telemetry.addData("Timeout MS", timeoutMS);
         progressBar(20, runTime() / timeoutMS);
     }
