@@ -499,13 +499,27 @@ public abstract class CyberarmEngine extends OpMode {
           lastActionName = action.name;
           lastActionNameSplit = lastActionName.split("-");
         }
-      } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+      } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
         e.printStackTrace();
 
         RuntimeException exception = new RuntimeException(e.getMessage(), e.getCause());
         exception.setStackTrace(e.getStackTrace());
 
         throw(exception);
+      } catch (InvocationTargetException | InstantiationException e) {
+        Throwable cause = e.getCause();
+
+        if (cause != null) {
+          cause.printStackTrace();
+
+          RuntimeException exception = new RuntimeException(cause.getMessage(), cause.getCause());
+          exception.setStackTrace(cause.getStackTrace());
+        } else {
+          e.printStackTrace();
+
+          RuntimeException exception = new RuntimeException(e.getMessage(), e.getCause());
+          exception.setStackTrace(e.getStackTrace());
+        }
       }
     }
   }
