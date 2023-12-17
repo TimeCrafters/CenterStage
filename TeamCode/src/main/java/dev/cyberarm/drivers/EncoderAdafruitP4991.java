@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import java.util.Arrays;
 
-@I2cDeviceType
-@DeviceProperties(name = "Adafruit P4991 Rotary Encoder QT", xmlTag = "Adafruit_Encoder_P4991")
+//@I2cDeviceType
+//@DeviceProperties(name = "Adafruit P4991 Rotary Encoder QT", xmlTag = "Adafruit_Encoder_P4991")
 public class EncoderAdafruitP4991 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
     final Object i2cLock = new Object();
     I2cAddr ADDRESS_I2C_DEFAULT = I2cAddr.create7bit(0x36);
