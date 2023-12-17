@@ -113,6 +113,14 @@ public abstract class CyberarmEngine extends OpMode {
       return;
     }
 
+    if (!useThreads) {
+      threadlessExecState(state);
+
+      for (CyberarmState task : backgroundTasks) {
+        threadlessExecState(task);
+      }
+    }
+
       // Add telemetry to show currently running state
     telemetry.addLine(
             "Running state: " +state.getClass().getSimpleName() + ". State: " +
@@ -213,15 +221,33 @@ public abstract class CyberarmEngine extends OpMode {
     final CyberarmState finalState = state;
 //    if (state.isRunning()) { return; } // Assume that we have already started running this state
 
-    new Thread(() -> {
+    if (useThreads) {
+      new Thread(() -> {
+        finalState.prestart();
+        finalState.start();
+        finalState.startTime = System.currentTimeMillis();
+        finalState.run();
+      }).start();
+    } else {
       finalState.prestart();
       finalState.start();
       finalState.startTime = System.currentTimeMillis();
-      finalState.run();
-    }).start();
+    }
 
     for (CyberarmState kid : state.children) {
       runState(kid);
+    }
+  }
+
+  /**
+   * Recursively exec states
+   * @param state State to exec
+   */
+  private void threadlessExecState(final CyberarmState state) {
+    state.exec();
+
+    for (CyberarmState kid : state.children) {
+      threadlessExecState(kid);
     }
   }
 
@@ -485,7 +511,7 @@ public abstract class CyberarmEngine extends OpMode {
   }
 
   /**
-   * NO OP
+   * Disable running states in their own threads which might help with random crashes.
    */
   public void threadless() {
     useThreads = false;

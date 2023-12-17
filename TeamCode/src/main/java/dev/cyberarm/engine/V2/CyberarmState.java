@@ -45,6 +45,7 @@ public abstract class CyberarmState implements Runnable {
   /**
    * State's main loop, calls exec() until hasFinished is true
    * DO NO OVERRIDE
+   * blocking
    */
   @Override
   public void run() {
@@ -162,6 +163,7 @@ public abstract class CyberarmState implements Runnable {
    */
   public void setHasFinished(boolean value) {
     hasFinished = value;
+    isRunning = value; // Dubious?
   }
 
   /**
@@ -177,6 +179,7 @@ public abstract class CyberarmState implements Runnable {
    */
   public void finished() {
     hasFinished = true;
+    isRunning = false;
   }
 
   /**
