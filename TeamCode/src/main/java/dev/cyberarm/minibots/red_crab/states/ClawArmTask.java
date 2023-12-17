@@ -11,8 +11,6 @@ public class ClawArmTask extends CyberarmState {
 
     @Override
     public void exec() {
-        double power = engine.blackboardGetDouble("clawArmPower");
-
-        robot.clawArm.set(power);
+        robot.controlClawArm();
     }
 }

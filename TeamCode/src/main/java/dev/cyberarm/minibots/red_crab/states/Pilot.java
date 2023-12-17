@@ -69,6 +69,9 @@ public class Pilot extends CyberarmState {
                 case "dpad_right":
                     clawArmPosition = RedCrabMinibot.ClawArm_COLLECT_FLOAT;
                     break;
+                case "start":
+                    robot.reloadConfig();
+                    break;
             }
         }
     }
@@ -164,9 +167,9 @@ public class Pilot extends CyberarmState {
                 RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
                 RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
                 RedCrabMinibot.CLAW_ARM_COLLECT_ANGLE) - 25.0) {
-            robot.clawArm.set(0);
-        } else {
-            robot.clawArm.set(RedCrabMinibot.CLAW_ARM_MAX_SPEED);
+//            robot.clawArm.setPower(0);
+//        } else {
+//            robot.clawArm.setPower(RedCrabMinibot.CLAW_ARM_MAX_SPEED);
         }
     }
 
