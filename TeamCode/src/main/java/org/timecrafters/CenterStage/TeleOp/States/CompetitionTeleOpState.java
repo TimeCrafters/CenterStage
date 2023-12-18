@@ -60,6 +60,10 @@ public class CompetitionTeleOpState extends CyberarmState {
 
     // ---------------------------------------------------------------------------------------------------------------Arm control Variables:
     public String armPos = "passive";
+    // chin up servo
+    public static double chinUpServoUp = 1;
+    public static double chinUpServoDown = 0.25;
+
 
 
 
@@ -197,6 +201,7 @@ public class CompetitionTeleOpState extends CyberarmState {
 
     public void ArmPosControl(){
 
+
         if (engine.gamepad2.a){
             armPos = "collect";
             depositMode = false;
@@ -210,15 +215,23 @@ public class CompetitionTeleOpState extends CyberarmState {
         else if (engine.gamepad2.b){
             armPos = "hover";
             depositMode = true;
+        } else if (engine.gamepad2.dpad_left){
+            armPos = "lift up";
+            depositMode = true;
+        } else if (engine.gamepad2.dpad_right){
+            armPos = "lift down";
+            depositMode = false;
         }
 
         if (armPos == "collect"){
             if (robot.lift.getCurrentPosition() >= 1){
+                robot.chinUpServo.setPosition(chinUpServoDown);
                 robot.lift.setPower(-0.6);
             } else {
                 robot.lift.setPower(0);
                 robot.shoulder.setPosition(robot.shoulderCollect);
                 robot.elbow.setPosition(robot.elbowCollect);
+                robot.chinUpServo.setPosition(chinUpServoDown);
                 target = 10;
 
             }
@@ -226,8 +239,10 @@ public class CompetitionTeleOpState extends CyberarmState {
         if (armPos == "passive"){
             if (robot.lift.getCurrentPosition() >= 1){
                 robot.lift.setPower(-0.6);
+                robot.chinUpServo.setPosition(chinUpServoDown);
             } else {
                 robot.lift.setPower(0);
+                robot.chinUpServo.setPosition(chinUpServoDown);
                 robot.shoulder.setPosition(robot.shoulderPassive);
                 robot.elbow.setPosition(robot.elbowPassive);
                 target = 850;
@@ -237,23 +252,43 @@ public class CompetitionTeleOpState extends CyberarmState {
                 robot.shoulder.setPosition(robot.shoulderDeposit);
                 robot.elbow.setPosition(robot.elbowDeposit);
                 target = 370;
+                robot.chinUpServo.setPosition(chinUpServoDown);
+
 
         }
-        if (armPos == "hover"){
-
+        if (armPos == "hover") {
             robot.shoulder.setPosition(robot.shoulderCollect);
             robot.elbow.setPosition(robot.elbowCollect);
             target = 120;
 
-
         }
+            if (armPos == "lift up") {
+                robot.shoulder.setPosition(robot.shoulderDeposit);
+                robot.elbow.setPosition(robot.elbowDeposit);
+                target = 120;
+                robot.chinUpServo.setPosition(chinUpServoUp);
+            }
+
+        if (armPos == "lift down"){
+            if (robot.lift.getCurrentPosition() >= 1){
+                robot.lift.setPower(-0.6);
+                robot.chinUpServo.setPosition(chinUpServoDown);
+            } else {
+                robot.lift.setPower(0);
+                robot.chinUpServo.setPosition(chinUpServoDown);
+                robot.shoulder.setPosition(robot.shoulderPassive);
+                robot.elbow.setPosition(robot.elbowPassive);
+                target = 850;
+            }
+        }
+
         }
 
     @Override
     public void init() {
-        robot.clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.clawArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        pidController = new PIDController(p, i, d);
+            super.init();
+            pidController = new PIDController(p, i, d);
+
 
     }
 

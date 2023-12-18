@@ -11,11 +11,12 @@ import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-@Autonomous(name = "Competition Red Close")
+@Autonomous(name = "Competition Blue Close")
 
-public class CompetitionRedClose extends CyberarmEngine {
+public class CompetitionBlueClose extends CyberarmEngine {
 
     CompetitionRobotV1 robot;
+
 
     @Override
     public void init() {
@@ -27,17 +28,16 @@ public class CompetitionRedClose extends CyberarmEngine {
 
     @Override
     public void setup() {
-        this.robot = new CompetitionRobotV1("Competition Red Close");
+        this.robot = new CompetitionRobotV1("Competition Blue Close");
         this.robot.setup();
-        this.robot.setup();
-        addState(new ClawFingerState(robot,"Competition Red Close", "01-0-00"));
+        addState(new ClawFingerState(robot,"Competition Blue Close", "01-0-00"));
         // drive to and face towards the right scenario
-        addState(new DriveToCoordinatesState(robot,"Competition Red Close", "02-0-01"));
+        addState(new DriveToCoordinatesState(robot,"Competition Blue Close", "02-0-01"));
         // check if its in the correct Position;
-        addState(new ClawArmState(robot,"Competition Red Close", "03-0-02"));
-        addState(new ClawFingerState(robot,"Competition Red Close", "04-0-04"));
-        addState(new DriveToCoordinatesState(robot,"Competition Red Close", "05-0-01"));
-        addState(new ClawArmState(robot,"Competition Red Close", "06-0-06"));
+        addState(new ClawArmState(robot,"Competition Blue Close", "03-0-02"));
+        addState(new ClawFingerState(robot,"Competition Blue Close", "04-0-04"));
+        addState(new DriveToCoordinatesState(robot,"Competition Blue Close", "05-0-01"));
+        addState(new ClawArmState(robot,"Competition Blue Close", "06-0-06"));
 
 
 

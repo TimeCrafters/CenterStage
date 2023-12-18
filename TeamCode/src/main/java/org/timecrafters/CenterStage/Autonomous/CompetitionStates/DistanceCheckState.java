@@ -12,11 +12,12 @@ import dev.cyberarm.engine.V2.CyberarmState;
 public class DistanceCheckState extends CyberarmState {
 
     CompetitionRobotV1 robot;
-    public String armPos;
     public long lastCheckedTIme = System.currentTimeMillis();
+    public String objectPosCheck;
 
     public DistanceCheckState(CompetitionRobotV1 robot, String groupName, String actionName) {
         this.robot = robot;
+        this.objectPosCheck = robot.configuration.variable(groupName, actionName, "objectPosCheck").value();
     }
 
     @Override
@@ -25,32 +26,26 @@ public class DistanceCheckState extends CyberarmState {
         robot.DriveToCoordinates();
         robot.OdometryLocalizer();
 
-        if (robot.customObject.getDistance(DistanceUnit.MM) < 1000 && robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > -47 && robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < -43){
-            robot.objectPos = "Right";
-        } else if (robot.customObject.getDistance(DistanceUnit.MM) > 1000){
-            robot.hTarget = 0;
-            }
-        if (robot.objectPos != "right")
-        if (Math.abs(robot.backLeftPower) < 0.15 &&
+        if (robot.armPos.equals("right")  || robot.armPos.equals("middle") || robot.armPos.equals("left")){
+            setHasFinished(true);
+        } else {
+            if (Math.abs(robot.backLeftPower) < 0.15 &&
                 Math.abs(robot.backRightPower) < 0.15 &&
                 Math.abs(robot.frontLeftPower) < 0.15 &&
-                Math.abs(robot.frontRightPower) < 0.15 && System.currentTimeMillis() - lastCheckedTIme > 2000){
-            if (robot.customObject.getDistance(DistanceUnit.MM) < 1000 && System.currentTimeMillis() - lastCheckedTIme > 2000){
-                robot.objectPos = "middle";
-            } else {
-                robot.hTarget = 45;
-                robot.objectPos = "left";
+                Math.abs(robot.frontRightPower) < 0.15) {
+                if (robot.customObject.getDistance(DistanceUnit.MM) < 1000 && System.currentTimeMillis() - lastCheckedTIme > 1000) {
+                    robot.objectPos = objectPosCheck;
+                    setHasFinished(true);
+                } else if (robot.customObject.getDistance(DistanceUnit.MM) > 1000 && System.currentTimeMillis() - lastCheckedTIme > 1000) {
+                    if (robot.loopCheck == 1 && robot.objectPos != objectPosCheck){
+                        robot.objectPos = "left";
+                        setHasFinished(true);
+                    }
+                    robot.loopCheck += 1;
+                    setHasFinished(true);
+                }
             }
         }
-
-        if (robot.objectPos.equals("left") || robot.objectPos.equals("right") || robot.objectPos.equals("middle")){
-            setHasFinished(true);
-        }
-
-
-
-
-
     }
 
 

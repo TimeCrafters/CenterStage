@@ -8,14 +8,30 @@ import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
 import dev.cyberarm.engine.V2.CyberarmState;
 
 @Config
-public class ClawArmState extends CyberarmState {
+public class ClawFingerState extends CyberarmState {
 
     CompetitionRobotV1 robot;
-    public String armPos;
+    public boolean leftOpen;
+    public boolean rightOpen;
+    public long waitTime;
+    public boolean armDrive;
+    public long initTime;
 
-    public ClawArmState(CompetitionRobotV1 robot, String groupName, String actionName) {
+
+
+    public ClawFingerState(CompetitionRobotV1 robot, String groupName, String actionName) {
         this.robot = robot;
-        this.armPos = robot.configuration.variable(groupName, actionName, "armPos").value();
+        this.leftOpen = robot.configuration.variable(groupName, actionName, "leftOpen").value();
+        this.rightOpen = robot.configuration.variable(groupName, actionName, "rightOpen").value();
+        this.waitTime = robot.configuration.variable(groupName, actionName, "waitTime").value();
+        this.armDrive = robot.configuration.variable(groupName, actionName, "armDrive").value();
+
+
+    }
+
+    @Override
+    public void start() {
+        initTime = System.currentTimeMillis();
     }
 
     @Override
@@ -23,47 +39,26 @@ public class ClawArmState extends CyberarmState {
         // odometry driving ALWAYS
         robot.DriveToCoordinates();
         robot.OdometryLocalizer();
-
-        // driving arm to pos
-        if (armPos.equals("collect")){
-            if (robot.lift.getCurrentPosition() >= 1){
-                robot.lift.setPower(-0.6);
-            } else {
-                robot.lift.setPower(0);
-                robot.shoulder.setPosition(robot.shoulderCollect);
-                robot.elbow.setPosition(robot.elbowCollect);
-                robot.target = 10;
-
-            }
+        if (armDrive) {
+            robot.clawArmControl();
         }
-        if (armPos.equals("passive")){
-            if (robot.lift.getCurrentPosition() >= 1){
-                robot.lift.setPower(-0.6);
-            } else {
-                robot.lift.setPower(0);
-                robot.shoulder.setPosition(robot.shoulderPassive);
-                robot.elbow.setPosition(robot.elbowPassive);
-                robot.target = 850;
-            }
-        }
-        if (armPos.equals("deposit")){
-            robot.shoulder.setPosition(robot.shoulderDeposit);
-            robot.elbow.setPosition(robot.elbowDeposit);
-            robot.target = 370;
 
+        if (!leftOpen){
+            robot.leftClaw.setPosition(0.25);
+        } else {
+            robot.leftClaw.setPosition(0.6);
         }
-        if (armPos.equals("hover")) {
-            robot.shoulder.setPosition(robot.shoulderCollect);
-            robot.elbow.setPosition(robot.elbowCollect);
-            robot.target = 150;
 
+        if (!rightOpen){
+            robot.rightClaw.setPosition(0.6);
+        } else {
+            robot.rightClaw.setPosition(0.25);
         }
-        robot.armPos = armPos;
-        robot.clawArmControl();
 
-        if (robot.power < 0.1) {
+        if (runTime() > waitTime){
             setHasFinished(true);
         }
+
 
 
 

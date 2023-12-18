@@ -12,7 +12,12 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvWebcam;
 import org.timecrafters.Library.Robot;
 import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
@@ -28,13 +33,17 @@ public class CompetitionRobotV1 extends Robot {
     public String objectPos;
 
     // ------------------------------------------------------------------------------------------------------------------ HardwareMap setup:
+    public double power;
 
+    public OpenCvWebcam webcam1 = null;
+    public WebcamName webCamName;
     public DcMotor frontLeft, frontRight, backLeft, backRight, lift, clawArm, chinUp;
     public DcMotor odometerR, odometerL, odometerA;
 
     public IMU imu;
-    public Servo shoulder, elbow, leftClaw, rightClaw;
+    public Servo shoulder, elbow, leftClaw, rightClaw, chinUpServo;
     public DistanceSensor customObject;
+    public int loopCheck = 0;
 
     // ----------------------------------------------------------------------------------------------------------------- odometry variables:
     public static double Hp = 0.8, Hi = 0, Hd = 0;
@@ -47,9 +56,9 @@ public class CompetitionRobotV1 extends Robot {
     public double positionX = 1000;
     public double positionY = 1000;
     public double positionH = 0;
-    public double xTarget;
-    public double yTarget;
-    public double hTarget;
+    public double xTarget = 1000;
+    public double yTarget = 1000;
+    public double hTarget = 0;
 
     public int currentRightPosition = 0;
     public int currentLeftPosition = 0;
@@ -79,15 +88,20 @@ public class CompetitionRobotV1 extends Robot {
     public double frontRightPower;
     public double backRightPower;
 
+    public double yMaxPower = 1;
+    public double xMaxPower = 1;
+    public double pidX;
+    public double pidY;
+
     //-------------------------------------------------------------------------------------------------------------- arm sequence variables:
     PIDController pidController;
     public String armPos;
     public int target;
     public static double p = 0.0015, i = 0,  d = 0, f = 0;
-    public static double shoulderCollect = 0.25;
+    public static double shoulderCollect = 0.27;
     public static double shoulderDeposit = 0.32;
     public static double shoulderPassive = 0.8;
-    public static double elbowCollect = 0;
+    public static double elbowCollect = 0.02;
     public static double elbowDeposit = 0;
     public static double elbowPassive = 0;
 
@@ -114,6 +128,8 @@ public class CompetitionRobotV1 extends Robot {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
         this.engine = CyberarmEngine.instance;
 
+        webCamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+
         imu = engine.hardwareMap.get(IMU.class, "imu");
 
         //-------------------------------------------------------------------------------------------------------------------------- MOTORS:
@@ -137,7 +153,6 @@ public class CompetitionRobotV1 extends Robot {
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -153,6 +168,7 @@ public class CompetitionRobotV1 extends Robot {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         chinUp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        clawArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //IMU
         IMU.Parameters parameters = new IMU.Parameters(
@@ -161,8 +177,6 @@ public class CompetitionRobotV1 extends Robot {
                         RevHubOrientationOnRobot.UsbFacingDirection.UP));
 
         imu.initialize(parameters);
-
-        imu.resetYaw();
 
         configuration = new TimeCraftersConfiguration("Blue Crab");
 
@@ -177,6 +191,8 @@ public class CompetitionRobotV1 extends Robot {
         elbow = hardwareMap.servo.get("elbow");
         leftClaw = hardwareMap.servo.get("leftClaw");
         rightClaw = hardwareMap.servo.get("rightClaw");
+        chinUpServo = hardwareMap.servo.get("chinUpServo");
+
 
         elbow.setDirection(Servo.Direction.REVERSE);
 
@@ -225,6 +241,14 @@ public class CompetitionRobotV1 extends Robot {
         }
         return radians;
     }
+
+    /**
+     * A Controller taking error of the heading position and converting to a power in the direction of a target.
+     * @param reference reference is the target position
+     * @param current  current is the measured sensor value.
+     * @return A power to the target the position
+     *
+     */
     public double HeadingPIDControl(double reference, double current){
         double error = angleWrap(current - reference);
         headingIntegralSum += error * headingTimer.seconds();
@@ -265,8 +289,20 @@ public class CompetitionRobotV1 extends Robot {
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double rx = HeadingPIDControl(Math.toRadians(hTarget), heading);
 
-        double pidX = YPIDControl(yTarget, positionY);
-        double pidY = XPIDControl(xTarget, positionX);
+        if (xMaxPower > XPIDControl(xTarget, positionX)){
+            pidX = xMaxPower;
+        } else {
+            pidX = YPIDControl(yTarget, positionY);
+        }
+
+        if (yMaxPower > YPIDControl(yTarget, positionY)){
+            pidY = yMaxPower;
+        } else {
+            pidY = XPIDControl(xTarget, positionX);
+        }
+
+        pidY = XPIDControl(xTarget, positionX);
+
 
         double denominator = Math.max(Math.abs(pidX) + Math.abs(pidY) + Math.abs(rx), 1);
 
@@ -294,7 +330,7 @@ public class CompetitionRobotV1 extends Robot {
         int armPos = clawArm.getCurrentPosition();
         double pid = pidController.calculate(armPos, target);
 
-        double power = pid;
+        power = pid;
 
         clawArm.setPower(power);
 
