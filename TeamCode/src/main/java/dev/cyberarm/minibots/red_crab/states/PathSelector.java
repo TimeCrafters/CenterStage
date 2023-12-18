@@ -1,6 +1,9 @@
 package dev.cyberarm.minibots.red_crab.states;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +28,12 @@ public class PathSelector extends CyberarmState {
 
     @Override
     public void init() {
-        robot.tfod.setClippingMargins(0, 0, 0, 0);
-        robot.tfod.setMinResultConfidence((float) minConfidence);
+        robot.tfPixel = TfodProcessor.easyCreateWithDefaults();
+        robot.visionPortal = VisionPortal.easyCreateWithDefaults(
+                engine.hardwareMap.get(WebcamName.class, robot.webcamName), robot.tfPixel);
+
+        robot.tfPixel.setClippingMargins(0, 0, 0, 0);
+        robot.tfPixel.setMinResultConfidence((float) minConfidence);
 
         engine.blackboardSet("autonomousPath", 0);
     }
@@ -39,7 +46,7 @@ public class PathSelector extends CyberarmState {
             return;
         }
 
-        recognitions = robot.tfod.getRecognitions();
+        recognitions = robot.tfPixel.getRecognitions();
         for (Recognition recognition : recognitions) {
             double x = (recognition.getLeft() + recognition.getRight()) / 2;
             double y = (recognition.getTop()  + recognition.getBottom()) / 2;
@@ -58,7 +65,7 @@ public class PathSelector extends CyberarmState {
 
     private void stopVision() {
         robot.visionPortal.close();
-        robot.tfod.shutdown();
+        robot.tfPixel.shutdown();
     }
 
     @Override

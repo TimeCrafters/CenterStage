@@ -27,11 +27,13 @@ public class SpikeMarkDetectorVisionProcessor implements VisionProcessor {
 
     private Selection selection = Selection.NONE;
 
-    /// NOTE: Rect defined with a 480x640 (WxH) frame size assumed
-    private Rect rect = new Rect(1, 1, 479, 639);
+    /// NOTE: Rect defined with a 640x480 (WxH) frame size assumed
+    private final Rect rect = new Rect(1, 1, 639, 479);
     private Mat subMat = new Mat();
     private Mat rotatedMat = new Mat();
     private Mat hsvMat = new Mat();
+
+    private double saturation;
 
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
@@ -39,10 +41,10 @@ public class SpikeMarkDetectorVisionProcessor implements VisionProcessor {
 
     @Override
     public Object processFrame(Mat frame, long captureTimeNanos) {
-        Core.rotate(frame, rotatedMat,Core.ROTATE_90_CLOCKWISE);
+        Core.rotate(frame, rotatedMat,Core.ROTATE_180);
         Imgproc.cvtColor(rotatedMat, hsvMat, Imgproc.COLOR_RGB2HSV);
 
-        double saturation = averageSaturation(hsvMat, rect);
+        saturation = averageSaturation(hsvMat, rect);
 
         // TODO: Tune this value or do more processing
         if (saturation > 0.5) {
@@ -98,6 +100,10 @@ public class SpikeMarkDetectorVisionProcessor implements VisionProcessor {
 
     public Selection getSelection() {
         return selection;
+    }
+
+    public double getSaturation() {
+        return saturation;
     }
 
     private android.graphics.Rect makeDrawableRect(Rect rect, float scaleBmpPxToCanvasPx) {

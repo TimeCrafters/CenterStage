@@ -11,17 +11,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 import org.timecrafters.TimeCraftersConfigurationTool.library.backend.config.Action;
 import org.timecrafters.TimeCraftersConfigurationTool.library.backend.config.Variable;
-
-import java.sql.Time;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 import dev.cyberarm.engine.V2.Utilities;
@@ -80,6 +76,7 @@ public class RedCrabMinibot {
 
     public TimeCraftersConfiguration config;
     private final PIDController clawArmPIDController;
+    public final String webcamName = "Webcam 1";
 
     public enum Path {
         LEFT,
@@ -87,23 +84,22 @@ public class RedCrabMinibot {
         RIGHT
     }
 
-    public final TfodProcessor tfod;
-    public final VisionPortal visionPortal;
+    /* --- VisionProcessors --- */
+    /// Tensorflow Lite Pixel detector.
+    /// NOTE: detects april tags as pixels, use with caution!
+    public TfodProcessor tfPixel = null;
+    /// TeamProp detector: using OpenCV for subframe saturation threshold detection.
+    public TeamPropVisionProcessor teamProp = null;
+    /// Spike Mark detector: using OpenCV for full frame saturation threshold detection.
+    public SpikeMarkDetectorVisionProcessor spikeMark = null;
+    /// Doohickey
+    public VisionPortal visionPortal = null;
 
     public RedCrabMinibot(boolean autonomous) {
         engine = CyberarmEngine.instance;
 
         config = new TimeCraftersConfiguration("cyberarm_RedCrab");
         loadConstants();
-
-        if (autonomous) {
-            tfod = TfodProcessor.easyCreateWithDefaults();
-            visionPortal = VisionPortal.easyCreateWithDefaults(
-                    engine.hardwareMap.get(WebcamName.class, "Webcam 1"), tfod);
-        } else {
-            tfod = null;
-            visionPortal = null;
-        }
 
         /// IMU ///
         /// ------------------------------------------------------------------------------------ ///

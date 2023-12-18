@@ -31,14 +31,17 @@ public class TeamPropVisionProcessor implements VisionProcessor {
 
     private Location location = Location.NONE;
 
-    /// NOTE: Rects are defined with a 480x640 (WxH) frame size assumed
+    /// NOTE: Rects are defined with a 640x480 (WxH) frame size assumed
     // 640 / 3 = ~212
-    private Rect rectLeft = new Rect(1, 1, 160, 639);
-    private Rect rectCenter = new Rect(rectLeft.x + rectLeft.width, 1, 160, 639);
-    private Rect rectRight = new Rect(rectCenter.x + rectCenter.width, 1, 160, 639);
+    private final Rect rectLeft = new Rect(1, 1, 639, 160);
+    private final Rect rectCenter = new Rect(rectLeft.x + rectLeft.width, 1, 639, 160);
+    private final Rect rectRight = new Rect(rectCenter.x + rectCenter.width, 1, 639, 160);
     private Mat subMat = new Mat();
     private Mat rotatedMat = new Mat();
     private Mat hsvMat = new Mat();
+    private double saturationLeft;
+    private double saturationCenter;
+    private double saturationRight;
 
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
@@ -46,12 +49,12 @@ public class TeamPropVisionProcessor implements VisionProcessor {
 
     @Override
     public Object processFrame(Mat frame, long captureTimeNanos) {
-        Core.rotate(frame, rotatedMat,Core.ROTATE_90_CLOCKWISE);
+        Core.rotate(frame, rotatedMat,Core.ROTATE_180);
         Imgproc.cvtColor(rotatedMat, hsvMat, Imgproc.COLOR_RGB2HSV);
 
-        double saturationLeft = averageSaturation(hsvMat, rectLeft);
-        double saturationCenter = averageSaturation(hsvMat, rectLeft);
-        double saturationRight = averageSaturation(hsvMat, rectLeft);
+        saturationLeft = averageSaturation(hsvMat, rectLeft);
+        saturationCenter = averageSaturation(hsvMat, rectLeft);
+        saturationRight = averageSaturation(hsvMat, rectLeft);
 
         if (saturationLeft > saturationCenter && saturationLeft > saturationRight) {
             location = Location.LEFT;
@@ -88,8 +91,7 @@ public class TeamPropVisionProcessor implements VisionProcessor {
 
         float textYOffset = selectedPaint.getTextSize() + selectedPaint.getStrokeWidth();
 
-        Location loc = (Location) userContext;
-        switch (loc) {
+        switch ((Location) userContext) {
             case LEFT:
                 canvas.drawRect(drawRectLeft, selectedPaint);
                 canvas.drawRect(drawRectCenter, notSelectedPaint);
@@ -129,6 +131,18 @@ public class TeamPropVisionProcessor implements VisionProcessor {
 
     public Location getLocation() {
         return location;
+    }
+
+    public double getSaturationLeft() {
+        return saturationLeft;
+    }
+
+    public double getSaturationCenter() {
+        return saturationCenter;
+    }
+
+    public double getSaturationRight() {
+        return saturationRight;
     }
 
     private android.graphics.Rect makeDrawableRect(Rect rect, float scaleBmpPxToCanvasPx) {
