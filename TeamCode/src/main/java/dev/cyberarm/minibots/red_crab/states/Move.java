@@ -93,13 +93,13 @@ public class Move extends CyberarmState {
         engine.telemetry.addData("lerp MM UP", lerpMM_UP);
         engine.telemetry.addData("lerp MM DOWN", lerpMM_DOWN);
         engine.telemetry.addData("Distance MM", distanceMM);
-        engine.telemetry.addData("Distance Travelled MM", (strafe ? robot.left.getDistance() : robot.frontLeft.getDistance()));
+        engine.telemetry.addData("Distance Travelled MM", robot.frontLeft.getDistance());
         engine.telemetry.addData("Timeout MS", timeoutMS);
         progressBar(20, runTime() / timeoutMS);
     }
 
     private void tankMove(){
-        double travelledDistance = Math.abs(robot.left.getDistance());
+        double travelledDistance = Math.abs(robot.frontLeft.getDistance());
         double power = lerpPower(travelledDistance);
 
         double angleDiff = Utilities.angleDiff(initialHeadingDegrees, Utilities.facing(robot.imu));
@@ -107,17 +107,19 @@ public class Move extends CyberarmState {
         double leftPower = power;
         double rightPower = power;
         // use +10% of power at 7 degrees of error to correct angle
-        double correctivePower = Utilities.lerp(0.0, 1.0, angleDiff / 7.0) * (power + power * 0.1);
-        if (angleDiff < -0.5) {
+        double correctivePower = Utilities.lerp(0.0, 1.0, angleDiff / 7.0) * (power * 0.1);
+        if (angleDiff > -0.5) {
             leftPower += correctivePower;
-        } else if (angleDiff > 0.5) {
+        } else if (angleDiff < 0.5) {
             rightPower += correctivePower;
         }
 
         robot.left.set(leftPower);
         robot.right.set(rightPower);
 
-        if (robot.left.atTargetPosition() && robot.right.atTargetPosition()) {
+        if (runTime() >= timeoutMS ||
+                (robot.frontLeft.atTargetPosition() || robot.frontRight.atTargetPosition()) ||
+                Math.abs(robot.frontLeft.getDistance()) >= Math.abs(distanceMM)) {
             robot.left.set(0);
             robot.right.set(0);
 
@@ -133,11 +135,11 @@ public class Move extends CyberarmState {
 
         double frontPower = power;
         double backPower = power;
-        // use +10% of power at 7 degrees of error to correct angle
-        double correctivePower = Utilities.lerp(0.0, 1.0, angleDiff / 7.0) * (power + power * 0.1);
-        if (angleDiff < -0.5) {
+        // use +40% of power at 7 degrees of error to correct angle
+        double correctivePower = Utilities.lerp(0.0, 1.0, angleDiff / 7.0) * (power * 0.40);
+        if (angleDiff > -0.5) {
             frontPower += correctivePower;
-        } else if (angleDiff > 0.5) {
+        } else if (angleDiff < 0.5) {
             backPower += correctivePower;
         }
 
@@ -146,7 +148,8 @@ public class Move extends CyberarmState {
         robot.backLeft.set(-backPower);
         robot.backRight.set(backPower);
 
-        if (robot.frontLeft.atTargetPosition() && robot.backRight.atTargetPosition()) {
+        if (runTime() >= timeoutMS || (robot.frontLeft.atTargetPosition() || robot.backRight.atTargetPosition()) ||
+            Math.abs(robot.frontLeft.getDistance()) >= Math.abs(distanceMM) || Math.abs(robot.backRight.getDistance()) >= Math.abs(distanceMM)) {
             robot.frontLeft.set(0);
             robot.frontRight.set(0);
             robot.backLeft.set(0);

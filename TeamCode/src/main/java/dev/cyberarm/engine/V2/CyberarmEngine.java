@@ -39,6 +39,7 @@ public abstract class CyberarmEngine extends OpMode {
   public boolean showStateChildrenListInTelemetry = false;
 
   private GamepadChecker gamepadCheckerGamepad1, gamepadCheckerGamepad2;
+  private boolean useThreads = true;
 
   /**
    * Called when INIT button on Driver Station is pushed
@@ -110,6 +111,14 @@ public abstract class CyberarmEngine extends OpMode {
       telemetry.addLine("" + this.getClass().getSimpleName() + " is out of states to run!");
       telemetry.addLine();
       return;
+    }
+
+    if (!useThreads) {
+      threadlessExecState(state);
+
+      for (CyberarmState task : backgroundTasks) {
+        threadlessExecState(task);
+      }
     }
 
       // Add telemetry to show currently running state
@@ -212,15 +221,33 @@ public abstract class CyberarmEngine extends OpMode {
     final CyberarmState finalState = state;
 //    if (state.isRunning()) { return; } // Assume that we have already started running this state
 
-    new Thread(() -> {
+    if (useThreads) {
+      new Thread(() -> {
+        finalState.prestart();
+        finalState.start();
+        finalState.startTime = System.currentTimeMillis();
+        finalState.run();
+      }).start();
+    } else {
       finalState.prestart();
       finalState.start();
       finalState.startTime = System.currentTimeMillis();
-      finalState.run();
-    }).start();
+    }
 
     for (CyberarmState kid : state.children) {
       runState(kid);
+    }
+  }
+
+  /**
+   * Recursively exec states
+   * @param state State to exec
+   */
+  private void threadlessExecState(final CyberarmState state) {
+    state.exec();
+
+    for (CyberarmState kid : state.children) {
+      threadlessExecState(kid);
     }
   }
 
@@ -472,14 +499,35 @@ public abstract class CyberarmEngine extends OpMode {
           lastActionName = action.name;
           lastActionNameSplit = lastActionName.split("-");
         }
-      } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+      } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
         e.printStackTrace();
 
         RuntimeException exception = new RuntimeException(e.getMessage(), e.getCause());
         exception.setStackTrace(e.getStackTrace());
 
         throw(exception);
+      } catch (InvocationTargetException | InstantiationException e) {
+        Throwable cause = e.getCause();
+
+        if (cause != null) {
+          cause.printStackTrace();
+
+          RuntimeException exception = new RuntimeException(cause.getMessage(), cause.getCause());
+          exception.setStackTrace(cause.getStackTrace());
+        } else {
+          e.printStackTrace();
+
+          RuntimeException exception = new RuntimeException(e.getMessage(), e.getCause());
+          exception.setStackTrace(e.getStackTrace());
+        }
       }
     }
+  }
+
+  /**
+   * Disable running states in their own threads which might help with random crashes.
+   */
+  public void threadless() {
+    useThreads = false;
   }
 }

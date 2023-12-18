@@ -1,5 +1,6 @@
 package dev.cyberarm.minibots.red_crab.states;
 
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -25,14 +26,16 @@ public class ClawArmMove extends CyberarmState {
 
     @Override
     public void start() {
-        robot.clawArm.setPositionTolerance(Utilities.motorAngle(motorTicks, gearRatio, toleranceAngle));
+        robot.clawArm.setTargetPositionTolerance(Utilities.motorAngle(motorTicks, gearRatio, toleranceAngle));
         robot.clawArm.setTargetPosition(Utilities.motorAngle(motorTicks, gearRatio, targetAngle));
-        robot.clawArm.set(power);
     }
 
     @Override
     public void exec() {
-        if (robot.clawArm.atTargetPosition() || runTime() >= timeoutMS) {
+        int tolerance = robot.clawArm.getTargetPositionTolerance();
+        int position = robot.clawArm.getCurrentPosition();
+
+        if (Utilities.isBetween(position, position - tolerance, position + tolerance) || runTime() >= timeoutMS) {
             this.finished();
         }
     }
@@ -40,8 +43,11 @@ public class ClawArmMove extends CyberarmState {
     @Override
     public void telemetry() {
         engine.telemetry.addLine();
+        engine.telemetry.addData("Motor Power", robot.clawArm.getPower());
         engine.telemetry.addData("Motor Position", robot.clawArm.getCurrentPosition());
         engine.telemetry.addData("Motor Angle", Utilities.motorAngle(motorTicks, gearRatio, robot.clawArm.getCurrentPosition()));
+        engine.telemetry.addData("Motor Target Position", Utilities.motorAngle(motorTicks, gearRatio, targetAngle));
+        engine.telemetry.addData("Motor Target Angle", targetAngle);
         engine.telemetry.addData("Timeout MS", timeoutMS);
         progressBar(20, runTime() / timeoutMS);
     }

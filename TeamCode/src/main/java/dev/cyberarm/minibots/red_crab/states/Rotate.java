@@ -13,6 +13,7 @@ public class Rotate extends CyberarmState {
 
     final private double maxPower, minPower, lerpDegrees, headingDegrees, toleranceDegrees;
     final private int timeoutMS;
+    private boolean commitToRotation = false;
 
     public Rotate(RedCrabMinibot robot, String groupName, String actionName) {
         this.robot = robot;
@@ -25,7 +26,7 @@ public class Rotate extends CyberarmState {
 
         this.lerpDegrees = robot.config.variable(groupName, actionName, "lerpDEGREES").value();
         this.headingDegrees = robot.config.variable(groupName, actionName, "headingDEGREES").value();
-        this.toleranceDegrees = robot.config.variable(groupName, actionName, "toleranceDEGREEES").value();
+        this.toleranceDegrees = robot.config.variable(groupName, actionName, "toleranceDEGREES").value();
 
         this.timeoutMS  = robot.config.variable(groupName, actionName, "timeoutMS").value();
     }
@@ -45,13 +46,17 @@ public class Rotate extends CyberarmState {
 
         double power = Utilities.lerp(minPower, maxPower, Range.clip(Math.abs(angleDiff) / lerpDegrees, 0.0, 1.0));
 
-        if (angleDiff > 0) {
-            robot.left.set(-power);
-            robot.right.set(power);
-        } else {
-            robot.left.set(power);
-            robot.right.set(-power);
+        if (!commitToRotation) {
+            if (angleDiff < 0) {
+                robot.left.set(-power);
+                robot.right.set(power);
+            } else {
+                robot.left.set(power);
+                robot.right.set(-power);
+            }
         }
+
+        commitToRotation = Math.abs(angleDiff) > 170;
     }
 
     @Override
