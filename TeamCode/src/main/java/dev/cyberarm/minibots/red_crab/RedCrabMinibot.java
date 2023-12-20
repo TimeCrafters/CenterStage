@@ -1,10 +1,10 @@
 package dev.cyberarm.minibots.red_crab;
 
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -15,7 +15,9 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 import org.timecrafters.TimeCraftersConfigurationTool.library.backend.config.Action;
@@ -34,10 +36,16 @@ public class RedCrabMinibot {
 
     /// TUNING CONSTANTS ///
     public static double DRIVETRAIN_MAX_SPEED = 0.5;
+    public static double DRIVETRAIN_GEAR_RATIO = 13.0321;
+    public static int DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION = 28;
+    public static double DRIVETRAIN_WHEEL_DIAMETER_MM = 90.0;
 
     public static double CLAW_ARM_MAX_SPEED = 0.5;
-    public static double CLAW_ARM_VELOCITY_DEGREES = 10;
-    public static double CLAW_ARM_kP = 0.1;
+    public static double CLAW_ARM_MAX_VELOCITY_DEGREES = 10;
+    public static double CLAW_ARM_kP = 0.0;
+    public static double CLAW_ARM_kI = 0.0;
+    public static double CLAW_ARM_kD = 0.0;
+    public static double CLAW_ARM_kF = 0.0;
     public static int CLAW_ARM_POSITION_TOLERANCE = 1;
     public static double CLAW_ARM_STOW_ANGLE = 45.0; // 45.0
     public static double CLAW_ARM_DEPOSIT_ANGLE = 130.0; // 110.0
@@ -95,6 +103,8 @@ public class RedCrabMinibot {
     public TeamPropVisionProcessor teamProp = null;
     /// Spike Mark detector: using OpenCV for full frame saturation threshold detection.
     public SpikeMarkDetectorVisionProcessor spikeMark = null;
+    /// April Tag detector: Untested
+    public AprilTagProcessor aprilTag = null;
     /// Doohickey
     public VisionPortal visionPortal = null;
 
@@ -148,12 +158,12 @@ public class RedCrabMinibot {
         right = new MotorGroup(frontRight, backRight);
 
         /// --- MOTOR DISTANCE PER TICK
-        double gearRatio = config.variable("Robot", "Drivetrain_Tuning", "gear_ratio").value();
-        double motorTicks = config.variable("Robot", "Drivetrain_Tuning", "motor_ticks").value();
-        double wheelDiameterMM = config.variable("Robot", "Drivetrain_Tuning", "wheel_diameter_mm").value();
-
-        double wheelCircumference = Math.PI * wheelDiameterMM;
-        double distancePerTick = (motorTicks * gearRatio) / wheelCircumference; // raw motor encoder * gear ratio
+        double distancePerTick = Utilities.ticksToUnit(
+                DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                DRIVETRAIN_GEAR_RATIO,
+                DRIVETRAIN_WHEEL_DIAMETER_MM,
+                DistanceUnit.MM,
+                1);
 
         frontLeft.setDistancePerPulse(distancePerTick);
         frontRight.setDistancePerPulse(distancePerTick);
@@ -188,7 +198,7 @@ public class RedCrabMinibot {
         /// --- --- NOTE: This won't hold back much, if anything, but its a small help, maybe? 😃
         clawArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         /// --- --- Run Mode
-        clawArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        clawArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         clawArm.setTargetPositionTolerance(CLAW_ARM_POSITION_TOLERANCE);
         clawArm.setTargetPosition(0);
 
@@ -204,14 +214,17 @@ public class RedCrabMinibot {
         rightClaw.setPosition((CLAW_RIGHT_CLOSED_POSITION));
 
         /// DRONE LATCH ///
-        droneLatch = engine.hardwareMap.servo.get("droneLatch");
+        droneLatch = engine.hardwareMap.servo.get("droneLatch"); //  | Ctrl|Ex Hub, Port: ??
         droneLatch.setDirection(Servo.Direction.FORWARD);
         droneLatch.setPosition(DRONE_LATCH_INITIAL_POSITION);
 
         /// HOOK ARM ///
-        hookArm = engine.hardwareMap.servo.get("hookArm");
+        hookArm = engine.hardwareMap.servo.get("hookArm"); //  | Ctrl|Ex Hub, Port: ??
         hookArm.setDirection(Servo.Direction.FORWARD);
 //        hookArm.setPosition(HOOK_ARM_STOW_POSITION); // LEAVE OFF:
+
+        // Bulk read from hubs
+        Utilities.hubsBulkReadMode(engine.hardwareMap, LynxModule.BulkCachingMode.MANUAL);
     }
 
     public void reloadConfig() {
@@ -223,10 +236,13 @@ public class RedCrabMinibot {
     private void loadConstants() {
         /// Drivetrain
         RedCrabMinibot.DRIVETRAIN_MAX_SPEED = config.variable("Robot", "Drivetrain_Tuning", "max_speed").value();
+        RedCrabMinibot.DRIVETRAIN_GEAR_RATIO = config.variable("Robot", "Drivetrain_Tuning", "gear_ratio").value();
+        RedCrabMinibot.DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION = config.variable("Robot", "Drivetrain_Tuning", "motor_ticks").value();
+        RedCrabMinibot.DRIVETRAIN_WHEEL_DIAMETER_MM = config.variable("Robot", "Drivetrain_Tuning", "wheel_diameter_mm").value();
 
         /// CLAW ARM
         RedCrabMinibot.CLAW_ARM_MAX_SPEED = config.variable("Robot", "ClawArm_Tuning", "max_speed").value();
-        RedCrabMinibot.CLAW_ARM_VELOCITY_DEGREES = config.variable("Robot", "ClawArm_Tuning", "velocityDEGREES").value();
+        RedCrabMinibot.CLAW_ARM_MAX_VELOCITY_DEGREES = config.variable("Robot", "ClawArm_Tuning", "max_velocityDEGREES").value();
         RedCrabMinibot.CLAW_ARM_POSITION_TOLERANCE = config.variable("Robot", "ClawArm_Tuning", "tolerance").value();
         RedCrabMinibot.CLAW_ARM_STOW_ANGLE = config.variable("Robot", "ClawArm_Tuning", "stow_angle").value();
         RedCrabMinibot.CLAW_ARM_DEPOSIT_ANGLE = config.variable("Robot", "ClawArm_Tuning", "collect_float_angle").value();
@@ -303,7 +319,17 @@ public class RedCrabMinibot {
                 clawArm.getCurrent(CurrentUnit.MILLIAMPS),
                 clawArm.getCurrentPosition(),
                 clawArm.getVelocity());
-        engine.telemetry.addData("PIDF", "P: %.8f, I: %.8f, D: %.8f, F: %.8f", clawArmPIDFController.getP(), clawArmPIDFController.getI(), clawArmPIDFController.getD(), clawArmPIDFController.getF());
+        engine.telemetry.addData(
+                "   PIDF", "P: %.4f, I: %.4f, D: %.4f, F: %.4f",
+                clawArmPIDFController.getP(),
+                clawArmPIDFController.getI(),
+                clawArmPIDFController.getD(),
+                clawArmPIDFController.getF());
+        engine.telemetry.addData(
+                "   PIDF+", "PosError: %.4f, velError: %.4f, Period: %.4f",
+                clawArmPIDFController.getPositionError(),
+                clawArmPIDFController.getVelocityError(),
+                clawArmPIDFController.getPeriod());
 
         engine.telemetry.addLine();
         engine.telemetry.addLine("Servos");
@@ -324,34 +350,34 @@ public class RedCrabMinibot {
     public void controlClawArm() {
         Action action = config.action("Robot", "ClawArm_Tuning");
 
-        double p = 0.0, i = 0.0, d = 0.0, f = 0.0;
-        double ticksInDegree = Utilities.motorAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, 1);
+        double ticksInDegree = Utilities.motorAngleToTicks(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, 1);
 
         for (Variable v : action.getVariables()) {
             switch (v.name.trim()) {
-                case "kP":
-                    p = v.value();
+                case "kP": // Proportional
+                    CLAW_ARM_kP = v.value();
                     break;
-                case "kI":
-                    i = v.value();
+                case "kI": // Integral
+                    CLAW_ARM_kI = v.value();
                     break;
-                case "kD":
-                    d = v.value();
+                case "kD": // Derivative (Dampener)
+                    CLAW_ARM_kD = v.value();
                     break;
-                case "kF": // feedback
-                    f = v.value();
+                case "kF": // Feedforward
+                    CLAW_ARM_kF = v.value();
                     break;
             }
         }
 
-        clawArmPIDFController.setPIDF(p, i, d, f);
         int armPos = clawArm.getCurrentPosition();
-        double pid = clawArmPIDFController.calculate(armPos, clawArm.getTargetPosition());
+        clawArmPIDFController.setTolerance(CLAW_ARM_POSITION_TOLERANCE);
+        clawArmPIDFController.setPIDF(CLAW_ARM_kP, CLAW_ARM_kI, CLAW_ARM_kD, CLAW_ARM_kF);
+        double pidf = clawArmPIDFController.calculate(armPos, clawArm.getTargetPosition());
 //        double ff = Math.cos(Math.toRadians(clawArm.getTargetPosition() / ticksInDegree)) * f;
 
-        double power = Range.clip(pid, -CLAW_ARM_MAX_SPEED, CLAW_ARM_MAX_SPEED);
+        // Limit pidf's value to max power range
+        double power = Range.clip(pidf, -CLAW_ARM_MAX_SPEED, CLAW_ARM_MAX_SPEED);
 
-        clawArm.setVelocityPIDFCoefficients(p, i, d, f);
-        clawArm.setVelocity(CLAW_ARM_VELOCITY_DEGREES, AngleUnit.DEGREES);
+        clawArm.setPower(power);
     }
 }

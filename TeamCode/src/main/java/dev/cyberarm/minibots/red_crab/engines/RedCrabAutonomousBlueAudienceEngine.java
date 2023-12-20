@@ -9,7 +9,7 @@ import dev.cyberarm.minibots.red_crab.RedCrabMinibot;
 import dev.cyberarm.minibots.red_crab.states.ClawArmTask;
 
 @Autonomous(name = "Cyberarm Red Crab BLUE AUDIENCE", group = "MINIBOT", preselectTeleOp = "Cyberarm Red Crab TeleOp")
-public class RedCrabAutonomousBlueAudienceEngine extends CyberarmEngine {
+public class RedCrabAutonomousBlueAudienceEngine extends RedCrabAutonomousEngine {
     @Override
     public void setup() {
         RedCrabMinibot robot = new RedCrabMinibot(true);
