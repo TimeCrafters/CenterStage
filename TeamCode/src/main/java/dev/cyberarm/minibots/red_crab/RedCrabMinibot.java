@@ -48,6 +48,7 @@ public class RedCrabMinibot {
     public static double CLAW_ARM_kI = 0.0;
     public static double CLAW_ARM_kD = 0.0;
     public static double CLAW_ARM_kF = 0.0;
+    public static double CLAW_ARM_kPosP = 0.0;
     public static int CLAW_ARM_POSITION_TOLERANCE = 1;
     public static double CLAW_ARM_STOW_ANGLE = 45.0; // 45.0
     public static double CLAW_ARM_DEPOSIT_ANGLE = 130.0; // 110.0
@@ -206,7 +207,7 @@ public class RedCrabMinibot {
         /// --- --- NOTE: This won't hold back much, if anything, but its a small help, maybe? 😃
         clawArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         /// --- --- Run Mode
-        clawArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        clawArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         clawArm.setTargetPositionTolerance(CLAW_ARM_POSITION_TOLERANCE);
         clawArm.setTargetPosition(0);
 
@@ -376,18 +377,26 @@ public class RedCrabMinibot {
                 case "kF": // Feedforward
                     CLAW_ARM_kF = v.value();
                     break;
+                case "KPosP": // Positional Proportional
+                    CLAW_ARM_kPosP = v.value();
+                    break;
             }
         }
 
-        int armPos = clawArm.getCurrentPosition();
-        clawArmPIDFController.setTolerance(CLAW_ARM_POSITION_TOLERANCE);
-        clawArmPIDFController.setPIDF(CLAW_ARM_kP, CLAW_ARM_kI, CLAW_ARM_kD, CLAW_ARM_kF);
-        double pidf = clawArmPIDFController.calculate(armPos, clawArm.getTargetPosition());
+//        int armPos = clawArm.getCurrentPosition();
+//        clawArmPIDFController.setTolerance(CLAW_ARM_POSITION_TOLERANCE);
+//        clawArmPIDFController.setPIDF(CLAW_ARM_kP, CLAW_ARM_kI, CLAW_ARM_kD, CLAW_ARM_kF);
+//        double pidf = clawArmPIDFController.calculate(armPos, clawArm.getTargetPosition());
 //        double ff = Math.cos(Math.toRadians(clawArm.getTargetPosition() / ticksInDegree)) * f;
 
         // Limit pidf's value to max power range
-        double power = Range.clip(pidf, -CLAW_ARM_MAX_SPEED, CLAW_ARM_MAX_SPEED);
+//        double power = Range.clip(pidf, -CLAW_ARM_MAX_SPEED, CLAW_ARM_MAX_SPEED);
 
-        clawArm.setPower(power);
+        clawArm.setVelocityPIDFCoefficients(CLAW_ARM_kP, CLAW_ARM_kI, CLAW_ARM_kD, CLAW_ARM_kF);
+        clawArm.setPositionPIDFCoefficients(CLAW_ARM_kPosP);
+
+        double velocity = Utilities.motorAngleToTicks(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, CLAW_ARM_MAX_VELOCITY_DEGREES);
+
+        clawArm.setVelocity(velocity);
     }
 }
