@@ -1,8 +1,12 @@
 package dev.cyberarm.engine.V2;
 
+import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Utilities {
     /***
@@ -11,21 +15,21 @@ public class Utilities {
      * @param imuAngleOffset optional angle offset added to IMU value
      * @return full range heading of the robot, in DEGREES.
      */
-    static public double facing(IMU imu, double imuAngleOffset) {
+    public static double facing(IMU imu, double imuAngleOffset) {
         double imuDegrees = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
         return (((imuDegrees + 360.0) % 360.0) + imuAngleOffset) % 360.0;
     }
 
-    static public double facing(IMU imu) {
+    public static double facing(IMU imu) {
         return facing(imu, 0);
     }
 
-    static public double heading(double facing) {
+    public static double heading(double facing) {
         return AngleUnit.normalizeRadians(-facing * Math.PI / 180.0);
     }
 
-    static public double turnRate(IMU imu) {
+    public static double turnRate(IMU imu) {
         return imu.getRobotAngularVelocity(AngleUnit.DEGREES).yRotationRate;
     }
 
@@ -36,11 +40,11 @@ public class Utilities {
      * @param max maximum value
      * @return true if value is between min and max. inclusive.
      */
-    static public boolean isBetween(double value, double min, double max) {
+    public static boolean isBetween(double value, double min, double max) {
         return value >= min && value <= max;
     }
 
-    static public boolean isBetween(int value, int min, int max) {
+    public static boolean isBetween(int value, int min, int max) {
         return value >= min && value <= max;
     }
 
@@ -53,7 +57,7 @@ public class Utilities {
      * @param to angle in DEGREES
      * @return Angular difference two angles in DEGREES
      */
-    static public double angleDiff(double from, double to) {
+    public static double angleDiff(double from, double to) {
         double value = (to - from + 180);
 
         double fmod = (value - 0.0) % (360.0 - 0.0);
@@ -68,19 +72,107 @@ public class Utilities {
      * @param t factor
      * @return
      */
-    static public double lerp(double min, double max, double t)
+    public static double lerp(double min, double max, double t)
     {
         return min + (max - min) * t;
     }
 
     /***
-     * Calculates motor angle in ticks
+     * Calculates motor angle (degrees) in ticks
      * @param motorTicksPerRevolution
      * @param gearRatio
      * @param angleInDegrees
      * @return Angle in motor ticks
      */
-    static public int motorAngle(int motorTicksPerRevolution, double gearRatio, double angleInDegrees) {
-        return (int) (angleInDegrees / (360.0 / (motorTicksPerRevolution * gearRatio)));
+    public static int motorAngleToTicks(int motorTicksPerRevolution, double gearRatio, double angleInDegrees) {
+        double d = (gearRatio * motorTicksPerRevolution) / 360.0;
+
+        return (int) (angleInDegrees * d);
+    }
+
+    /**
+     * Calculates motor angle (degrees) from ticks
+     * @param motorTicksPerRevolution
+     * @param gearRatio
+     * @param ticks
+     * @return Motor ticks for angle
+     */
+    public static double motorTicksToAngle(int motorTicksPerRevolution, double gearRatio, int ticks) {
+        double oneDegree = 360.0 / (gearRatio * motorTicksPerRevolution);
+
+        return oneDegree * ticks;
+    }
+
+    /**
+     * Convert a distance into motor ticks
+     * @param motorTicksPerRevolution
+     * @param gearRatio
+     * @param wheelDiameterMM wheel diameter in millimeters
+     * @param unit
+     * @param distance
+     * @return motor ticks for distance
+     */
+    public static int unitToTicks(int motorTicksPerRevolution, double gearRatio, double wheelDiameterMM, DistanceUnit unit, double distance) {
+        double fMM = (gearRatio * motorTicksPerRevolution) / (wheelDiameterMM * Math.PI * (gearRatio * motorTicksPerRevolution) / (gearRatio * motorTicksPerRevolution));
+
+        double mm = unit.toMm(unit.fromUnit(unit, distance));
+
+        double ticks = fMM * mm;
+
+        return (int)ticks;
+    }
+
+    /**
+     * Convert ticks into a distance
+     * @param motorTicksPerRevolution
+     * @param gearRatio
+     * @param wheelDiameterMM wheel diameter in millimeters
+     * @param unit
+     * @param ticks
+     * @return distance for motor ticks
+     */
+    public static double ticksToUnit(int motorTicksPerRevolution, double gearRatio, double wheelDiameterMM, DistanceUnit unit, int ticks) {
+        // Convert to millimeters, then to unit.
+        double mm = wheelDiameterMM * Math.PI * ticks / (gearRatio * motorTicksPerRevolution);
+
+        return unit.fromUnit(DistanceUnit.MM, mm);
+    }
+
+    /**
+     * Sets bulk caching mode for hubs
+     * @param hardwareMap
+     * @param mode
+     */
+    public static void hubsBulkReadMode(HardwareMap hardwareMap, LynxModule.BulkCachingMode mode) {
+        for (LynxModule hub : hardwareMap.getAll(LynxModule.class)) {
+            hub.setBulkCachingMode(mode);
+        }
+    }
+
+    /**
+     * Clears bulk cache data for hubs
+     * @param hardwareMap
+     */
+    public static void hubsClearBulkReadCache(HardwareMap hardwareMap) {
+        for (LynxModule hub : hardwareMap.getAll(LynxModule.class)) {
+            hub.clearBulkCache();
+        }
+    }
+
+    /**
+     * Get battery voltage
+     * @param hardwareMap
+     * @return battery voltage or POSITIVE_INFINITY if no voltage sensor is found or has an invalid value
+     */
+    public static double getVoltage(HardwareMap hardwareMap) {
+        for (VoltageSensor voltageSensor : hardwareMap.voltageSensor) {
+            double v = voltageSensor.getVoltage();
+
+            if (v >= 6.0) {
+                return voltageSensor.getVoltage();
+            }
+        }
+
+        return Double.POSITIVE_INFINITY;
     }
 }
