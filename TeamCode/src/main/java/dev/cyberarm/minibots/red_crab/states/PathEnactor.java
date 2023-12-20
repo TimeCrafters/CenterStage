@@ -13,7 +13,7 @@ public class PathEnactor extends CyberarmState {
     @Override
     public void start() {
         String path;
-        switch (engine.blackboardGetInt("AutonomousPath")) {
+        switch (engine.blackboardGetInt("autonomousPath")) {
             case 1:
                 path = "CENTER";
                 break;

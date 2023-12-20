@@ -47,7 +47,7 @@ public class SpikeMarkDetectorVisionProcessor implements VisionProcessor {
         saturation = averageSaturation(hsvMat, rect);
 
         // TODO: Tune this value or do more processing
-        if (saturation > 0.5) {
+        if (saturation > 75.0) {
             selection = Selection.LINE;
         } else {
             selection = Selection.NONE;
@@ -82,7 +82,7 @@ public class SpikeMarkDetectorVisionProcessor implements VisionProcessor {
             case LINE:
                 canvas.drawRect(drawRect, notSelectedPaint);
 
-                canvas.drawText("LINE!", drawRect.centerX(), drawRect.bottom - textYOffset, selectedPaint);
+                canvas.drawText("LINE!", drawRect.centerX(), textYOffset, selectedPaint);
                 break;
             case NONE:
                 canvas.drawRect(drawRect, notSelectedPaint);

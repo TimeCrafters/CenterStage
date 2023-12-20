@@ -33,9 +33,9 @@ public class TeamPropVisionProcessor implements VisionProcessor {
 
     /// NOTE: Rects are defined with a 640x480 (WxH) frame size assumed
     // 640 / 3 = ~212
-    private final Rect rectLeft = new Rect(1, 1, 639, 160);
-    private final Rect rectCenter = new Rect(rectLeft.x + rectLeft.width, 1, 639, 160);
-    private final Rect rectRight = new Rect(rectCenter.x + rectCenter.width, 1, 639, 160);
+    private final Rect rectLeft = new Rect(1, 1, 212, 479);
+    private final Rect rectCenter = new Rect(rectLeft.x + rectLeft.width, 1, 212, 479);
+    private final Rect rectRight = new Rect(rectCenter.x + rectCenter.width, 1, 212, 479);
     private Mat subMat = new Mat();
     private Mat rotatedMat = new Mat();
     private Mat hsvMat = new Mat();
@@ -53,8 +53,8 @@ public class TeamPropVisionProcessor implements VisionProcessor {
         Imgproc.cvtColor(rotatedMat, hsvMat, Imgproc.COLOR_RGB2HSV);
 
         saturationLeft = averageSaturation(hsvMat, rectLeft);
-        saturationCenter = averageSaturation(hsvMat, rectLeft);
-        saturationRight = averageSaturation(hsvMat, rectLeft);
+        saturationCenter = averageSaturation(hsvMat, rectCenter);
+        saturationRight = averageSaturation(hsvMat, rectRight);
 
         if (saturationLeft > saturationCenter && saturationLeft > saturationRight) {
             location = Location.LEFT;
@@ -79,11 +79,20 @@ public class TeamPropVisionProcessor implements VisionProcessor {
 
         Paint notSelectedPaint = new Paint();
         notSelectedPaint.setColor(Color.WHITE);
+        notSelectedPaint.setAlpha(127);
         notSelectedPaint.setStyle(Paint.Style.STROKE);
         notSelectedPaint.setStrokeWidth(scaleCanvasDensity * 4);
         selectedPaint.setTextSize(scaleCanvasDensity * 28);
         selectedPaint.setTextAlign(Paint.Align.CENTER);
         selectedPaint.setTypeface(Typeface.MONOSPACE);
+
+        Paint whitePaint = new Paint();
+        whitePaint.setColor(Color.WHITE);
+        whitePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        whitePaint.setStrokeWidth(scaleCanvasDensity * 4);
+        whitePaint.setTextSize(scaleCanvasDensity * 28);
+        whitePaint.setTextAlign(Paint.Align.CENTER);
+        whitePaint.setTypeface(Typeface.MONOSPACE);
 
         android.graphics.Rect drawRectLeft = makeDrawableRect(rectLeft, scaleBmpPxToCanvasPx);
         android.graphics.Rect drawRectCenter = makeDrawableRect(rectCenter, scaleBmpPxToCanvasPx);
@@ -97,21 +106,21 @@ public class TeamPropVisionProcessor implements VisionProcessor {
                 canvas.drawRect(drawRectCenter, notSelectedPaint);
                 canvas.drawRect(drawRectRight, notSelectedPaint);
 
-                canvas.drawText("LEFT", drawRectCenter.centerX(), drawRectCenter.bottom - textYOffset, selectedPaint);
+                canvas.drawText("LEFT", drawRectLeft.centerX(), textYOffset, selectedPaint);
                 break;
             case CENTER:
                 canvas.drawRect(drawRectLeft, notSelectedPaint);
                 canvas.drawRect(drawRectCenter, selectedPaint);
                 canvas.drawRect(drawRectRight, notSelectedPaint);
 
-                canvas.drawText("CENTER", drawRectCenter.centerX(), drawRectCenter.bottom - textYOffset, selectedPaint);
+                canvas.drawText("CENTER", drawRectCenter.centerX(), textYOffset, selectedPaint);
                 break;
             case RIGHT:
                 canvas.drawRect(drawRectLeft, notSelectedPaint);
                 canvas.drawRect(drawRectCenter, notSelectedPaint);
                 canvas.drawRect(drawRectRight, selectedPaint);
 
-                canvas.drawText("RIGHT", drawRectRight.centerX(), drawRectRight.bottom - textYOffset, selectedPaint);
+                canvas.drawText("RIGHT", drawRectRight.centerX(), textYOffset, selectedPaint);
                 break;
             case NONE:
                 canvas.drawRect(drawRectLeft, notSelectedPaint);
@@ -119,6 +128,10 @@ public class TeamPropVisionProcessor implements VisionProcessor {
                 canvas.drawRect(drawRectRight, notSelectedPaint);
                 break;
         }
+        canvas.drawText(String.format("%.4f", getSaturationLeft()), drawRectLeft.centerX(), textYOffset + whitePaint.getTextSize() + textYOffset, whitePaint);
+        canvas.drawText(String.format("%.4f", getSaturationCenter()), drawRectCenter.centerX(), textYOffset + whitePaint.getTextSize() + textYOffset, whitePaint);
+        canvas.drawText(String.format("%.4f", getSaturationRight()), drawRectRight.centerX(), textYOffset + whitePaint.getTextSize() + textYOffset, whitePaint);
+
     }
 
     private double averageSaturation(Mat input, Rect rect) {
