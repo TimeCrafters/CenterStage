@@ -9,7 +9,7 @@ import dev.cyberarm.minibots.red_crab.RedCrabMinibot;
 public class Move extends CyberarmState {
     private final RedCrabMinibot robot;
     private final String groupName, actionName;
-    private final double distanceMM, lerpMM_UP, lerpMM_DOWN, maxPower, minPower, toleranceMM;
+    private final double distanceMM, lerpMM_UP, lerpMM_DOWN, maxVelocityMM, minVelocityMM, toleranceMM;
     private boolean strafe = false;
     private final int timeoutMS;
     private double initialHeadingDegrees = 1024.0;
@@ -23,8 +23,8 @@ public class Move extends CyberarmState {
         this.lerpMM_DOWN = robot.config.variable(groupName, actionName, "lerpMM_DOWN").value();
         this.toleranceMM = robot.config.variable(groupName, actionName, "toleranceMM").value();
 
-        this.maxPower = robot.config.variable(groupName, actionName, "maxPower").value();
-        this.minPower = robot.config.variable(groupName, actionName, "minPower").value();
+        this.maxVelocityMM = robot.config.variable(groupName, actionName, "maxVelocityMM").value();
+        this.minVelocityMM = robot.config.variable(groupName, actionName, "minVelocityMM").value();
 
         this.strafe = robot.config.variable(groupName, actionName, "strafe").value();
 
@@ -100,22 +100,22 @@ public class Move extends CyberarmState {
 
     private void tankMove(){
         double travelledDistance = Math.abs(robot.frontLeft.getDistance());
-        double power = lerpPower(travelledDistance);
+        double velocity = lerpVelocity(travelledDistance);
 
         double angleDiff = Utilities.angleDiff(initialHeadingDegrees, Utilities.facing(robot.imu));
 
-        double leftPower = power;
-        double rightPower = power;
+        double leftVelocity = velocity;
+        double rightVelocity = velocity;
         // use +10% of power at 7 degrees of error to correct angle
-        double correctivePower = Utilities.lerp(0.0, 1.0, angleDiff / 7.0) * (power * 0.1);
+        double correctiveVelocity = Utilities.lerp(0.0, 1.0, angleDiff / 7.0) * (velocity * 0.1);
         if (angleDiff > -0.5) {
-            leftPower += correctivePower;
+            leftVelocity += correctiveVelocity;
         } else if (angleDiff < 0.5) {
-            rightPower += correctivePower;
+            rightVelocity += correctiveVelocity;
         }
 
-        robot.left.set(leftPower);
-        robot.right.set(rightPower);
+        robot.left.set(leftVelocity);
+        robot.right.set(rightVelocity);
 
         if (runTime() >= timeoutMS ||
                 (robot.frontLeft.atTargetPosition() || robot.frontRight.atTargetPosition()) ||
@@ -129,24 +129,24 @@ public class Move extends CyberarmState {
 
     private void strafeMove() {
         double travelledDistance = Math.abs(robot.frontLeft.getDistance());
-        double power = lerpPower(travelledDistance);
+        double velocity = lerpVelocity(travelledDistance);
 
         double angleDiff = Utilities.angleDiff(initialHeadingDegrees, Utilities.facing(robot.imu));
 
-        double frontPower = power;
-        double backPower = power;
+        double frontVelocity = velocity;
+        double backVelocity = velocity;
         // use +40% of power at 7 degrees of error to correct angle
-        double correctivePower = Utilities.lerp(0.0, 1.0, angleDiff / 7.0) * (power * 0.40);
+        double correctiveVelocity = Utilities.lerp(0.0, 1.0, angleDiff / 7.0) * (velocity * 0.40);
         if (angleDiff > -0.5) {
-            frontPower += correctivePower;
+            frontVelocity += correctiveVelocity;
         } else if (angleDiff < 0.5) {
-            backPower += correctivePower;
+            backVelocity += correctiveVelocity;
         }
 
-        robot.frontLeft.set(frontPower);
-        robot.frontRight.set(-frontPower);
-        robot.backLeft.set(-backPower);
-        robot.backRight.set(backPower);
+        robot.frontLeft.set(frontVelocity);
+        robot.frontRight.set(-frontVelocity);
+        robot.backLeft.set(-backVelocity);
+        robot.backRight.set(backVelocity);
 
         if (runTime() >= timeoutMS || (robot.frontLeft.atTargetPosition() || robot.backRight.atTargetPosition()) ||
             Math.abs(robot.frontLeft.getDistance()) >= Math.abs(distanceMM) || Math.abs(robot.backRight.getDistance()) >= Math.abs(distanceMM)) {
@@ -159,20 +159,20 @@ public class Move extends CyberarmState {
         }
     }
 
-    private double lerpPower(double travelledDistance) {
-        double lerpPower = maxPower;
+    private double lerpVelocity(double travelledDistance) {
+        double lerpVelocity = maxVelocityMM;
 
         // Ease power up
         if (travelledDistance < lerpMM_UP) { // Not using <= to prevent divide by zero
-            lerpPower = Utilities.lerp(minPower, maxPower, Range.clip(travelledDistance / lerpMM_UP, 0.0, 1.0));
+            lerpVelocity = Utilities.lerp(minVelocityMM, maxVelocityMM, Range.clip(travelledDistance / lerpMM_UP, 0.0, 1.0));
             // Cruising power
         } else if (travelledDistance < Math.abs(distanceMM) - lerpMM_DOWN) {
-            lerpPower = maxPower;
+            lerpVelocity = maxVelocityMM;
             // Ease power down
         } else {
-            lerpPower = Utilities.lerp(minPower, maxPower, Range.clip( (Math.abs(distanceMM) - travelledDistance) / lerpMM_DOWN, 0.0, 1.0));
+            lerpVelocity = Utilities.lerp(minVelocityMM, maxVelocityMM, Range.clip( (Math.abs(distanceMM) - travelledDistance) / lerpMM_DOWN, 0.0, 1.0));
         }
 
-        return lerpPower;
+        return lerpVelocity;
     }
 }

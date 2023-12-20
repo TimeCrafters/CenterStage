@@ -3,6 +3,7 @@ package dev.cyberarm.minibots.red_crab.states;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import dev.cyberarm.engine.V2.CyberarmState;
 import dev.cyberarm.engine.V2.Utilities;
@@ -18,6 +19,7 @@ public class Pilot extends CyberarmState {
     private boolean droneLaunchAuthorized = false;
     private boolean droneLaunchRequested = false;
     private double droneLastLaunchRequestStartMS = 0;
+    private boolean robotSlowMode = false;
 
     public Pilot(RedCrabMinibot robot) {
         this.robot = robot;
@@ -117,12 +119,24 @@ public class Pilot extends CyberarmState {
         double frontRightPower = (rotY - rotX - rx) / denominator;
         double backRightPower = (rotY + rotX - rx) / denominator;
 
-        double maxPower = RedCrabMinibot.DRIVETRAIN_MAX_SPEED;
+        double maxVelocity = Utilities.unitToTicks(
+                RedCrabMinibot.DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                RedCrabMinibot.DRIVETRAIN_GEAR_RATIO,
+                RedCrabMinibot.DRIVETRAIN_WHEEL_DIAMETER_MM,
+                DistanceUnit.MM,
+                RedCrabMinibot.DRIVETRAIN_VELOCITY_MAX_MM);
+        double slowVelocity = Utilities.unitToTicks(
+                RedCrabMinibot.DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                RedCrabMinibot.DRIVETRAIN_GEAR_RATIO,
+                RedCrabMinibot.DRIVETRAIN_WHEEL_DIAMETER_MM,
+                DistanceUnit.MM,
+                RedCrabMinibot.DRIVETRAIN_VELOCITY_SLOW_MM);
+        double velocity = robotSlowMode ? slowVelocity : maxVelocity;
 
-        robot.frontLeft.motorEx.setPower(frontLeftPower * maxPower);
-        robot.backLeft.motorEx.setPower(backLeftPower * maxPower);
-        robot.frontRight.motorEx.setPower(frontRightPower * maxPower);
-        robot.backRight.motorEx.setPower(backRightPower * maxPower);
+        robot.frontLeft.set(frontLeftPower * velocity);
+        robot.backLeft.set(backLeftPower * velocity);
+        robot.frontRight.set(frontRightPower * velocity);
+        robot.backRight.set(backRightPower * velocity);
     }
 
     private void clawArmAndWristController() {

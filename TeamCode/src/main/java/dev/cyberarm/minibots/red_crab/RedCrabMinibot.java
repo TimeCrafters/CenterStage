@@ -36,6 +36,8 @@ public class RedCrabMinibot {
 
     /// TUNING CONSTANTS ///
     public static double DRIVETRAIN_MAX_SPEED = 0.5;
+    public static double DRIVETRAIN_VELOCITY_MAX_MM = 610;
+    public static double DRIVETRAIN_VELOCITY_SLOW_MM = 250;
     public static double DRIVETRAIN_GEAR_RATIO = 13.0321;
     public static int DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION = 28;
     public static double DRIVETRAIN_WHEEL_DIAMETER_MM = 90.0;
@@ -170,6 +172,12 @@ public class RedCrabMinibot {
         backLeft.setDistancePerPulse(distancePerTick);
         backRight.setDistancePerPulse(distancePerTick);
 
+        /// --- RUN MODE
+        frontLeft.setRunMode(Motor.RunMode.VelocityControl);
+        frontRight.setRunMode(Motor.RunMode.VelocityControl);
+        backLeft.setRunMode(Motor.RunMode.VelocityControl);
+        backRight.setRunMode(Motor.RunMode.VelocityControl);
+
         /// WINCH ///
         /// ------------------------------------------------------------------------------------ ///
         winch = new MotorEx(engine.hardwareMap, "winch"); // | Ctrl|Ex Hub, Port: ??
@@ -236,6 +244,8 @@ public class RedCrabMinibot {
     private void loadConstants() {
         /// Drivetrain
         RedCrabMinibot.DRIVETRAIN_MAX_SPEED = config.variable("Robot", "Drivetrain_Tuning", "max_speed").value();
+        RedCrabMinibot.DRIVETRAIN_VELOCITY_MAX_MM = config.variable("Robot", "Drivetrain_Tuning", "velocity_max_in_mm").value();
+        RedCrabMinibot.DRIVETRAIN_VELOCITY_SLOW_MM = config.variable("Robot", "Drivetrain_Tuning", "velocity_slow_in_mm").value();
         RedCrabMinibot.DRIVETRAIN_GEAR_RATIO = config.variable("Robot", "Drivetrain_Tuning", "gear_ratio").value();
         RedCrabMinibot.DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION = config.variable("Robot", "Drivetrain_Tuning", "motor_ticks").value();
         RedCrabMinibot.DRIVETRAIN_WHEEL_DIAMETER_MM = config.variable("Robot", "Drivetrain_Tuning", "wheel_diameter_mm").value();
