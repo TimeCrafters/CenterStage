@@ -133,10 +133,10 @@ public class Pilot extends CyberarmState {
                 RedCrabMinibot.DRIVETRAIN_VELOCITY_SLOW_MM);
         double velocity = robotSlowMode ? slowVelocity : maxVelocity;
 
-        robot.frontLeft.set(frontLeftPower * velocity);
-        robot.backLeft.set(backLeftPower * velocity);
-        robot.frontRight.set(frontRightPower * velocity);
-        robot.backRight.set(backRightPower * velocity);
+        robot.frontLeft.setVelocity(frontLeftPower * velocity);
+        robot.backLeft.setVelocity(backLeftPower * velocity);
+        robot.frontRight.setVelocity(frontRightPower * velocity);
+        robot.backRight.setVelocity(backRightPower * velocity);
     }
 
     private void clawArmAndWristController() {
@@ -207,11 +207,11 @@ public class Pilot extends CyberarmState {
 
     private void winchController() {
         if (engine.gamepad1.right_trigger > 0) {
-            robot.winch.motorEx.setPower(engine.gamepad1.right_trigger * RedCrabMinibot.WINCH_MAX_SPEED);
+            robot.winch.setPower(engine.gamepad1.right_trigger * RedCrabMinibot.WINCH_MAX_SPEED);
         } else if (engine.gamepad1.left_trigger > 0) {
-            robot.winch.motorEx.setPower(-engine.gamepad1.left_trigger * RedCrabMinibot.WINCH_MAX_SPEED);
+            robot.winch.setPower(-engine.gamepad1.left_trigger * RedCrabMinibot.WINCH_MAX_SPEED);
         } else {
-            robot.winch.motorEx.setPower(0);
+            robot.winch.setPower(0);
         }
     }
 }

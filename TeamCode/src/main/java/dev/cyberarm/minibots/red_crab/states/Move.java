@@ -1,6 +1,10 @@
 package dev.cyberarm.minibots.red_crab.states;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import dev.cyberarm.engine.V2.CyberarmState;
 import dev.cyberarm.engine.V2.Utilities;
@@ -50,30 +54,45 @@ public class Move extends CyberarmState {
             throw(new RuntimeException("INVALID Initial IMU value!"));
         }
 
+        int toleranceTicks = Utilities.unitToTicks(
+                RedCrabMinibot.DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                RedCrabMinibot.DRIVETRAIN_GEAR_RATIO,
+                RedCrabMinibot.DRIVETRAIN_WHEEL_DIAMETER_MM,
+                DistanceUnit.MM,
+                toleranceMM);
+        int distanceTicks = Utilities.unitToTicks(
+                RedCrabMinibot.DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                RedCrabMinibot.DRIVETRAIN_GEAR_RATIO,
+                RedCrabMinibot.DRIVETRAIN_WHEEL_DIAMETER_MM,
+                DistanceUnit.MM,
+                toleranceMM);
+
+        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        robot.frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        robot.frontLeft.setTargetPositionTolerance(toleranceTicks);
+        robot.frontRight.setTargetPositionTolerance(toleranceTicks);
+        robot.backLeft.setTargetPositionTolerance(toleranceTicks);
+        robot.backRight.setTargetPositionTolerance(toleranceTicks);
+
         if (strafe) {
-            robot.frontLeft.resetEncoder();
-            robot.frontRight.resetEncoder();
-            robot.backLeft.resetEncoder();
-            robot.backRight.resetEncoder();
+            robot.frontLeft.setTargetPosition(distanceTicks);
+            robot.frontRight.setTargetPosition(-distanceTicks);
+            robot.backLeft.setTargetPosition(-distanceTicks);
+            robot.backRight.setTargetPosition(distanceTicks);
 
-            robot.frontLeft.setPositionTolerance(toleranceMM);
-            robot.frontRight.setPositionTolerance(toleranceMM);
-            robot.backLeft.setPositionTolerance(toleranceMM);
-            robot.backRight.setPositionTolerance(toleranceMM);
-
-            robot.frontLeft.setTargetDistance(distanceMM);
-            robot.frontRight.setTargetDistance(-distanceMM);
-            robot.backLeft.setTargetDistance(-distanceMM);
-            robot.backRight.setTargetDistance(distanceMM);
         } else {
-            robot.left.resetEncoder();
-            robot.right.resetEncoder();
-
-            robot.left.setPositionTolerance(toleranceMM);
-            robot.right.setPositionTolerance(toleranceMM);
-
-            robot.left.setTargetDistance(distanceMM);
-            robot.right.setTargetDistance(distanceMM);
+            robot.frontLeft.setTargetPosition(distanceTicks);
+            robot.frontRight.setTargetPosition(distanceTicks);
+            robot.backLeft.setTargetPosition(distanceTicks);
+            robot.backRight.setTargetPosition(distanceTicks);
         }
     }
 
@@ -93,13 +112,13 @@ public class Move extends CyberarmState {
         engine.telemetry.addData("lerp MM UP", lerpMM_UP);
         engine.telemetry.addData("lerp MM DOWN", lerpMM_DOWN);
         engine.telemetry.addData("Distance MM", distanceMM);
-        engine.telemetry.addData("Distance Travelled MM", robot.frontLeft.getDistance());
+        engine.telemetry.addData("Distance Travelled MM", robot.distanceMM(robot.frontLeft));
         engine.telemetry.addData("Timeout MS", timeoutMS);
         progressBar(20, runTime() / timeoutMS);
     }
 
     private void tankMove(){
-        double travelledDistance = Math.abs(robot.frontLeft.getDistance());
+        double travelledDistance = Math.abs(robot.distanceMM(robot.frontLeft));
         double velocity = lerpVelocity(travelledDistance);
 
         double angleDiff = Utilities.angleDiff(initialHeadingDegrees, Utilities.facing(robot.imu));
@@ -114,21 +133,25 @@ public class Move extends CyberarmState {
             rightVelocity += correctiveVelocity;
         }
 
-        robot.left.set(leftVelocity);
-        robot.right.set(rightVelocity);
+        robot.frontLeft.setVelocity(leftVelocity);
+        robot.frontRight.setVelocity(rightVelocity);
+        robot.backLeft.setVelocity(leftVelocity);
+        robot.backRight.setVelocity(leftVelocity);
 
         if (runTime() >= timeoutMS ||
-                (robot.frontLeft.atTargetPosition() || robot.frontRight.atTargetPosition()) ||
-                Math.abs(robot.frontLeft.getDistance()) >= Math.abs(distanceMM)) {
-            robot.left.set(0);
-            robot.right.set(0);
+                (atTargetPosition(robot.frontLeft) || atTargetPosition(robot.frontRight)) ||
+                Math.abs(robot.distanceMM(robot.frontLeft)) >= Math.abs(distanceMM)) {
+            robot.frontLeft.setVelocity(0);
+            robot.frontRight.setVelocity(0);
+            robot.backLeft.setVelocity(0);
+            robot.backRight.setVelocity(0);
 
             this.finished();
         }
     }
 
     private void strafeMove() {
-        double travelledDistance = Math.abs(robot.frontLeft.getDistance());
+        double travelledDistance = Math.abs(robot.distanceMM(robot.frontLeft));
         double velocity = lerpVelocity(travelledDistance);
 
         double angleDiff = Utilities.angleDiff(initialHeadingDegrees, Utilities.facing(robot.imu));
@@ -143,17 +166,17 @@ public class Move extends CyberarmState {
             backVelocity += correctiveVelocity;
         }
 
-        robot.frontLeft.set(frontVelocity);
-        robot.frontRight.set(-frontVelocity);
-        robot.backLeft.set(-backVelocity);
-        robot.backRight.set(backVelocity);
+        robot.frontLeft.setVelocity(frontVelocity);
+        robot.frontRight.setVelocity(-frontVelocity);
+        robot.backLeft.setVelocity(-backVelocity);
+        robot.backRight.setVelocity(backVelocity);
 
-        if (runTime() >= timeoutMS || (robot.frontLeft.atTargetPosition() || robot.backRight.atTargetPosition()) ||
-            Math.abs(robot.frontLeft.getDistance()) >= Math.abs(distanceMM) || Math.abs(robot.backRight.getDistance()) >= Math.abs(distanceMM)) {
-            robot.frontLeft.set(0);
-            robot.frontRight.set(0);
-            robot.backLeft.set(0);
-            robot.backRight.set(0);
+        if (runTime() >= timeoutMS || (atTargetPosition(robot.frontLeft) || atTargetPosition(robot.backRight)) ||
+            Math.abs(robot.distanceMM(robot.frontLeft)) >= Math.abs(distanceMM) || Math.abs(robot.distanceMM(robot.backRight)) >= Math.abs(distanceMM)) {
+            robot.frontLeft.setVelocity(0);
+            robot.frontRight.setVelocity(0);
+            robot.backLeft.setVelocity(0);
+            robot.backRight.setVelocity(0);
 
             this.finished();
         }
@@ -174,5 +197,11 @@ public class Move extends CyberarmState {
         }
 
         return lerpVelocity;
+    }
+
+    private boolean atTargetPosition(DcMotorEx motor) {
+        double travelledDistanceMM = robot.distanceMM(motor);
+
+        return Utilities.isBetween(travelledDistanceMM, distanceMM - toleranceMM, distanceMM + toleranceMM);
     }
 }

@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -55,7 +56,7 @@ public class RedCrabMinibot {
     public static double CLAW_ARM_COLLECT_FLOAT_ANGLE = 180.0;
     public static double CLAW_ARM_COLLECT_ANGLE = 200.0;
 
-    public static final double WINCH_MAX_SPEED = 0.5;
+    public static double WINCH_MAX_SPEED = 0.5;
 
     public static double CLAW_WRIST_STOW_POSITION = 0.7;
     public static double CLAW_WRIST_DEPOSIT_POSITION = 0.64;
@@ -80,11 +81,9 @@ public class RedCrabMinibot {
 
     /// HARDWARE ///
     public final IMU imu;
-    public final MotorEx frontLeft, frontRight, backLeft, backRight, winch;
+    public final DcMotorEx frontLeft, frontRight, backLeft, backRight, winch;
     public final DcMotorEx clawArm;
     public final Servo leftClaw, rightClaw, clawWrist, droneLatch, hookArm;
-
-    public final MotorGroup left, right;
 
     final CyberarmEngine engine;
 
@@ -119,7 +118,7 @@ public class RedCrabMinibot {
 
         /// IMU ///
         /// ------------------------------------------------------------------------------------ ///
-        imu = engine.hardwareMap.get(IMU.class, "imu"); // | Ctrl Hub, I2C Port: 0
+        imu = engine.hardwareMap.get(IMU.class, "imu"); // | Control Hub, I2C Port: 0
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
@@ -132,33 +131,29 @@ public class RedCrabMinibot {
 
         /// DRIVE TRAIN ///
         /// ------------------------------------------------------------------------------------ ///
-        frontLeft = new MotorEx(engine.hardwareMap, "frontLeft"); // | Ctrl|Ex Hub, Port: ??
-        frontRight = new MotorEx(engine.hardwareMap, "frontRight"); // | Ctrl|Ex Hub, Port: ??
-        backLeft = new MotorEx(engine.hardwareMap, "backLeft"); // | Ctrl|Ex Hub, Port: ??
-        backRight = new MotorEx(engine.hardwareMap, "backRight"); // | Ctrl|Ex Hub, Port: ??
+        frontLeft = (DcMotorEx) engine.hardwareMap.dcMotor.get("frontLeft");   // | Expansion Hub, Motor Port: 2
+        frontRight = (DcMotorEx) engine.hardwareMap.dcMotor.get("frontRight"); // | Expansion Hub, Motor Port: 3
+        backLeft = (DcMotorEx) engine.hardwareMap.dcMotor.get("backLeft");     // | Expansion Hub, Motor Port: 3
+        backRight = (DcMotorEx) engine.hardwareMap.dcMotor.get("backRight");   // | Expansion Hub, Motor Port: 2
 
-        /// --- (SOFT) RESET MOTOR ENCODERS
-        frontLeft.resetEncoder();
-        frontRight.resetEncoder();
-        backLeft.resetEncoder();
-        backRight.resetEncoder();
+        /// --- RESET MOTOR ENCODERS
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         /// --- MOTOR DIRECTIONS
-        frontLeft.motorEx.setDirection(DcMotorSimple.Direction.REVERSE);
-        frontRight.motorEx.setDirection(DcMotorSimple.Direction.FORWARD);
-        backLeft.motorEx.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRight.motorEx.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
         /// --- MOTOR BRAKING MODE
         /// --- NOTE: Having BRAKE mode set for drivetrain helps with consistently of control
-        frontLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior((Motor.ZeroPowerBehavior.BRAKE));
-
-        /// --- MOTOR GROUPS
-        left = new MotorGroup(frontLeft, backLeft);
-        right = new MotorGroup(frontRight, backRight);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         /// --- MOTOR DISTANCE PER TICK
         double distancePerTick = Utilities.ticksToUnit(
@@ -168,35 +163,33 @@ public class RedCrabMinibot {
                 DistanceUnit.MM,
                 1);
 
-        frontLeft.setDistancePerPulse(distancePerTick);
-        frontRight.setDistancePerPulse(distancePerTick);
-        backLeft.setDistancePerPulse(distancePerTick);
-        backRight.setDistancePerPulse(distancePerTick);
-
         /// --- RUN MODE
-        frontLeft.setRunMode(Motor.RunMode.VelocityControl);
-        frontRight.setRunMode(Motor.RunMode.VelocityControl);
-        backLeft.setRunMode(Motor.RunMode.VelocityControl);
-        backRight.setRunMode(Motor.RunMode.VelocityControl);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         /// WINCH ///
         /// ------------------------------------------------------------------------------------ ///
-        winch = new MotorEx(engine.hardwareMap, "winch"); // | Ctrl|Ex Hub, Port: ??
+        winch = (DcMotorEx) engine.hardwareMap.dcMotor.get("winch"); // | Expansion Hub, Motor Port: 0
 
-        /// --- (SOFT) MOTOR ENCODER RESET
-        winch.resetEncoder();
+        /// --- MOTOR ENCODER RESET
+        winch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         /// --- MOTOR DIRECTION
         /// --- NOTE: Unknown if FORWARD or REVERSE is correct
-        winch.motorEx.setDirection(DcMotorSimple.Direction.FORWARD);
+        winch.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        /// --- RUN MODE
+        winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         /// CLAW and Co. ///
         /// ------------------------------------------------------------------------------------ ///
         clawArmPIDFController = new PIDFController(0.4, 0.01, 0.1, 0.0);
-        clawArm = (DcMotorEx) engine.hardwareMap.dcMotor.get("clawArm"); //  | Ctrl|Ex Hub, Port: ??
-        clawWrist = engine.hardwareMap.servo.get("clawWrist");   //  | Ctrl|Ex Hub, Port: ??
-        leftClaw = engine.hardwareMap.servo.get("leftClaw");     //  | Ctrl|Ex Hub, Port: ??
-        rightClaw = engine.hardwareMap.servo.get("rightClaw");   //  | Ctrl|Ex Hub, Port: ??
+        clawArm = (DcMotorEx) engine.hardwareMap.dcMotor.get("clawArm"); //  | Expansion Hub, Motor Port: 1
+        clawWrist = engine.hardwareMap.servo.get("clawWrist");           //  | Control Hub, Servo Port: 0
+        leftClaw = engine.hardwareMap.servo.get("leftClaw");             //  | Control Hub, Servo Port: 2
+        rightClaw = engine.hardwareMap.servo.get("rightClaw");           //  | Control Hub, Servo Port: 1
 
         /// --- Claw Arm Motor
         /// --- --- (SOFT) RESET MOTOR ENCODER
@@ -207,9 +200,9 @@ public class RedCrabMinibot {
         /// --- --- NOTE: This won't hold back much, if anything, but its a small help, maybe? 😃
         clawArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         /// --- --- Run Mode
-        clawArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        clawArm.setTargetPositionTolerance(CLAW_ARM_POSITION_TOLERANCE);
         clawArm.setTargetPosition(0);
+        clawArm.setTargetPositionTolerance(CLAW_ARM_POSITION_TOLERANCE);
+        clawArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         /// --- Claws
         /// --- --- Wrist
@@ -223,12 +216,12 @@ public class RedCrabMinibot {
         rightClaw.setPosition((CLAW_RIGHT_CLOSED_POSITION));
 
         /// DRONE LATCH ///
-        droneLatch = engine.hardwareMap.servo.get("droneLatch"); //  | Ctrl|Ex Hub, Port: ??
+        droneLatch = engine.hardwareMap.servo.get("droneLatch"); //  | Expansion Hub, Servo Port: 0
         droneLatch.setDirection(Servo.Direction.FORWARD);
         droneLatch.setPosition(DRONE_LATCH_INITIAL_POSITION);
 
         /// HOOK ARM ///
-        hookArm = engine.hardwareMap.servo.get("hookArm"); //  | Ctrl|Ex Hub, Port: ??
+        hookArm = engine.hardwareMap.servo.get("hookArm"); //  | Control Hub, Servo Port: 3
         hookArm.setDirection(Servo.Direction.FORWARD);
 //        hookArm.setPosition(HOOK_ARM_STOW_POSITION); // LEAVE OFF:
 
@@ -263,6 +256,10 @@ public class RedCrabMinibot {
         RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO = config.variable("Robot", "ClawArm_Tuning", "gear_ratio").value();
         RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION = config.variable("Robot", "ClawArm_Tuning", "motor_ticks").value();
 
+        /// WINCH
+
+        RedCrabMinibot.WINCH_MAX_SPEED = config.variable("Robot", "Winch_Tuning", "max_speed").value();
+
         /// CLAW WRIST
         RedCrabMinibot.CLAW_WRIST_STOW_POSITION = config.variable("Robot", "ClawWrist_Tuning", "stow_position").value();
         RedCrabMinibot.CLAW_WRIST_DEPOSIT_POSITION = config.variable("Robot", "ClawWrist_Tuning", "deposit_position").value();
@@ -280,8 +277,8 @@ public class RedCrabMinibot {
         RedCrabMinibot.HOOK_ARM_UP_POSITION = config.variable("Robot", "HookArm_Tuning", "up_position").value();
 
         /// DRONE LATCH
-        RedCrabMinibot.DRONE_LATCH_LAUNCH_POSITION = config.variable("Robot", "DroneLauncher_Tuning", "initial_position").value();
-        RedCrabMinibot.DRONE_LATCH_INITIAL_POSITION = config.variable("Robot", "DroneLauncher_Tuning", "launch_position").value();
+        RedCrabMinibot.DRONE_LATCH_INITIAL_POSITION = config.variable("Robot", "DroneLauncher_Tuning", "initial_position").value();
+        RedCrabMinibot.DRONE_LATCH_LAUNCH_POSITION = config.variable("Robot", "DroneLauncher_Tuning", "launch_position").value();
         RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS = config.variable("Robot", "DroneLauncher_Tuning", "launch_confirmation_time_ms").value();
     }
 
@@ -291,56 +288,96 @@ public class RedCrabMinibot {
         engine.telemetry.addLine("Motors");
         engine.telemetry.addData(
                 "Front Left",
-                "Power: %.2f, Current: %.2f mAmp, Position: %d",
-                frontLeft.motorEx.getPower(),
-                frontLeft.motorEx.getCurrent(CurrentUnit.MILLIAMPS),
-                frontLeft.motorEx.getCurrentPosition());
+                "Power: %.2f, Current: %.2f mAmp, Position: %d, Velocity: %.2f (%.2f mm/s)",
+                frontLeft.getPower(),
+                frontLeft.getCurrent(CurrentUnit.MILLIAMPS),
+                frontLeft.getCurrentPosition(),
+                frontLeft.getVelocity(),
+                Utilities.ticksToUnit(
+                        DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                        DRIVETRAIN_GEAR_RATIO,
+                        DRIVETRAIN_WHEEL_DIAMETER_MM,
+                        DistanceUnit.MM,
+                        (int)frontLeft.getVelocity()));
+        engine.telemetry.addLine();
         engine.telemetry.addData(
                 "Front Right",
-                "Power: %.2f, Current: %.2f mAmp, Position: %d",
-                frontRight.motorEx.getPower(),
-                frontRight.motorEx.getCurrent(CurrentUnit.MILLIAMPS),
-                frontRight.motorEx.getCurrentPosition());
+                "Power: %.2f, Current: %.2f mAmp, Position: %d, Velocity: %.2f (%.2f mm/s)",
+                frontRight.getPower(),
+                frontRight.getCurrent(CurrentUnit.MILLIAMPS),
+                frontRight.getCurrentPosition(),
+                frontRight.getVelocity(),
+                Utilities.ticksToUnit(
+                        DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                        DRIVETRAIN_GEAR_RATIO,
+                        DRIVETRAIN_WHEEL_DIAMETER_MM,
+                        DistanceUnit.MM,
+                        (int)frontLeft.getVelocity()));
+        engine.telemetry.addLine();
         engine.telemetry.addData(
                 "Back Left",
-                "Power: %.2f, Current: %.2f mAmp, Position: %d",
-                backLeft.motorEx.getPower(),
-                backLeft.motorEx.getCurrent(CurrentUnit.MILLIAMPS),
-                backLeft.motorEx.getCurrentPosition());
+                "Power: %.2f, Current: %.2f mAmp, Position: %d, Velocity: %.2f (%.2f mm/s)",
+                backLeft.getPower(),
+                backLeft.getCurrent(CurrentUnit.MILLIAMPS),
+                backLeft.getCurrentPosition(),
+                backLeft.getVelocity(),
+                Utilities.ticksToUnit(
+                        DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                        DRIVETRAIN_GEAR_RATIO,
+                        DRIVETRAIN_WHEEL_DIAMETER_MM,
+                        DistanceUnit.MM,
+                        (int)backLeft.getVelocity()));
+        engine.telemetry.addLine();
         engine.telemetry.addData(
                 "Back Right",
-                "Power: %.2f, Current: %.2f mAmp, Position: %d",
-                backRight.motorEx.getPower(),
-                backRight.motorEx.getCurrent(CurrentUnit.MILLIAMPS),
-                backRight.motorEx.getCurrentPosition());
+                "Power: %.2f, Current: %.2f mAmp, Position: %d, Velocity: %.2f (%.2f mm/s)",
+                backRight.getPower(),
+                backRight.getCurrent(CurrentUnit.MILLIAMPS),
+                backRight.getCurrentPosition(),
+                backRight.getVelocity(),
+                Utilities.ticksToUnit(
+                        DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                        DRIVETRAIN_GEAR_RATIO,
+                        DRIVETRAIN_WHEEL_DIAMETER_MM,
+                        DistanceUnit.MM,
+                        (int)backRight.getVelocity()));
 
         engine.telemetry.addLine();
+        engine.telemetry.addLine();
+
         engine.telemetry.addData(
                 "Winch",
-                "Power: %.2f, Current: %.2f mAmp, Position: %d",
-                winch.motorEx.getPower(),
-                winch.motorEx.getCurrent(CurrentUnit.MILLIAMPS),
-                winch.motorEx.getCurrentPosition());
+                "Power: %.2f, Current: %.2f mAmp, Position: %d, Velocity: %.2f (%.2f mm/s)",
+                winch.getPower(),
+                winch.getCurrent(CurrentUnit.MILLIAMPS),
+                winch.getCurrentPosition(),
+                winch.getVelocity(),
+                Utilities.ticksToUnit(
+                        DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                        DRIVETRAIN_GEAR_RATIO,
+                        DRIVETRAIN_WHEEL_DIAMETER_MM,
+                        DistanceUnit.MM,
+                        (int)winch.getVelocity()));
         engine.telemetry.addLine();
 
+        PIDFCoefficients clawArmPIDFPosition = clawArm.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+        PIDFCoefficients clawArmPIDFEncoder = clawArm.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
         engine.telemetry.addData(
                 "Claw Arm",
-                "Power: %.2f, Current: %.2f mAmp, Position: %d, Velocity: %.2f",
+                "Power: %.2f, Current: %.2f mAmp, Position: %d, Angle: %.2f, Velocity: %.2f (%.2f degrees/s)",
                 clawArm.getPower(),
                 clawArm.getCurrent(CurrentUnit.MILLIAMPS),
                 clawArm.getCurrentPosition(),
-                clawArm.getVelocity());
+                Utilities.motorTicksToAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, clawArm.getCurrentPosition()),
+                clawArm.getVelocity(),
+                Utilities.motorTicksToAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, (int)clawArm.getVelocity()));
         engine.telemetry.addData(
-                "   PIDF", "P: %.4f, I: %.4f, D: %.4f, F: %.4f",
-                clawArmPIDFController.getP(),
-                clawArmPIDFController.getI(),
-                clawArmPIDFController.getD(),
-                clawArmPIDFController.getF());
-        engine.telemetry.addData(
-                "   PIDF+", "PosError: %.4f, velError: %.4f, Period: %.4f",
-                clawArmPIDFController.getPositionError(),
-                clawArmPIDFController.getVelocityError(),
-                clawArmPIDFController.getPeriod());
+                "   PIDF", "P: %.4f, I: %.4f, D: %.4f, F: %.4f, PosP: %.4f",
+                clawArmPIDFEncoder.p,
+                clawArmPIDFEncoder.i,
+                clawArmPIDFEncoder.d,
+                clawArmPIDFEncoder.f,
+                clawArmPIDFPosition.p);
 
         engine.telemetry.addLine();
         engine.telemetry.addLine("Servos");
@@ -398,5 +435,21 @@ public class RedCrabMinibot {
         double velocity = Utilities.motorAngleToTicks(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, CLAW_ARM_MAX_VELOCITY_DEGREES);
 
         clawArm.setVelocity(velocity);
+    }
+
+    public double distanceMM(DcMotorEx motor) {
+        return Utilities.ticksToUnit(
+                RedCrabMinibot.DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
+                RedCrabMinibot.DRIVETRAIN_GEAR_RATIO,
+                RedCrabMinibot.DRIVETRAIN_WHEEL_DIAMETER_MM,
+                DistanceUnit.MM,
+                motor.getCurrentPosition()
+        );
+    }
+
+    public boolean atTargetPosition(DcMotorEx motor, double travelledDistanceMM, double toleranceMM) {
+        double distanceMM = distanceMM(motor);
+
+        return Utilities.isBetween(distanceMM, travelledDistanceMM - toleranceMM, travelledDistanceMM + toleranceMM);
     }
 }
