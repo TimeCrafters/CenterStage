@@ -1,6 +1,7 @@
 package org.timecrafters.CenterStage.TeleOp.States;
 
 import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_COLLECT;
+import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_DELIVER;
 import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_HOVER_5_STACK;
 import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_PRECOLLECT;
 
@@ -28,6 +29,12 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     public SodiPizzaTeleOPState() {
         robot = new SodiPizzaMinibotObject();
         robot.setup();
+    }
+
+    @Override
+    public void telemetry() {
+        engine.telemetry.addData("Arm should be at Position ", armPos);
+        engine.telemetry.addData("Arm servo is at ", robot.shoulder.getPosition());
     }
 
     @Override
@@ -126,9 +133,13 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
 
         if (engine.gamepad2.a && !engine.gamepad2.start) {
+            armPos = 1;
+        }
 
-            if (Math.abs(drivePower) < 0.5) {
-                drivePower = 0.25;
+        if (armPos == 1) {
+
+            if (Math.abs(drivePower) > 0.5) {
+                drivePower = 0.15;
             } else {
 
                 if (robot.shoulder.getPosition() > ARM_PRECOLLECT && System.currentTimeMillis() - lastMoveTime >= 250) {
@@ -136,6 +147,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
                     lastMoveTime = System.currentTimeMillis();
                 } else if (System.currentTimeMillis() - lastMoveTime >= 250) {
                     robot.shoulder.setPosition(ARM_COLLECT);
+                    armPos = 0;
                 }
 
             }
@@ -144,14 +156,14 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         //End of code for armPos = 1
 
 
-        if (engine.gamepad2.y) {
+        if (engine.gamepad2.x) {
             armPos = 2;
         }
 
         if (armPos == 2) {
 
-            if (Math.abs(drivePower) < 0.5) {
-                drivePower = 0.25;
+            if (Math.abs(drivePower) > 0.5) {
+                drivePower = 0.15;
             } else {
 
                 if (robot.shoulder.getPosition() > ARM_HOVER_5_STACK && System.currentTimeMillis() - lastMoveTime >= 250) {
@@ -159,21 +171,44 @@ public class SodiPizzaTeleOPState extends CyberarmState {
                     lastMoveTime = System.currentTimeMillis();
                 } else if (System.currentTimeMillis() - lastMoveTime >= 250) {
                     robot.shoulder.setPosition(ARM_PRECOLLECT);
+                    armPos = 0;
                 }
 
             }
         }
         //End of code for armPos = 2
 
-
-         if (engine.gamepad2.y) {
-            armPos = 2;
+        if (engine.gamepad2.b && !engine.gamepad2.start) {
+            armPos = 3;
         }
 
         if (armPos == 3) {
 
-            if (Math.abs(drivePower) < 0.5) {
-                drivePower = 0.25;
+            if (Math.abs(drivePower) > 0.5) {
+                drivePower = 0.15;
+            } else {
+
+                if (robot.shoulder.getPosition() < ARM_DELIVER - 0.05 && System.currentTimeMillis() - lastMoveTime >= 250) {
+                    robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
+                    lastMoveTime = System.currentTimeMillis();
+                } else if (System.currentTimeMillis() - lastMoveTime >= 250) {
+                    robot.shoulder.setPosition(ARM_DELIVER);
+                    armPos = 0;
+                }
+
+            }
+        }
+        //End of code for armPos = 3
+
+
+         if (engine.gamepad2.y) {
+            armPos = 4;
+        }
+
+        if (armPos == 4) {
+
+            if (Math.abs(drivePower) > 0.5) {
+                drivePower = 0.15;
             } else {
 
                 if (robot.shoulder.getPosition() > ARM_HOVER_5_STACK && System.currentTimeMillis() - lastMoveTime >= 250) {
@@ -182,11 +217,12 @@ public class SodiPizzaTeleOPState extends CyberarmState {
                 }
                 else if (System.currentTimeMillis() - lastMoveTime >= 250) {
                     robot.shoulder.setPosition(ARM_PRECOLLECT);
+                    armPos = 0;
                 }
 
             }
         }
-        //End of code for armPos = 2
+        //End of code for armPos = 4
 
         }
 
