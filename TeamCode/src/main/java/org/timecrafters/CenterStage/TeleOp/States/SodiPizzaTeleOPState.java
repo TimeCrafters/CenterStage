@@ -2,8 +2,8 @@ package org.timecrafters.CenterStage.TeleOp.States;
 
 import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_COLLECT;
 import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_DELIVER;
-import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_HOVER_5_STACK;
 import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_PRECOLLECT;
+import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_STOW;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -23,6 +23,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     public final double minInput = 0.1 /* <- Minimum input from stick to send command */;
     public double lastToldAngle /* <- The angle the bot was last told to stop at */;
     private int armPos;
+    private char buttonPressed;
     YawPitchRollAngles imuInitAngle;
 
 
@@ -35,6 +36,8 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     public void telemetry() {
         engine.telemetry.addData("Arm should be at Position ", armPos);
         engine.telemetry.addData("Arm servo is at ", robot.shoulder.getPosition());
+
+        engine.telemetry.addData("Button Pressed = ", buttonPressed);
     }
 
     @Override
@@ -131,21 +134,24 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             lastToldAngle = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         }
 
-
+        // This moves the arm to Collect position, which is at servo position 0.00.
         if (engine.gamepad2.a && !engine.gamepad2.start) {
             armPos = 1;
         }
 
         if (armPos == 1) {
 
-            if (Math.abs(drivePower) > 0.5) {
+            buttonPressed = 'a';
+
+            if (Math.abs(drivePower) > 0.25) {
                 drivePower = 0.15;
             } else {
-
-                if (robot.shoulder.getPosition() > ARM_PRECOLLECT && System.currentTimeMillis() - lastMoveTime >= 250) {
+                //if servo's position is greater than Collect position with a run-to tolerance of 0.05,
+                //decrement position at a rate of 0.05 per 150 milliseconds.
+                if (robot.shoulder.getPosition() > ARM_PRECOLLECT && System.currentTimeMillis() - lastMoveTime >= 150) {
                     robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
                     lastMoveTime = System.currentTimeMillis();
-                } else if (System.currentTimeMillis() - lastMoveTime >= 250) {
+                } else if (System.currentTimeMillis() - lastMoveTime >= 150) {
                     robot.shoulder.setPosition(ARM_COLLECT);
                     armPos = 0;
                 }
@@ -155,21 +161,25 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         }
         //End of code for armPos = 1
 
-
+        // This moves the arm to Precollect position, which is at servo position 0.05.
         if (engine.gamepad2.x) {
             armPos = 2;
         }
 
         if (armPos == 2) {
 
-            if (Math.abs(drivePower) > 0.5) {
+            buttonPressed = 'x';
+
+            if (Math.abs(drivePower) > 0.25) {
                 drivePower = 0.15;
             } else {
-
-                if (robot.shoulder.getPosition() > ARM_HOVER_5_STACK && System.currentTimeMillis() - lastMoveTime >= 250) {
+                //if servo's position is greater than Precollect position with a run-to tolerance of 0.05,
+                //decrement position at a rate of 0.05 per 150 milliseconds.
+                if (robot.shoulder.getPosition() > ARM_PRECOLLECT + 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
                     robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
                     lastMoveTime = System.currentTimeMillis();
-                } else if (System.currentTimeMillis() - lastMoveTime >= 250) {
+                }//Incrementing from Collect position is unnecessary, because Collect is within the tolerance of run-to.
+                 else if (System.currentTimeMillis() - lastMoveTime >= 150) {
                     robot.shoulder.setPosition(ARM_PRECOLLECT);
                     armPos = 0;
                 }
@@ -178,20 +188,29 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         }
         //End of code for armPos = 2
 
+        // This moves the arm to Deliver position, which is at servo position 0.28.
         if (engine.gamepad2.b && !engine.gamepad2.start) {
             armPos = 3;
         }
 
         if (armPos == 3) {
 
-            if (Math.abs(drivePower) > 0.5) {
+            buttonPressed = 'b';
+
+            if (Math.abs(drivePower) > 0.25) {
                 drivePower = 0.15;
             } else {
-
-                if (robot.shoulder.getPosition() < ARM_DELIVER - 0.05 && System.currentTimeMillis() - lastMoveTime >= 250) {
+                //if servo's position is less than Deliver position with a run-to tolerance of 0.05,
+                //increment position at a rate of 0.05 per 150 milliseconds.
+                if (robot.shoulder.getPosition() < ARM_DELIVER - 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(robot.shoulder.getPosition() + 0.05);
+                    lastMoveTime = System.currentTimeMillis();
+                }//if servo's position is greater than Deliver position with a run-to tolerance of 0.05,
+                //decrement position at a rate of 0.05 per 150 milliseconds.
+                else if (robot.shoulder.getPosition() > ARM_DELIVER + 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
                     robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
                     lastMoveTime = System.currentTimeMillis();
-                } else if (System.currentTimeMillis() - lastMoveTime >= 250) {
+                } else if (System.currentTimeMillis() - lastMoveTime >= 150) {
                     robot.shoulder.setPosition(ARM_DELIVER);
                     armPos = 0;
                 }
@@ -200,29 +219,35 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         }
         //End of code for armPos = 3
 
-
+        // This moves the arm to Stow position, which is at servo position 0.72.
          if (engine.gamepad2.y) {
             armPos = 4;
         }
 
         if (armPos == 4) {
 
-            if (Math.abs(drivePower) > 0.5) {
+            buttonPressed = 'y';
+
+            if (Math.abs(drivePower) > 0.25) {
                 drivePower = 0.15;
             } else {
-
-                if (robot.shoulder.getPosition() > ARM_HOVER_5_STACK && System.currentTimeMillis() - lastMoveTime >= 250) {
-                    robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
+                //if servo's position is less than Collect position with a run-to tolerance of 0.05,
+                //increment position at a rate of 0.05 per 150 milliseconds.
+                if (robot.shoulder.getPosition() < ARM_STOW - 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(robot.shoulder.getPosition() + 0.05);
                     lastMoveTime = System.currentTimeMillis();
                 }
-                else if (System.currentTimeMillis() - lastMoveTime >= 250) {
-                    robot.shoulder.setPosition(ARM_PRECOLLECT);
+                //Decrementing is unnecessary, because servo is mechanically inhibited from further advancing.
+                else if (System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(ARM_STOW);
                     armPos = 0;
                 }
 
             }
         }
         //End of code for armPos = 4
+
+
 
         }
 
