@@ -4,6 +4,8 @@ import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_COL
 import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_DELIVER;
 import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_PRECOLLECT;
 import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.ARM_STOW;
+import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.GRIPPER_CLOSED;
+import static org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject.GRIPPER_OPEN;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -80,8 +82,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
                 robot.rightBack.setPower(robot.leftBack.getPower() * 0.8);
             }
 
-        } else
-        if (robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < lastToldAngle - 0.5 &&
+        } else if (robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < lastToldAngle - 0.5 &&
                 Math.abs(engine.gamepad1.left_stick_y) > minInput) {
 
             robot.leftFront.setPower(robot.rightFront.getPower() * 0.8);
@@ -95,7 +96,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.rightBack.setPower(drivePower);
         }
 
-        if (engine.gamepad1.start && !engine.gamepad1.a) {
+        if (engine.gamepad1.start && !engine.gamepad1.a) /*<-- reset everything: encoders, imu, and armPos int*/ {
 
             robot.leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             robot.rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -104,7 +105,9 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.imu.resetYaw();
         }
 
-        if (Math.abs(engine.gamepad1.left_stick_y) > minInput && Math.abs(engine.gamepad1.left_stick_x) < minInput/* &&
+        if (Math.abs(engine.gamepad1.left_stick_y) > minInput &&
+            Math.abs(engine.gamepad1.left_stick_x) < minInput &&
+            armPos == 0/* &&
                 robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > lastToldAngle - 0.5 &&
                 robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < lastToldAngle + 0.5*/) {
 
@@ -115,7 +118,8 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.rightBack.setPower(drivePower);
         }
 
-        if (Math.abs(engine.gamepad1.left_stick_x) > minInput) {
+        if (Math.abs(engine.gamepad1.left_stick_x) > minInput &&
+            armPos == 0) {
 
             drivePower = engine.gamepad1.left_stick_x;
             robot.leftFront.setPower(-drivePower);
@@ -124,7 +128,8 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.rightBack.setPower(-drivePower);
         }
 
-        if (Math.abs(engine.gamepad1.right_stick_x) > minInput) {
+        if (Math.abs(engine.gamepad1.right_stick_x) > minInput &&
+                armPos == 0) {
 
             drivePower = engine.gamepad1.right_stick_x;
             robot.leftFront.setPower(-drivePower);
@@ -145,6 +150,10 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
             if (Math.abs(drivePower) > 0.25) {
                 drivePower = 0.15;
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
             } else {
                 //if servo's position is greater than Collect position with a run-to tolerance of 0.05,
                 //decrement position at a rate of 0.05 per 150 milliseconds.
@@ -172,6 +181,10 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
             if (Math.abs(drivePower) > 0.25) {
                 drivePower = 0.15;
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
             } else {
                 //if servo's position is greater than Precollect position with a run-to tolerance of 0.05,
                 //decrement position at a rate of 0.05 per 150 milliseconds.
@@ -199,6 +212,10 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
             if (Math.abs(drivePower) > 0.25) {
                 drivePower = 0.15;
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
             } else {
                 //if servo's position is less than Deliver position with a run-to tolerance of 0.05,
                 //increment position at a rate of 0.05 per 150 milliseconds.
@@ -230,6 +247,10 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
             if (Math.abs(drivePower) > 0.25) {
                 drivePower = 0.15;
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
             } else {
                 //if servo's position is less than Collect position with a run-to tolerance of 0.05,
                 //increment position at a rate of 0.05 per 150 milliseconds.
@@ -246,6 +267,12 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             }
         }
         //End of code for armPos = 4
+
+        if (engine.gamepad2.dpad_left) {
+            robot.gripper.setPosition(GRIPPER_OPEN);
+        } else if (engine.gamepad2.dpad_right) {
+            robot.gripper.setPosition(GRIPPER_CLOSED);
+        }
 
 
 
