@@ -25,41 +25,10 @@ public class ClawArmState extends CyberarmState {
         robot.OdometryLocalizer();
 
         // driving arm to pos
-        if (armPos == "collect") {
-            if (robot.lift.getCurrentPosition() >= 20) {
-                robot.lift.setPower(-0.6);
-            } else {
-                robot.lift.setPower(0);
-                robot.shoulder.setPosition(robot.shoulderCollect);
-                robot.elbow.setPosition(robot.elbowCollect);
-                robot.target = 30;
-
-            }
-        }
-        if (armPos == "deposit") {
-            robot.shoulder.setPosition(robot.shoulderDeposit);
-            robot.elbow.setPosition(robot.elbowDeposit);
-            robot.target = 400;
-
-
-        }
-        if (armPos == "hover") {
-            if (robot.lift.getCurrentPosition() >= 20) {
-                robot.lift.setPower(-0.6);
-            } else {
-                robot.shoulder.setPosition(0.38);
-                robot.target = 200;
-            }
-
-        }
-        if (armPos.equals("search")) {
-            robot.shoulder.setPosition(0.15);
-            robot.target = 570;
-
-        }
+        robot.armPos = armPos;
         robot.clawArmControl();
 
-        if (robot.power < 0.1) {
+        if (robot.clawArm.getCurrentPosition() > robot.target - 20 || robot.clawArm.getCurrentPosition() < robot.target + 20) {
             setHasFinished(true);
         }
 

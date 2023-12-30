@@ -22,6 +22,8 @@ import org.openftc.easyopencv.OpenCvWebcam;
 import org.timecrafters.Library.Robot;
 import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
+import java.util.Objects;
+
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
 @Config
@@ -94,6 +96,9 @@ public class CompetitionRobotV1 extends Robot {
 
     //-------------------------------------------------------------------------------------------------------------- arm sequence variables:
     PIDController pidController;
+
+    public String armPos;
+
     public int target;
     public  double p = 0.007, i = 0,  d = 0.0001, f = 0;
     public  double shoulderCollect = 0.38;
@@ -324,6 +329,37 @@ public class CompetitionRobotV1 extends Robot {
     }
 
     public void clawArmControl(){
+        if (armPos.equals("collect")) {
+            if (lift.getCurrentPosition() >= 20) {
+                lift.setPower(-0.6);
+            } else {
+                lift.setPower(0);
+                shoulder.setPosition(shoulderCollect);
+                elbow.setPosition(elbowCollect);
+                target = 30;
+            }
+        }
+        if (Objects.equals(armPos, "deposit")) {
+            shoulder.setPosition(shoulderDeposit);
+            elbow.setPosition(elbowDeposit);
+            target = 400;
+
+
+        }
+        if (Objects.equals(armPos, "hover")) {
+            if (lift.getCurrentPosition() >= 20) {
+                lift.setPower(-0.6);
+            } else {
+                shoulder.setPosition(0.38);
+                target = 100;
+            }
+
+        }
+        if (armPos.equals("search")) {
+            shoulder.setPosition(0.15);
+            target = 570;
+
+        }
 
         pidController.setPID(p, i, d);
         int armPos = clawArm.getCurrentPosition();

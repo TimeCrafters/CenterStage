@@ -39,6 +39,12 @@ public class Competition2BlueBackStage extends CyberarmEngine {
 
         addState(new DriveToCoordinatesState(robot,"burnsville backdrop blue", "3-03-0"));
 
+        addState(new ClawFingerState(robot,"burnsville backdrop blue", "0-04-0"));
+
+        addState(new DriveToCoordinatesState(robot,"burnsville backdrop blue", "3-05-0"));
+        addState(new DriveToCoordinatesState(robot,"burnsville backdrop blue", "3-06-0"));
+
+
 
 
 

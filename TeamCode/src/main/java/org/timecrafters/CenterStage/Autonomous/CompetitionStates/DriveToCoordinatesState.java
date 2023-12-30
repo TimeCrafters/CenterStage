@@ -21,6 +21,7 @@ public class DriveToCoordinatesState extends CyberarmState {
     public boolean posSpecific;
     public double maxXPower;
     public double maxYPower;
+    public long initTime;
 
     public DriveToCoordinatesState(CompetitionRobotV1 robot, String groupName, String actionName) {
         this.robot = robot;
@@ -32,6 +33,12 @@ public class DriveToCoordinatesState extends CyberarmState {
         this.armDrive = robot.configuration.variable(groupName, actionName, "armDrive").value();
         this.objectPos = robot.configuration.variable(groupName, actionName, "objectPos").value();
         this.posSpecific = robot.configuration.variable(groupName, actionName, "posSpecific").value();
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        initTime = System.currentTimeMillis();
     }
 
     @Override
@@ -63,10 +70,10 @@ public class DriveToCoordinatesState extends CyberarmState {
         robot.OdometryLocalizer();
 
 
-        if (Math.abs(robot.backLeftPower) < 0.15 &&
-                Math.abs(robot.backRightPower) < 0.15 &&
-                Math.abs(robot.frontLeftPower) < 0.15 &&
-                Math.abs(robot.frontRightPower) < 0.15) {
+        if ((Math.abs(robot.backLeftPower) < 0.18 &&
+                Math.abs(robot.backRightPower) < 0.18 &&
+                Math.abs(robot.frontLeftPower) < 0.18 &&
+                Math.abs(robot.frontRightPower) < 0.18) || (System.currentTimeMillis() - initTime > 5000)) {
             posAchieved = true;
         }
     }
