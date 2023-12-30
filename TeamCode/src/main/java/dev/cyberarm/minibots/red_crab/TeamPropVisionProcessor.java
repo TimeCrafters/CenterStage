@@ -49,8 +49,8 @@ public class TeamPropVisionProcessor implements VisionProcessor {
 
     @Override
     public Object processFrame(Mat frame, long captureTimeNanos) {
-        Core.rotate(frame, rotatedMat,Core.ROTATE_180);
-        Imgproc.cvtColor(rotatedMat, hsvMat, Imgproc.COLOR_RGB2HSV);
+//        Core.rotate(frame, rotatedMat,Core.ROTATE_180);
+        Imgproc.cvtColor(frame, hsvMat, Imgproc.COLOR_RGB2HSV);
 
         saturationLeft = averageSaturation(hsvMat, rectLeft);
         saturationCenter = averageSaturation(hsvMat, rectCenter);
