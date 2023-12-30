@@ -12,48 +12,64 @@ import dev.cyberarm.engine.V2.CyberarmState;
 public class DriveToCoordinatesState extends CyberarmState {
 
     CompetitionRobotV1 robot;
-    public double xTarget = 0;
-    public double yTarget = 0;
-    public double hTarget = 0;
+    public double xTarget;
+    public double yTarget;
+    public double hTarget;
     public boolean posAchieved = false;
     public boolean armDrive;
-    public String objectPos;
-//    public boolean posSpecific;
+    public int objectPos;
+    public boolean posSpecific;
+    public double maxXPower;
+    public double maxYPower;
 
     public DriveToCoordinatesState(CompetitionRobotV1 robot, String groupName, String actionName) {
         this.robot = robot;
         this.xTarget = robot.configuration.variable(groupName, actionName, "xTarget").value();
         this.yTarget = robot.configuration.variable(groupName, actionName, "yTarget").value();
         this.hTarget = robot.configuration.variable(groupName, actionName, "hTarget").value();
+        this.maxXPower = robot.configuration.variable(groupName, actionName, "maxXPower").value();
+        this.maxYPower = robot.configuration.variable(groupName, actionName, "maxYPower").value();
         this.armDrive = robot.configuration.variable(groupName, actionName, "armDrive").value();
         this.objectPos = robot.configuration.variable(groupName, actionName, "objectPos").value();
-//        this.posSpecific = robot.configuration.variable(groupName, actionName, "posSpecific").value();
+        this.posSpecific = robot.configuration.variable(groupName, actionName, "posSpecific").value();
     }
 
     @Override
     public void exec() {
-        robot.hTarget = hTarget;
-        robot.yTarget = yTarget;
-        robot.xTarget = xTarget;
-        robot.DriveToCoordinates();
-        robot.OdometryLocalizer();
+        if (!posSpecific) {
+            // enter loop
+        } else {
+            if (objectPos != robot.objectPos) {
+                // enter the ending loop
+                setHasFinished(true);
+            }
+        }
+        if (posAchieved) {
+            setHasFinished(true);
+        }
+
         if (armDrive) {
             robot.clawArmControl();
         }
 
-        if (posAchieved){
-            setHasFinished(true);
-        } else {
-//            if (objectPos.equals(robot.objectPos) || objectPos.equals("everything") ) {
-                if (Math.abs(robot.backLeftPower) < 0.15 &&
-                   Math.abs(robot.backRightPower) < 0.15 &&
-                   Math.abs(robot.frontLeftPower) < 0.15 &&
-                   Math.abs(robot.frontRightPower) < 0.15) {
-                    posAchieved = true;
-//                }
-            }
-            }
+        robot.yMaxPower = maxYPower;
+        robot.xMaxPower = maxXPower;
+
+        robot.hTarget = hTarget;
+        robot.yTarget = yTarget;
+        robot.xTarget = xTarget;
+
+        robot.DriveToCoordinates();
+        robot.OdometryLocalizer();
+
+
+        if (Math.abs(robot.backLeftPower) < 0.15 &&
+                Math.abs(robot.backRightPower) < 0.15 &&
+                Math.abs(robot.frontLeftPower) < 0.15 &&
+                Math.abs(robot.frontRightPower) < 0.15) {
+            posAchieved = true;
         }
+    }
 
 
 

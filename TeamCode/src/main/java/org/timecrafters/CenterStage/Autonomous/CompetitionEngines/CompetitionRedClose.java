@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.timecrafters.CenterStage.Autonomous.CompetitionStates.ClawArmState;
 import org.timecrafters.CenterStage.Autonomous.CompetitionStates.ClawFingerState;
-import org.timecrafters.CenterStage.Autonomous.CompetitionStates.DistanceCheckState;
 import org.timecrafters.CenterStage.Autonomous.CompetitionStates.DriveToCoordinatesState;
 import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
 

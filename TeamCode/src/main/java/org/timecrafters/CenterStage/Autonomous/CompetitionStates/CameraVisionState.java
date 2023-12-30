@@ -17,6 +17,8 @@ public class CameraVisionState extends CyberarmState {
 
     CompetitionRobotV1 robot;
     ExamplePipeline pipeline;
+    private long initTime;
+    private boolean finish = false;
 
     public CameraVisionState(CompetitionRobotV1 robot) {
         this.robot = robot;
@@ -25,6 +27,7 @@ public class CameraVisionState extends CyberarmState {
     @Override
     public void init() {
         super.init();
+
 
         int cameraMonitorViewId = engine.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", engine.hardwareMap.appContext.getPackageName());
         robot.webcam1 = OpenCvCameraFactory.getInstance().createWebcam(robot.webCamName, cameraMonitorViewId);
@@ -43,10 +46,24 @@ public class CameraVisionState extends CyberarmState {
     }
 
     @Override
+    public void start() {
+        super.start();
+        initTime = System.currentTimeMillis();
+
+    }
+
+    @Override
     public void exec() {
+        robot.clawArmControl();
+        if (System.currentTimeMillis() - initTime > 3000){
+            robot.objectPos = pipeline.objectPos();
+            setHasFinished(true);
+        }
+
         // odometry driving ALWAYS
-//        robot.DriveToCoordinates();
-//        robot.OdometryLocalizer();
+        robot.DriveToCoordinates();
+        robot.OdometryLocalizer();
+
 
 
     }
@@ -58,10 +75,12 @@ public class CameraVisionState extends CyberarmState {
         engine.telemetry.addData("middle side pixel amount", pipeline.middleavgfin);
         engine.telemetry.addData("right side pixel amount", pipeline.rightavgfin);
         engine.telemetry.addData("object pos", pipeline.objectPos());
+
+
     }
 
     class ExamplePipeline extends OpenCvPipeline {
-        Mat YCbCr = new Mat();
+        Mat HSV = new Mat();
         Mat leftCrop;
         Mat middleCrop;
         Mat rightCrop;
@@ -72,7 +91,7 @@ public class CameraVisionState extends CyberarmState {
         Scalar rectColor = new Scalar(255.0, 0.0, 0.0);
 
         public Mat processFrame(Mat input) {
-            Imgproc.cvtColor(input, YCbCr, Imgproc.COLOR_RGB2YCrCb);
+            Imgproc.cvtColor(input, HSV, Imgproc.COLOR_RGB2HSV);
 
             Rect leftRect = new Rect(1, 1, 212, 359);
             Rect rightRect = new Rect(213, 1, 212, 359);
@@ -83,13 +102,13 @@ public class CameraVisionState extends CyberarmState {
             Imgproc.rectangle(output, rightRect, rectColor, 2);
             Imgproc.rectangle(output, middleRect, rectColor, 2);
 
-            leftCrop = YCbCr.submat(leftRect);
-            rightCrop = YCbCr.submat(rightRect);
-            middleCrop = YCbCr.submat(middleRect);
+            leftCrop = HSV.submat(leftRect);
+            rightCrop = HSV.submat(rightRect);
+            middleCrop = HSV.submat(middleRect);
 
-            Core.extractChannel(leftCrop, leftCrop, 2);
-            Core.extractChannel(middleCrop, middleCrop, 2);
-            Core.extractChannel(rightCrop, rightCrop, 2);
+            Core.extractChannel(leftCrop, leftCrop, 1);
+            Core.extractChannel(middleCrop, middleCrop, 1);
+            Core.extractChannel(rightCrop, rightCrop, 1);
 
             Scalar leftavg = Core.mean(leftCrop);
             Scalar middleavg = Core.mean(middleCrop);
@@ -99,21 +118,29 @@ public class CameraVisionState extends CyberarmState {
             rightavgfin = rightavg.val[0];
             middleavgfin = middleavg.val[0];
 
+            HSV.release();
+            leftCrop.release();
+            middleCrop.release();
+            rightCrop.release();
+
             return (output);
+
 
         }
 
-        public String objectPos() {
+        public int objectPos() {
             if (leftavgfin > rightavgfin && leftavgfin > middleavgfin) {
-                return "LEFT";
+                return 1;
             }
             else if (rightavgfin > leftavgfin && rightavgfin > middleavgfin) {
-                return "RIGHT";
+                return 2;
             }
             else {
-                return "MIDDLE";
+                return 3;
             }
         }
     }
+
+
 }
 
