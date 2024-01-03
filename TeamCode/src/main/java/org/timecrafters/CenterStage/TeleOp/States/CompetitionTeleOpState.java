@@ -9,6 +9,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
 import org.timecrafters.CenterStage.Common.PrototypeRobot;
 
+import java.util.Objects;
+
 import dev.cyberarm.engine.V2.CyberarmState;
 
 @Config
@@ -53,8 +55,6 @@ public class CompetitionTeleOpState extends CyberarmState {
     private boolean lbsVar1;
     private double drivePower = 1;
     public double rx;
-    public double minPower = 0;
-
 
     // ------------------------------------------------------------------------------------------------------------------- Slider Variables:
     private int maxExtension = 2000;
@@ -108,11 +108,11 @@ public class CompetitionTeleOpState extends CyberarmState {
 
     public void DriveTrainTeleOp () {
         if (headingLock){
-            robot.rx = HeadingPIDControl(targetHeading, currentHeading);
+            rx = HeadingPIDControl(targetHeading, currentHeading);
         } else {
-            robot.rx = engine.gamepad1.right_stick_x / 2;
-
+            rx = engine.gamepad1.right_stick_x / 2;
         }
+
 
         boolean lbs1 = engine.gamepad1.left_stick_button;
         if (lbs1 && !lbsVar1) {
@@ -124,22 +124,6 @@ public class CompetitionTeleOpState extends CyberarmState {
         }
         lbsVar1 = lbs1;
 
-
-
-
-//        // Improve control?
-//        if (y < 0) {
-//            y = -Math.sqrt(-y);
-//        } else {
-//            y = Math.sqrt(y);
-//        }
-//
-//        if (x < 0) {
-//            x = -Math.sqrt(-x) * 1.1; // Counteract imperfect strafing;
-//        } else {
-//            x = Math.sqrt(x) * 1.1; // Counteract imperfect strafing;
-//        }
-
         double x = engine.gamepad1.left_stick_x;
         double y = -engine.gamepad1.left_stick_y;
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
@@ -150,14 +134,14 @@ public class CompetitionTeleOpState extends CyberarmState {
         double rotY = x * Math.sin(heading) + y * Math.cos(heading);
 
         // joystick math to find the approximate power across each wheel for a movement
-        double frontLeftPower = (rotY + rotX + robot.rx) / denominator;
-        double backLeftPower = (rotY - rotX + robot.rx) / denominator;
-        double frontRightPower = (rotY - rotX - robot.rx) / denominator;
-        double backRightPower = (rotY + rotX - robot.rx) / denominator;
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
 
         // setting each power determined previously from the math above
         // as well as multiplying it by a drive power that can be changed.
-        robot.backLeft.setPower(backLeftPower * drivePower + minPower);
+        robot.backLeft.setPower(backLeftPower * drivePower);
         robot.backRight.setPower(-backRightPower * drivePower);
         robot.frontLeft.setPower(frontLeftPower * drivePower);
         robot.frontRight.setPower(frontRightPower * drivePower);
@@ -242,7 +226,7 @@ public class CompetitionTeleOpState extends CyberarmState {
             armPos = "reset";
         }
 
-        if (armPos == "collect") {
+        if (Objects.equals(armPos, "collect")) {
             if (robot.lift.getCurrentPosition() >= 20) {
                 robot.chinUpServo.setPosition(chinUpServoDown);
                 robot.lift.setPower(-0.6);
@@ -267,7 +251,7 @@ public class CompetitionTeleOpState extends CyberarmState {
 //                target = 850;
 //            }
 //        }
-        if (armPos == "deposit") {
+        if (Objects.equals(armPos, "deposit")) {
             robot.shoulder.setPosition(robot.shoulderDeposit);
             robot.elbow.setPosition(robot.elbowDeposit);
             target = 400;
@@ -275,25 +259,25 @@ public class CompetitionTeleOpState extends CyberarmState {
 
 
         }
-        if (armPos == "hover") {
+        if (Objects.equals(armPos, "hover")) {
             if (robot.lift.getCurrentPosition() >= 20) {
                 robot.chinUpServo.setPosition(chinUpServoDown);
                 robot.lift.setPower(-0.6);
             } else {
                 robot.shoulder.setPosition(robot.shoulderCollect);
                 robot.elbow.setPosition(robot.elbowCollect);
-                target = 200;
+                target = 120;
             }
 
         }
-        if (armPos == "lift up") {
+        if (Objects.equals(armPos, "lift up")) {
             robot.shoulder.setPosition(robot.shoulderDeposit);
             robot.elbow.setPosition(robot.elbowDeposit);
             target = 120;
             robot.chinUpServo.setPosition(chinUpServoUp);
         }
 
-        if (armPos == "lift down") {
+        if (Objects.equals(armPos, "lift down")) {
             if (robot.lift.getCurrentPosition() >= 1) {
                 robot.lift.setPower(-0.6);
                 robot.chinUpServo.setPosition(chinUpServoDown);
@@ -306,7 +290,7 @@ public class CompetitionTeleOpState extends CyberarmState {
             }
         }
 
-        if (armPos == "reset") {
+        if (armPos.equals("reset")) {
             robot.shoulder.setPosition(robot.shoulderPassive);
             if (robot.touchLeftArm.isPressed() || robot.touchRightArm.isPressed()) {
                 robot.clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -340,13 +324,6 @@ public class CompetitionTeleOpState extends CyberarmState {
             robot.imu.resetYaw();
         }
 
-        if (headingLock){
-            robot.rx = HeadingPIDControl(targetHeading, currentHeading);
-        } else {
-            robot.rx = engine.gamepad1.right_stick_x;
-
-        }
-
         currentHeading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // drivetrain
@@ -373,11 +350,10 @@ public class CompetitionTeleOpState extends CyberarmState {
         int armCurrentPos = robot.clawArm.getCurrentPosition();
         double pid = pidController.calculate(armCurrentPos, target);
 
-        if (armPos == "reset"){
+        if (armPos.equals("reset")){
             armPower = -0.2;
-        } else if (armPos != "reset"){
+        } else {
             armPower = pid;
-
         }
 
         robot.clawArm.setPower(armPower);
@@ -400,6 +376,7 @@ public class CompetitionTeleOpState extends CyberarmState {
             engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
             engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getRoll(AngleUnit.DEGREES));
             engine.telemetry.addData("pid power", power);
+            engine.telemetry.addData("rx power", robot.rx);
             engine.telemetry.addData("heading Lock?", headingLock);
             engine.telemetry.addData("Kp", Kp);
             engine.telemetry.addData("Ki", Ki);

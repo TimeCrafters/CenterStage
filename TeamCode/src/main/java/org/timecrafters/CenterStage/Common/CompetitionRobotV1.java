@@ -170,6 +170,7 @@ public class CompetitionRobotV1 extends Robot {
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         chinUp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         clawArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
