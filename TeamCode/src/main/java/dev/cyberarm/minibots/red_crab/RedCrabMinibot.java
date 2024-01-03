@@ -45,6 +45,7 @@ public class RedCrabMinibot {
 
     public static double CLAW_ARM_MAX_SPEED = 0.5;
     public static double CLAW_ARM_MAX_VELOCITY_DEGREES = 10;
+    private static double CLAW_ARM_MOTOR_MAX_CURRENT_MILLIAMPS = 1588.0;
     public static double CLAW_ARM_kP = 0.0;
     public static double CLAW_ARM_kI = 0.0;
     public static double CLAW_ARM_kD = 0.0;
@@ -181,6 +182,7 @@ public class RedCrabMinibot {
         winch.setDirection(DcMotorSimple.Direction.FORWARD);
 
         /// --- RUN MODE
+        winch.setTargetPosition(winch.getCurrentPosition());
         winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         /// CLAW and Co. ///
@@ -249,12 +251,13 @@ public class RedCrabMinibot {
         RedCrabMinibot.CLAW_ARM_MAX_VELOCITY_DEGREES = config.variable("Robot", "ClawArm_Tuning", "max_velocityDEGREES").value();
         RedCrabMinibot.CLAW_ARM_POSITION_TOLERANCE = config.variable("Robot", "ClawArm_Tuning", "tolerance").value();
         RedCrabMinibot.CLAW_ARM_STOW_ANGLE = config.variable("Robot", "ClawArm_Tuning", "stow_angle").value();
-        RedCrabMinibot.CLAW_ARM_DEPOSIT_ANGLE = config.variable("Robot", "ClawArm_Tuning", "collect_float_angle").value();
+        RedCrabMinibot.CLAW_ARM_DEPOSIT_ANGLE = config.variable("Robot", "ClawArm_Tuning", "deposit_angle").value();
         RedCrabMinibot.CLAW_ARM_COLLECT_FLOAT_ANGLE = config.variable("Robot", "ClawArm_Tuning", "collect_angle").value();
         RedCrabMinibot.CLAW_ARM_COLLECT_ANGLE = config.variable("Robot", "ClawArm_Tuning", "collect_angle").value();
 
         RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO = config.variable("Robot", "ClawArm_Tuning", "gear_ratio").value();
         RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION = config.variable("Robot", "ClawArm_Tuning", "motor_ticks").value();
+        RedCrabMinibot.CLAW_ARM_MOTOR_MAX_CURRENT_MILLIAMPS = config.variable("Robot", "ClawArm_Tuning", "max_current_milliamps").value();
 
         /// WINCH
 
@@ -362,6 +365,7 @@ public class RedCrabMinibot {
 
         PIDFCoefficients clawArmPIDFPosition = clawArm.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
         PIDFCoefficients clawArmPIDFEncoder = clawArm.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        int clawArmError = clawArm.getCurrentPosition() - clawArm.getTargetPosition();
         engine.telemetry.addData(
                 "Claw Arm",
                 "Power: %.2f, Current: %.2f mAmp, Position: %d, Angle: %.2f, Velocity: %.2f (%.2f degrees/s)",
@@ -371,6 +375,16 @@ public class RedCrabMinibot {
                 Utilities.motorTicksToAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, clawArm.getCurrentPosition()),
                 clawArm.getVelocity(),
                 Utilities.motorTicksToAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, (int)clawArm.getVelocity()));
+        engine.telemetry.addData(
+                "Claw Arm",
+                "TPos: %d, TAngle: %.2f, ErrPos: %d ErrAngle: %.2f",
+                clawArm.getTargetPosition(),
+                Utilities.motorTicksToAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, clawArm.getTargetPosition()),
+                clawArmError,
+                Utilities.motorTicksToAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, clawArmError),
+                clawArm.getVelocity(),
+                Utilities.motorTicksToAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, (int)clawArm.getVelocity()));
+        engine.telemetry.addData("Current Alarm?", clawArm.isOverCurrent());
         engine.telemetry.addData(
                 "   PIDF", "P: %.4f, I: %.4f, D: %.4f, F: %.4f, PosP: %.4f",
                 clawArmPIDFEncoder.p,
@@ -431,6 +445,8 @@ public class RedCrabMinibot {
 
         clawArm.setVelocityPIDFCoefficients(CLAW_ARM_kP, CLAW_ARM_kI, CLAW_ARM_kD, CLAW_ARM_kF);
         clawArm.setPositionPIDFCoefficients(CLAW_ARM_kPosP);
+
+        clawArm.setCurrentAlert(CLAW_ARM_MOTOR_MAX_CURRENT_MILLIAMPS, CurrentUnit.MILLIAMPS);
 
         double velocity = Utilities.motorAngleToTicks(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, CLAW_ARM_MAX_VELOCITY_DEGREES);
 

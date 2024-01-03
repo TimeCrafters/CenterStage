@@ -1,5 +1,6 @@
 package dev.cyberarm.minibots.red_crab.states;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -20,6 +21,9 @@ public class Pilot extends CyberarmState {
     private boolean droneLaunchRequested = false;
     private double droneLastLaunchRequestStartMS = 0;
     private boolean robotSlowMode = false;
+    private boolean triggersControlClawArm = false;
+    private double deltaTime = 0;
+    private double lastLoopTimeMS = 0;
 
     public Pilot(RedCrabMinibot robot) {
         this.robot = robot;
@@ -27,6 +31,8 @@ public class Pilot extends CyberarmState {
 
     @Override
     public void exec() {
+        deltaTime = runTime() - lastLoopTimeMS;
+
         drivetrain();
 
         clawArmAndWristController();
@@ -34,6 +40,8 @@ public class Pilot extends CyberarmState {
         droneLatchController();
         hookArmController(); // disabled for swrist debug
         winchController();
+
+        lastLoopTimeMS = runTime();
     }
 
     @Override
@@ -70,6 +78,17 @@ public class Pilot extends CyberarmState {
                     break;
                 case "dpad_right":
                     clawArmPosition = RedCrabMinibot.ClawArm_COLLECT_FLOAT;
+                    break;
+                case "back":
+                    // FIXME: trigger controls don't yet work well.
+                    triggersControlClawArm = false; //!triggersControlClawArm;
+
+                    if (triggersControlClawArm)
+                    {
+                        engine.telemetry.speak("Claw Arm Manual");
+                    } else {
+                        engine.telemetry.speak("Winch Manual");
+                    }
                     break;
                 case "start":
                     robot.reloadConfig();
@@ -140,6 +159,23 @@ public class Pilot extends CyberarmState {
     }
 
     private void clawArmAndWristController() {
+        if (triggersControlClawArm)
+        {
+            double triggerPower = engine.gamepad1.right_trigger - engine.gamepad1.left_trigger;
+
+            robot.clawArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            double maxVelocity = Utilities.motorAngleToTicks(
+                    RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
+                    RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
+                    RedCrabMinibot.CLAW_ARM_MAX_VELOCITY_DEGREES);
+            robot.clawArm.setTargetPosition((int)(deltaTime * maxVelocity));
+
+            robot.clawArm.setVelocity(maxVelocity * triggerPower);
+            return;
+        } else {
+            robot.clawArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+
         switch (clawArmPosition) {
             case RedCrabMinibot.ClawArm_STOW:
                 robot.clawArm.setTargetPosition(Utilities.motorAngleToTicks(
@@ -180,10 +216,10 @@ public class Pilot extends CyberarmState {
                 robot.clawArm.getCurrentPosition() >= Utilities.motorAngleToTicks(
                 RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
                 RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
-                RedCrabMinibot.CLAW_ARM_COLLECT_ANGLE) - 25.0) {
-//            robot.clawArm.setPower(0);
-//        } else {
-//            robot.clawArm.setPower(RedCrabMinibot.CLAW_ARM_MAX_SPEED);
+                RedCrabMinibot.CLAW_ARM_COLLECT_ANGLE) - 5.0) {
+            robot.clawArm.setPower(0);
+        } else {
+            robot.clawArm.setPower(RedCrabMinibot.CLAW_ARM_MAX_SPEED);
         }
     }
 
@@ -206,12 +242,22 @@ public class Pilot extends CyberarmState {
     }
 
     private void winchController() {
+        if (triggersControlClawArm)
+        {
+            return;
+        }
+
         if (engine.gamepad1.right_trigger > 0) {
+            robot.winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             robot.winch.setPower(engine.gamepad1.right_trigger * RedCrabMinibot.WINCH_MAX_SPEED);
+            robot.winch.setTargetPosition(robot.winch.getCurrentPosition());
         } else if (engine.gamepad1.left_trigger > 0) {
+            robot.winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             robot.winch.setPower(-engine.gamepad1.left_trigger * RedCrabMinibot.WINCH_MAX_SPEED);
+            robot.winch.setTargetPosition(robot.winch.getCurrentPosition());
         } else {
-            robot.winch.setPower(0);
+            robot.winch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.winch.setPower(RedCrabMinibot.WINCH_MAX_SPEED);
         }
     }
 }
