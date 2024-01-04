@@ -20,8 +20,8 @@ public class CompetitionTeleOpState extends CyberarmState {
     private CompetitionRobotV1 robot;
     // ------------------------------------------------------------------------------------------------------------robot claw arm variables:
     private PIDController pidController;
-    public static double p = 0.007, i = 0,  d = 0.0001, f = 0;
-    public static int target = 0;
+    public  double p = 0.007, i = 0,  d = 0.0001, f = 0;
+    public int target = 0;
 
     // ------------------------------------------------------------------------------------------------------------- Heading lock variables:
     public double integralSum = 0;
@@ -29,7 +29,6 @@ public class CompetitionTeleOpState extends CyberarmState {
     public double collectLock = Math.toRadians(-90);
     public double backDropLock = Math.toRadians(90);
 
-    public double power;
     public double armPower;
     private double currentHeading;
     private boolean headingLock = false;
@@ -107,12 +106,6 @@ public class CompetitionTeleOpState extends CyberarmState {
 
 
     public void DriveTrainTeleOp () {
-        if (headingLock){
-            rx = HeadingPIDControl(targetHeading, currentHeading);
-        } else {
-            rx = engine.gamepad1.right_stick_x / 2;
-        }
-
 
         boolean lbs1 = engine.gamepad1.left_stick_button;
         if (lbs1 && !lbsVar1) {
@@ -239,18 +232,6 @@ public class CompetitionTeleOpState extends CyberarmState {
 
             }
         }
-//        if (armPos == "passive") {
-//            if (robot.lift.getCurrentPosition() >= 20) {
-//                robot.lift.setPower(-0.6);
-//                robot.chinUpServo.setPosition(chinUpServoDown);
-//            } else {
-//                robot.lift.setPower(0);
-//                robot.chinUpServo.setPosition(chinUpServoDown);
-//                robot.shoulder.setPosition(robot.shoulderPassive);
-//                robot.elbow.setPosition(robot.elbowPassive);
-//                target = 850;
-//            }
-//        }
         if (Objects.equals(armPos, "deposit")) {
             robot.shoulder.setPosition(robot.shoulderDeposit);
             robot.elbow.setPosition(robot.elbowDeposit);
@@ -306,11 +287,11 @@ public class CompetitionTeleOpState extends CyberarmState {
             super.init();
             pidController = new PIDController(p, i, d);
 
-
     }
 
     @Override
     public void exec() {
+
 
         if (engine.gamepad2.dpad_up) {
             robot.chinUp.setPower(-1);
@@ -327,23 +308,27 @@ public class CompetitionTeleOpState extends CyberarmState {
         currentHeading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // drivetrain
-        DriveTrainTeleOp();
 
         if (engine.gamepad1.b){
             headingLock = true;
             targetHeading = backDropLock;
-        }
-        if (engine.gamepad1.x){
+        } else if (engine.gamepad1.x){
             headingLock = true;
             targetHeading = collectLock;
-        }
-        if (engine.gamepad1.a){
+        } else if (engine.gamepad1.a){
             headingLock = true;
             targetHeading = currentHeading;
-        }
-        if (engine.gamepad1.right_stick_x != 0){
+        } else if (engine.gamepad1.right_stick_x != 0){
             headingLock = false;
         }
+
+        if (headingLock){
+            rx = HeadingPIDControl(targetHeading, currentHeading);
+        } else {
+            rx = engine.gamepad1.right_stick_x / 2;
+        }
+
+        DriveTrainTeleOp();
 
         // ---------------------------------------------------------------------------------------- Game Pad 2, arms, claw, drone, and lift:
         pidController.setPID(p, i, d);
@@ -375,8 +360,8 @@ public class CompetitionTeleOpState extends CyberarmState {
             engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
             engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getRoll(AngleUnit.DEGREES));
-            engine.telemetry.addData("pid power", power);
-            engine.telemetry.addData("rx power", robot.rx);
+            engine.telemetry.addData("pid power", HeadingPIDControl(targetHeading, currentHeading));
+            engine.telemetry.addData("rx power", rx);
             engine.telemetry.addData("heading Lock?", headingLock);
             engine.telemetry.addData("Kp", Kp);
             engine.telemetry.addData("Ki", Ki);

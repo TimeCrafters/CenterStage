@@ -36,7 +36,6 @@ public class CompetitionRobotV1 extends Robot {
     public int objectPos;
 
     // ------------------------------------------------------------------------------------------------------------------ HardwareMap setup:
-    public double power;
     public OpenCvWebcam webcam1 = null;
     public WebcamName webCamName;
     public DcMotor frontLeft, frontRight, backLeft, backRight, lift, clawArm, chinUp;
@@ -45,13 +44,11 @@ public class CompetitionRobotV1 extends Robot {
     public Servo shoulder, elbow, leftClaw, rightClaw, chinUpServo;
     public DistanceSensor customObject;
     public TouchSensor touchLeftArm, touchRightArm;
-    public int loopCheck = 0;
 
     // ----------------------------------------------------------------------------------------------------------------- odometry variables:
     public static double Hp = 0.8, Hi = 0, Hd = 0;
     public static double Xp = -0.035, Xi = 0, Xd = 0;
     public static double Yp = 0.035, Yi = 0, Yd = 0.0013;
-    public double rx;
     public double xMultiplier = 1;
     public double yMultiplier = 1;
     public double positionX = 1000;
@@ -93,10 +90,12 @@ public class CompetitionRobotV1 extends Robot {
     public double xMaxPower = 1;
     public double pidX;
     public double pidY;
+    public double rawPidX;
+    public double rawPidY;
 
     //-------------------------------------------------------------------------------------------------------------- arm sequence variables:
     PIDController pidController;
-
+    public double power;
     public String armPos;
 
     public int target;
@@ -106,7 +105,6 @@ public class CompetitionRobotV1 extends Robot {
     public  double shoulderPassive = 0.8;
     public  double elbowCollect = 0.02;
     public  double elbowDeposit = 0;
-    public  double elbowPassive = 0;
 
 
     private HardwareMap hardwareMap;
@@ -288,26 +286,42 @@ public class CompetitionRobotV1 extends Robot {
     }
 
     public void DriveToCoordinates () {
-        // determine the velocities needed for each direction
+        // determine the powers needed for each direction
         // this uses PID to adjust needed Power for robot to move to target
 
-//        if (yMaxPower < XPIDControl(xTarget, positionX)){
-//            pidX = yMaxPower;
-//        } else {
-//            pidX = YPIDControl(yTarget, positionY);
-//        }
+//        rawPidY = XPIDControl(xTarget, positionX);
+//        rawPidX = YPIDControl(yTarget, positionY);
+
+        if (Math.abs(yTarget - positionY) > 5) {
+            if (Math.abs(XPIDControl(xTarget, positionX)) >= yMaxPower) {
+                if (XPIDControl(xTarget, positionX) < 0) {
+                    pidY = yMaxPower * -1;
+                } else {
+                    pidY = yMaxPower;
+                }
+            } else {
+                pidY = rawPidX;
+            }
+        } else {
+            pidY = rawPidX;
+        }
+
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double rx = HeadingPIDControl(Math.toRadians(hTarget), heading);
 
-//        if (xMaxPower < YPIDControl(yTarget, positionY)){
-//            pidY = xMaxPower;
-//        } else {
-//            pidY = XPIDControl(xTarget, positionX);
-//        }
-
-            pidY = XPIDControl(xTarget, positionX);
-            pidX = YPIDControl(yTarget, positionY);
-
+        if (Math.abs(xTarget - positionX) > 5) {
+            if (Math.abs(YPIDControl(yTarget, positionY)) >= xMaxPower) {
+                if (YPIDControl(yTarget, positionY) < 0) {
+                    pidX = xMaxPower * -1;
+                } else {
+                    pidX = xMaxPower;
+                }
+            } else {
+                pidX = rawPidY;
+            }
+        } else {
+            pidX = rawPidY;
+        }
 
         double denominator = Math.max(Math.abs(pidX) + Math.abs(pidY) + Math.abs(rx), 1);
 

@@ -48,11 +48,11 @@ public class DriveToCoordinatesState extends CyberarmState {
         } else {
             if (objectPos != robot.objectPos) {
                 // enter the ending loop
-                setHasFinished(true);
+//                setHasFinished(true);
             }
         }
         if (posAchieved) {
-            setHasFinished(true);
+//            setHasFinished(true);
         }
 
         if (armDrive) {
@@ -93,6 +93,10 @@ public class DriveToCoordinatesState extends CyberarmState {
         engine.telemetry.addData("front left power", robot.frontLeftPower);
         engine.telemetry.addData("back right power", robot.backRightPower);
         engine.telemetry.addData("back left power", robot.backLeftPower);
+        engine.telemetry.addData("input y pidPower", robot.pidX);
+        engine.telemetry.addData("input x pidPower", robot.pidY);
+        engine.telemetry.addData("raw x pid", robot.XPIDControl(robot.xTarget, robot.positionX));
+        engine.telemetry.addData("raw y pid", robot.YPIDControl(robot.yTarget, robot.positionY));
         engine.telemetry.addData("global object position", robot.objectPos);
         engine.telemetry.addData("local object position", objectPos);
 
