@@ -43,51 +43,51 @@ public class TankMove extends CyberarmState {
 
     @Override
     public void start() {
-        robot.left.resetEncoder();
-        robot.right.resetEncoder();
-
-        robot.left.setTargetDistance(leftDistanceMM);
-        robot.right.setTargetDistance(rightDistanceMM);
-
-        robot.left.setPositionTolerance(tolerance);
-        robot.right.setPositionTolerance(tolerance);
-
-        robot.left.set(leftVelocity);
-        robot.right.set(rightVelocity);
+//        robot.left.resetEncoder();
+//        robot.right.resetEncoder();
+//
+//        robot.left.setTargetDistance(leftDistanceMM);
+//        robot.right.setTargetDistance(rightDistanceMM);
+//
+//        robot.left.setPositionTolerance(tolerance);
+//        robot.right.setPositionTolerance(tolerance);
+//
+//        robot.left.set(leftVelocity);
+//        robot.right.set(rightVelocity);
     }
 
     @Override
     public void exec() {
-        if (robot.left.atTargetPosition() || Math.abs(robot.leftFront.getDistance()) >= Math.abs(leftDistanceMM)) {
-            robot.left.set(0);
-        }
-        if (robot.right.atTargetPosition() || Math.abs(robot.rightFront.getDistance()) >= Math.abs(leftDistanceMM)) {
-            robot.right.set(0);
-        }
-
-        if (
-                (robot.left.atTargetPosition() && robot.right.atTargetPosition()) ||
-                (Math.abs(robot.leftFront.getDistance()) >= Math.abs(leftDistanceMM) && robot.right.atTargetPosition() || Math.abs(robot.rightFront.getDistance()) >= Math.abs(leftDistanceMM))  ||
-                runTime() >= timeoutMS) {
-            robot.left.set(0);
-            robot.right.set(0);
-            setHasFinished(true);
-        }
+//        if (robot.left.atTargetPosition() || Math.abs(robot.leftFront.getDistance()) >= Math.abs(leftDistanceMM)) {
+//            robot.left.set(0);
+//        }
+//        if (robot.right.atTargetPosition() || Math.abs(robot.rightFront.getDistance()) >= Math.abs(leftDistanceMM)) {
+//            robot.right.set(0);
+//        }
+//
+//        if (
+//                (robot.left.atTargetPosition() && robot.right.atTargetPosition()) ||
+//                (Math.abs(robot.leftFront.getDistance()) >= Math.abs(leftDistanceMM) && robot.right.atTargetPosition() || Math.abs(robot.rightFront.getDistance()) >= Math.abs(leftDistanceMM))  ||
+//                runTime() >= timeoutMS) {
+//            robot.left.set(0);
+//            robot.right.set(0);
+//            setHasFinished(true);
+//        }
     }
 
     @Override
     public void telemetry() {
-        engine.telemetry.addLine();
-
-        engine.telemetry.addData("Left distance", robot.leftFront.getDistance());
-        engine.telemetry.addData("Left position", robot.left.getPositions().get(0));
-        engine.telemetry.addData("Left speed", robot.left.getSpeeds().get(0));
-        engine.telemetry.addData("Left velocity", robot.left.getVelocity());
-        engine.telemetry.addLine();
-
-        engine.telemetry.addData("Right distance", robot.rightFront.getDistance());
-        engine.telemetry.addData("Right position", robot.right.getPositions().get(0));
-        engine.telemetry.addData("Right speed", robot.right.getSpeeds().get(0));
-        engine.telemetry.addData("Right velocity", robot.right.getVelocity());
+//        engine.telemetry.addLine();
+//
+//        engine.telemetry.addData("Left distance", robot.leftFront.getDistance());
+//        engine.telemetry.addData("Left position", robot.left.getPositions().get(0));
+//        engine.telemetry.addData("Left speed", robot.left.getSpeeds().get(0));
+//        engine.telemetry.addData("Left velocity", robot.left.getVelocity());
+//        engine.telemetry.addLine();
+//
+//        engine.telemetry.addData("Right distance", robot.rightFront.getDistance());
+//        engine.telemetry.addData("Right position", robot.right.getPositions().get(0));
+//        engine.telemetry.addData("Right speed", robot.right.getSpeeds().get(0));
+//        engine.telemetry.addData("Right velocity", robot.right.getVelocity());
     }
 }

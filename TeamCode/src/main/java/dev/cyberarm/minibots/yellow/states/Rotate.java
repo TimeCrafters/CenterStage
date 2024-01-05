@@ -47,40 +47,40 @@ public class Rotate extends CyberarmState {
 
     @Override
     public void exec() {
-        if (Math.abs(robot.angleDiff(robot.facing(), heading)) <= tolerance) {
-            robot.left.set(0);
-            robot.right.set(0);
-
-            setHasFinished(true);
-
-            return;
-        }
-
-        if (runTime() >= timeoutMS) {
-            robot.left.set(0);
-            robot.right.set(0);
-
-            setHasFinished(true);
-        }
-
-        double angleDiff = robot.angleDiff(robot.facing() + robot.turnRate(), heading);
-        double velocity = robot.lerp(minVelocity, maxVelocity, Range.clip(Math.abs(angleDiff) / 90.0, 0.0, 1.0));
-
-        if (angleDiff > 0) {
-            robot.left.set(-velocity);
-            robot.right.set(velocity);
-        } else {
-            robot.left.set(velocity);
-            robot.right.set(-velocity);
-        }
+//        if (Math.abs(robot.angleDiff(robot.facing(), heading)) <= tolerance) {
+//            robot.left.set(0);
+//            robot.right.set(0);
+//
+//            setHasFinished(true);
+//
+//            return;
+//        }
+//
+//        if (runTime() >= timeoutMS) {
+//            robot.left.set(0);
+//            robot.right.set(0);
+//
+//            setHasFinished(true);
+//        }
+//
+//        double angleDiff = robot.angleDiff(robot.facing() + robot.turnRate(), heading);
+//        double velocity = robot.lerp(minVelocity, maxVelocity, Range.clip(Math.abs(angleDiff) / 90.0, 0.0, 1.0));
+//
+//        if (angleDiff > 0) {
+//            robot.left.set(-velocity);
+//            robot.right.set(velocity);
+//        } else {
+//            robot.left.set(velocity);
+//            robot.right.set(-velocity);
+//        }
     }
 
     @Override
     public void telemetry() {
-        engine.telemetry.addLine();
-        engine.telemetry.addData("Robot Heading", robot.facing());
-        engine.telemetry.addData("Robot Target Heading", heading);
-        engine.telemetry.addData("Robot Angle Diff", robot.angleDiff(robot.facing() + robot.turnRate(), heading));
-        engine.telemetry.addData("Robot Turn Rate", robot.turnRate());
+//        engine.telemetry.addLine();
+//        engine.telemetry.addData("Robot Heading", robot.facing());
+//        engine.telemetry.addData("Robot Target Heading", heading);
+//        engine.telemetry.addData("Robot Angle Diff", robot.angleDiff(robot.facing() + robot.turnRate(), heading));
+//        engine.telemetry.addData("Robot Turn Rate", robot.turnRate());
     }
 }
