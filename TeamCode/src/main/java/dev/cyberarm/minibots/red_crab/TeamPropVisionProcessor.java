@@ -158,6 +158,15 @@ public class TeamPropVisionProcessor implements VisionProcessor {
         return saturationRight;
     }
 
+    public double getHighestSaturation() {
+        if (getSaturationLeft() > getSaturationCenter() && getSaturationLeft() > getSaturationRight())
+            return getSaturationLeft();
+        if (getSaturationCenter() > getSaturationLeft() && getSaturationCenter() > getSaturationRight())
+            return getSaturationCenter();
+
+        return getSaturationRight();
+    }
+
     private android.graphics.Rect makeDrawableRect(Rect rect, float scaleBmpPxToCanvasPx) {
         int left = Math.round(rect.x * scaleBmpPxToCanvasPx);
         int top = Math.round(rect.y * scaleBmpPxToCanvasPx);
