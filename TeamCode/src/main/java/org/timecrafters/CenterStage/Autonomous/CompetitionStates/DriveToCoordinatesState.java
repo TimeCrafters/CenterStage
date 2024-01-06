@@ -21,7 +21,6 @@ public class DriveToCoordinatesState extends CyberarmState {
     public boolean posSpecific;
     public double maxXPower;
     public double maxYPower;
-    public long initTime;
 
     public DriveToCoordinatesState(CompetitionRobotV1 robot, String groupName, String actionName) {
         this.robot = robot;
@@ -38,43 +37,38 @@ public class DriveToCoordinatesState extends CyberarmState {
     @Override
     public void start() {
         super.start();
-        initTime = System.currentTimeMillis();
+        robot.hTarget = hTarget;
+        robot.yTarget = yTarget;
+        robot.xTarget = xTarget;
+        robot.yMaxPower = maxYPower;
+        robot.xMaxPower = maxXPower;
+
     }
 
     @Override
     public void exec() {
-        if (!posSpecific) {
-            // enter loop
-        } else {
+        if (posSpecific) {
             if (objectPos != robot.objectPos) {
                 // enter the ending loop
-//                setHasFinished(true);
+                setHasFinished(true);
             }
-        }
-        if (posAchieved) {
-//            setHasFinished(true);
         }
 
         if (armDrive) {
             robot.clawArmControl();
         }
 
-        robot.yMaxPower = maxYPower;
-        robot.xMaxPower = maxXPower;
-
-        robot.hTarget = hTarget;
-        robot.yTarget = yTarget;
-        robot.xTarget = xTarget;
-
+        robot.OdometryLocalizer();
+        robot.XDrivePowerModifier();
+        robot.YDrivePowerModifier();
         robot.DriveToCoordinates();
         robot.OdometryLocalizer();
 
-
-        if ((Math.abs(robot.backLeftPower) < 0.18 &&
-                Math.abs(robot.backRightPower) < 0.18 &&
-                Math.abs(robot.frontLeftPower) < 0.18 &&
-                Math.abs(robot.frontRightPower) < 0.18) || (System.currentTimeMillis() - initTime > 5000)) {
-            posAchieved = true;
+        if ((Math.abs(robot.backLeftPower) < 0.15 &&
+                Math.abs(robot.backRightPower) < 0.15 &&
+                Math.abs(robot.frontLeftPower) < .15 &&
+                Math.abs(robot.frontRightPower) < 0.15)){
+                setHasFinished(true);
         }
     }
 

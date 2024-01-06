@@ -47,8 +47,8 @@ public class CompetitionRobotV1 extends Robot {
 
     // ----------------------------------------------------------------------------------------------------------------- odometry variables:
     public static double Hp = 0.8, Hi = 0, Hd = 0;
-    public static double Xp = -0.035, Xi = 0, Xd = 0;
-    public static double Yp = 0.035, Yi = 0, Yd = 0.0013;
+    public static double Xp = -0.03, Xi = 0, Xd = 0;
+    public static double Yp = 0.03, Yi = 0, Yd = 0;
     public double xMultiplier = 1;
     public double yMultiplier = 1;
     public double positionX = 1000;
@@ -175,8 +175,9 @@ public class CompetitionRobotV1 extends Robot {
         // ----------------------------------------------------------------------------------------------------------------------------- IMU
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                         RevHubOrientationOnRobot.UsbFacingDirection.UP));
+
 
         imu.initialize(parameters);
 
@@ -285,43 +286,42 @@ public class CompetitionRobotV1 extends Robot {
         return output;
     }
 
+    public void YDrivePowerModifier () {
+
+        rawPidY = XPIDControl(xTarget, positionX);
+
+        if (Math.abs(rawPidY) > yMaxPower) {
+            if (rawPidY < 0) {
+                pidY = -yMaxPower;
+            } else {
+                pidY = yMaxPower;
+            }
+        } else {
+            pidY = rawPidY;
+        }
+    }
+
+    public void XDrivePowerModifier () {
+
+        rawPidX = YPIDControl(yTarget, positionY);
+
+        if (Math.abs(rawPidX) > xMaxPower) {
+            if (rawPidX < 0) {
+                pidX = -xMaxPower;
+            } else {
+                pidX = xMaxPower;
+            }
+        } else {
+            pidX = rawPidX;
+        }
+    }
+
     public void DriveToCoordinates () {
         // determine the powers needed for each direction
         // this uses PID to adjust needed Power for robot to move to target
 
-//        rawPidY = XPIDControl(xTarget, positionX);
-//        rawPidX = YPIDControl(yTarget, positionY);
-
-        if (Math.abs(yTarget - positionY) > 5) {
-            if (Math.abs(XPIDControl(xTarget, positionX)) >= yMaxPower) {
-                if (XPIDControl(xTarget, positionX) < 0) {
-                    pidY = yMaxPower * -1;
-                } else {
-                    pidY = yMaxPower;
-                }
-            } else {
-                pidY = rawPidX;
-            }
-        } else {
-            pidY = rawPidX;
-        }
-
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double rx = HeadingPIDControl(Math.toRadians(hTarget), heading);
-
-        if (Math.abs(xTarget - positionX) > 5) {
-            if (Math.abs(YPIDControl(yTarget, positionY)) >= xMaxPower) {
-                if (YPIDControl(yTarget, positionY) < 0) {
-                    pidX = xMaxPower * -1;
-                } else {
-                    pidX = xMaxPower;
-                }
-            } else {
-                pidX = rawPidY;
-            }
-        } else {
-            pidX = rawPidY;
-        }
 
         double denominator = Math.max(Math.abs(pidX) + Math.abs(pidY) + Math.abs(rx), 1);
 
@@ -366,7 +366,7 @@ public class CompetitionRobotV1 extends Robot {
                 lift.setPower(-0.6);
             } else {
                 shoulder.setPosition(0.38);
-                target = 100;
+                target = 120;
             }
 
         }

@@ -13,9 +13,18 @@ public class ClawArmState extends CyberarmState {
 
     CompetitionRobotV1 robot;
     public String armPos;
+    public long wait;
+    public long initTime;
     public ClawArmState(CompetitionRobotV1 robot, String groupName, String actionName) {
         this.robot = robot;
         this.armPos = robot.configuration.variable(groupName, actionName, "armPos").value();
+        this.wait = robot.configuration.variable(groupName, actionName, "wait").value();
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        initTime = System.currentTimeMillis();
     }
 
     @Override
@@ -28,7 +37,7 @@ public class ClawArmState extends CyberarmState {
         robot.armPos = armPos;
         robot.clawArmControl();
 
-        if (robot.clawArm.getCurrentPosition() > robot.target - 20 || robot.clawArm.getCurrentPosition() < robot.target + 20) {
+        if ((robot.clawArm.getCurrentPosition() > robot.target - 20 || robot.clawArm.getCurrentPosition() < robot.target + 20) && wait < System.currentTimeMillis() - initTime) {
             setHasFinished(true);
         }
 

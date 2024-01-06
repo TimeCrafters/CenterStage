@@ -23,17 +23,18 @@ public class CompetitionTeleOpState extends CyberarmState {
     public  double p = 0.007, i = 0,  d = 0.0001, f = 0;
     public int target = 0;
 
+
     // ------------------------------------------------------------------------------------------------------------- Heading lock variables:
     public double integralSum = 0;
     private double targetHeading;
-    public double collectLock = Math.toRadians(-90);
-    public double backDropLock = Math.toRadians(90);
-
+    public double collectLock = Math.toRadians(90);
+    public double backDropLock = Math.toRadians(-90);
+    public double boost;
     public double armPower;
     private double currentHeading;
     private boolean headingLock = false;
 
-    public static double Kp = 1;
+    public static double Kp = 0.8;
     public static double Ki = 0;
     public static double Kd = 0;
     private double lastError = 0;
@@ -53,7 +54,7 @@ public class CompetitionTeleOpState extends CyberarmState {
     //---------------------------------------------------------------------------------------------------------------- Drivetrain Variables:
     private boolean lbsVar1;
     private double drivePower = 1;
-    public double rx;
+    public double rx = engine.gamepad1.right_stick_x / 2;
 
     // ------------------------------------------------------------------------------------------------------------------- Slider Variables:
     private int maxExtension = 2000;
@@ -117,8 +118,12 @@ public class CompetitionTeleOpState extends CyberarmState {
         }
         lbsVar1 = lbs1;
 
-        double x = engine.gamepad1.left_stick_x;
-        double y = -engine.gamepad1.left_stick_y;
+        if (engine.gamepad1.left_stick_x != 0 || engine.gamepad1.left_stick_y != 0){
+            boost = engine.gamepad1.right_trigger + 1;
+        }
+
+        double x = -((engine.gamepad1.left_stick_x * 0.5)  * boost);
+        double y = ((engine.gamepad1.left_stick_y * 0.5)  * boost);
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
         // angle math to make things field oriented
@@ -134,10 +139,10 @@ public class CompetitionTeleOpState extends CyberarmState {
 
         // setting each power determined previously from the math above
         // as well as multiplying it by a drive power that can be changed.
-        robot.backLeft.setPower(backLeftPower * drivePower);
-        robot.backRight.setPower(-backRightPower * drivePower);
-        robot.frontLeft.setPower(frontLeftPower * drivePower);
-        robot.frontRight.setPower(frontRightPower * drivePower);
+        robot.backLeft.setPower(backLeftPower);
+        robot.backRight.setPower(-backRightPower);
+        robot.frontLeft.setPower(frontLeftPower);
+        robot.frontRight.setPower(frontRightPower);
     }
 
     public double angleWrap(double radians) {
@@ -200,9 +205,6 @@ public class CompetitionTeleOpState extends CyberarmState {
         if (engine.gamepad2.a) {
             armPos = "collect";
             depositMode = false;
-//        } else if (engine.gamepad2.x) {
-//            armPos = "passive";
-//            depositMode = false;
         } else if (engine.gamepad2.y) {
             armPos = "deposit";
             depositMode = true;
@@ -286,6 +288,7 @@ public class CompetitionTeleOpState extends CyberarmState {
     public void init() {
             super.init();
             pidController = new PIDController(p, i, d);
+            robot.imu.resetYaw();
 
     }
 
