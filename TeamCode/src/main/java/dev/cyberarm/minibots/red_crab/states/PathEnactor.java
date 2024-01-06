@@ -25,7 +25,7 @@ public class PathEnactor extends CyberarmState {
                 break;
         }
 
-        this.pathGroupName = String.format("AutonomousPixelPath_%s", path);
+        this.pathGroupName = String.format("Autonomous_SpikePath_%s", path);
     }
 
     @Override
