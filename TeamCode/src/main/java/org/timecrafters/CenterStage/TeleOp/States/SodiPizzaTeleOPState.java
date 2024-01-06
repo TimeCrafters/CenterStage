@@ -78,52 +78,30 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
     @Override
     public void exec() {
-        
-        
-        
 
-        if (Math.abs(engine.gamepad1.left_stick_y) < minInput &&
-                Math.abs(engine.gamepad1.left_stick_x) < minInput &&
-                Math.abs(engine.gamepad1.right_stick_x) < minInput){
+        double y = -engine.gamepad1.left_stick_y; // Remember, this is reversed!
+        double x = engine.gamepad1.left_stick_x;
+        double rx = engine.gamepad1.right_stick_x;
 
-            drivePower = 0;
-            robot.leftFront.setPower(drivePower);
-            robot.rightFront.setPower(drivePower);
-            robot.leftBack.setPower(drivePower);
-            robot.rightBack.setPower(drivePower);
+        double lbPower = (y - x + rx);
+        double rbPower = (y + x - rx);
+        double lfPower = (y + x + rx);
+        double rfPower = (y - x - rx);
+
+        robot.leftFront.setPower(lfPower * drivePower);
+        robot.leftBack.setPower(lbPower * drivePower);
+        robot.rightFront.setPower(rfPower * drivePower);
+        robot.rightBack.setPower(rbPower * drivePower);
+
+        if (engine.gamepad1.left_stick_x > 0.1) {
+            robot.leftBack.setPower(lbPower);
+            robot.rightBack.setPower(rbPower);
+            robot.leftFront.setPower(lfPower);
+            robot.rightFront.setPower(rfPower);
+
+
         }
 
-        if (Math.abs(yTransitPercent) > 0.01) {
-
-            percentDenom = 100;
-        } else {
-            percentDenom = 0;
-        }
-
-        if (Math.abs(xTransitPercent) > 0.01) {
-
-            percentDenom = percentDenom + 100;
-        }
-
-        if (Math.abs(rotPercent) > 0.01) {
-
-            percentDenom = percentDenom + 100;
-        }
-        yTransitPercent = engine.gamepad1.left_stick_y * 100;
-        xTransitPercent = engine.gamepad1.left_stick_x * 100;
-        rotPercent = engine.gamepad1.right_stick_x * -100;
-
-        lfPower = ((yTransitPercent + -xTransitPercent + rotPercent) / percentDenom);
-        robot.leftFront.setPower(lfPower);
-
-        rfPower = ((yTransitPercent + xTransitPercent + -rotPercent) / percentDenom);
-        robot.rightFront.setPower(rfPower);
-
-        lbPower = ((yTransitPercent + xTransitPercent + rotPercent) / percentDenom);
-        robot.leftBack.setPower(lbPower);
-
-        rbPower = ((yTransitPercent + -xTransitPercent + -rotPercent) / percentDenom);
-        robot.rightBack.setPower(rbPower);
 
         if (engine.gamepad2.left_stick_button) {
             if (System.currentTimeMillis() - lastMoveTime >= 200) {
