@@ -38,26 +38,26 @@ public class StrafeMove extends CyberarmState {
 
     @Override
     public void start() {
-        robot.leftFront.setTargetDistance(distanceMM);
-
-        robot.left.setPositionTolerance(tolerance);
-        robot.right.setPositionTolerance(tolerance);
-
-        double motorVelocity = (distanceMM < 0 ? velocity * -1 : velocity);
-
-        robot.leftFront.set(motorVelocity);
-        robot.rightFront.set(-motorVelocity);
-
-        robot.leftBack.set(-motorVelocity);
-        robot.rightBack.set(motorVelocity);
+//        robot.leftFront.setTargetDistance(distanceMM);
+//
+//        robot.left.setPositionTolerance(tolerance);
+//        robot.right.setPositionTolerance(tolerance);
+//
+//        double motorVelocity = (distanceMM < 0 ? velocity * -1 : velocity);
+//
+//        robot.leftFront.set(motorVelocity);
+//        robot.rightFront.set(-motorVelocity);
+//
+//        robot.leftBack.set(-motorVelocity);
+//        robot.rightBack.set(motorVelocity);
     }
 
     @Override
     public void exec() {
-        if (robot.left.atTargetPosition() || Math.abs(robot.leftFront.getDistance()) >= Math.abs(distanceMM) ||  runTime() >= timeoutMS) {
-            robot.left.set(0);
-            robot.right.set(0);
-            setHasFinished(true);
-        }
+//        if (robot.left.atTargetPosition() || Math.abs(robot.leftFront.getDistance()) >= Math.abs(distanceMM) ||  runTime() >= timeoutMS) {
+//            robot.left.set(0);
+//            robot.right.set(0);
+//            setHasFinished(true);
+//        }
     }
 }

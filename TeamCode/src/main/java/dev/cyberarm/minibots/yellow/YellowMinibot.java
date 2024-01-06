@@ -3,8 +3,14 @@ package dev.cyberarm.minibots.yellow;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -14,46 +20,88 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 
 public class YellowMinibot {
     private final CyberarmEngine engine;
-    public final TimeCraftersConfiguration config;
-    public MotorEx leftFront, rightFront, leftBack, rightBack;
-    public MotorGroup left, right;
-    public IMU imu;
-    public CRServo droneLauncher;
-    public final double wheelCircumference, distancePerTick, imuAngleOffset, initialFacing;
+    public TimeCraftersConfiguration config;
+    public final DcMotorEx backLeft, frontLeft, frontRight, backRight;
+    public final IMU imu;
+    public final Servo leftClaw, rightClaw, droneLatch;
+    public final CRServo arm;
+    public final TouchSensor armEndStopLeft, armEndStopRight;
+
+    public double DRIVETRAIN_WHEEL_DIAMETER_MM = 90.0;
+    public int    DRIVETRAIN_MOTOR_TICKS = 4;
+    public double DRIVETRAIN_MOTOR_GEAR_RATIO = 72.0;
+    public double DRIVETRAIN_MAX_VELOCITY_MM = 305.0;
+    public double LEFT_CLAW_CLOSED_POSITION = 0.0;
+    public double LEFT_CLAW_OPEN_POSITION = 0.0;
+    public double RIGHT_CLAW_CLOSED_POSITION = 0.0;
+    public double RIGHT_CLAW_OPEN_POSITION = 0.0;
+    public double DRONE_LATCH_INITIAL_POSITION = 0.0;
+    public double DRONE_LATCH_LAUNCH_POSITION = 0.0;
+
     public YellowMinibot(CyberarmEngine engine) {
         this.engine = engine;
 
-        this.config = new TimeCraftersConfiguration("Vexy_2023");
+        reloadConfig();
 
-        leftFront = new MotorEx(engine.hardwareMap, "leftFront");
-        rightFront = new MotorEx(engine.hardwareMap, "rightFront");
+        backLeft = (DcMotorEx) engine.hardwareMap.dcMotor.get("backLeft");
+        frontLeft = (DcMotorEx) engine.hardwareMap.dcMotor.get("frontLeft");
+        frontRight = (DcMotorEx) engine.hardwareMap.dcMotor.get("frontRight");
+        backRight = (DcMotorEx) engine.hardwareMap.dcMotor.get("backRight");
 
-        leftBack = new MotorEx(engine.hardwareMap, "leftBack");
-        rightBack = new MotorEx(engine.hardwareMap, "rightBack");
+        backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        backRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        wheelCircumference = Math.PI * (50.0 * 2); //wheelRadius * wheelRadius;
-        distancePerTick = 288 / wheelCircumference; // raw motor encoder * gear ratio
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        leftFront.setDistancePerPulse(distancePerTick);
-        rightFront.setDistancePerPulse(distancePerTick);
-        leftBack.setDistancePerPulse(distancePerTick);
-        rightBack.setDistancePerPulse(distancePerTick);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        left = new MotorGroup(leftFront, leftBack);
-        right = new MotorGroup(rightFront, rightBack);
+        leftClaw = engine.hardwareMap.servo.get("leftClaw"); /// Port 0
+        rightClaw = engine.hardwareMap.servo.get("rightClaw"); /// Port 1
+        arm = engine.hardwareMap.crservo.get("arm"); /// Port 2
+        arm.setDirection(DcMotorSimple.Direction.REVERSE);
+        droneLatch = engine.hardwareMap.servo.get("droneLatch"); /// Port 3
 
-        imu = engine.hardwareMap.get(IMU.class, "imu");
+        armEndStopLeft = engine.hardwareMap.touchSensor.get("armEndStopLeft");
+        armEndStopRight = engine.hardwareMap.touchSensor.get("armEndStopRight");
+
+        imu = engine.hardwareMap.get(IMU.class, "imu"); // Embedded | IC2 port 0
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.UP,
                         RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
 
         imu.initialize(parameters);
+    }
 
-        imuAngleOffset = 0;
-        initialFacing = facing();
+    public void reloadConfig() {
+        this.config = new TimeCraftersConfiguration("cyberarm_Vexy_Yellow");
 
-        droneLauncher = engine.hardwareMap.crservo.get("droneLauncher"); /// Port 5
+        loadConstants();
+    }
+
+    public void loadConstants() {
+        DRIVETRAIN_WHEEL_DIAMETER_MM = config.variable("Robot", "Drivetrain_Tuning", "wheel_diameter_mm").value();
+        DRIVETRAIN_MOTOR_TICKS = config.variable("Robot", "Drivetrain_Tuning", "motor_ticks").value();
+        DRIVETRAIN_MOTOR_GEAR_RATIO = config.variable("Robot", "Drivetrain_Tuning", "motor_gear_ratio").value();
+        DRIVETRAIN_MAX_VELOCITY_MM = config.variable("Robot", "Drivetrain_Tuning", "max_velocity_mm").value();
+
+        LEFT_CLAW_CLOSED_POSITION = config.variable("Robot", "LeftClaw_Tuning", "open_position").value();
+        LEFT_CLAW_OPEN_POSITION = config.variable("Robot", "LeftClaw_Tuning", "closed_position").value();
+
+
+        RIGHT_CLAW_OPEN_POSITION = config.variable("Robot", "RightClaw_Tuning", "open_position").value();
+        RIGHT_CLAW_CLOSED_POSITION = config.variable("Robot", "RightClaw_Tuning", "closed_position").value();
+
+        DRONE_LATCH_INITIAL_POSITION = config.variable("Robot", "DroneLatch_Tuning", "initial_position").value();
+        DRONE_LATCH_LAUNCH_POSITION = config.variable("Robot", "DroneLatch_Tuning", "launch_position").value();
     }
 
     public void standardTelemetry() {
@@ -61,82 +109,50 @@ public class YellowMinibot {
 
         engine.telemetry.addLine("Motors");
         engine.telemetry.addData(
-                "Left Front",
+                "Front Left",
                 "Power: %.2f, Current: %.2f mAmp, Position: %d",
-                leftFront.motorEx.getPower(),
-                leftFront.motorEx.getCurrent(CurrentUnit.MILLIAMPS),
-                leftFront.motorEx.getCurrentPosition());
+                frontLeft.getPower(),
+                frontLeft.getCurrent(CurrentUnit.MILLIAMPS),
+                frontLeft.getCurrentPosition());
         engine.telemetry.addData(
-                "Right Front",
+                "Front Right",
                 "Power: %.2f, Current: %.2f mAmp, Position: %d",
-                rightFront.motorEx.getPower(),
-                rightFront.motorEx.getCurrent(CurrentUnit.MILLIAMPS),
-                rightFront.motorEx.getCurrentPosition());
+                frontRight.getPower(),
+                frontRight.getCurrent(CurrentUnit.MILLIAMPS),
+                frontRight.getCurrentPosition());
         engine.telemetry.addData(
-                "Left Back",
+                "Back Left",
                 "Power: %.2f, Current: %.2f mAmp, Position: %d",
-                leftBack.motorEx.getPower(),
-                leftBack.motorEx.getCurrent(CurrentUnit.MILLIAMPS),
-                leftBack.motorEx.getCurrentPosition());
+                backLeft.getPower(),
+                backLeft.getCurrent(CurrentUnit.MILLIAMPS),
+                backLeft.getCurrentPosition());
         engine.telemetry.addData(
-                "Right Back",
+                "Back Right",
                 "Power: %.2f, Current: %.2f mAmp, Position: %d",
-                rightBack.motorEx.getPower(),
-                rightBack.motorEx.getCurrent(CurrentUnit.MILLIAMPS),
-                rightBack.motorEx.getCurrentPosition());
+                backRight.getPower(),
+                backRight.getCurrent(CurrentUnit.MILLIAMPS),
+                backRight.getCurrentPosition());
 
         engine.telemetry.addLine();
+
         engine.telemetry.addLine("Servos");
-        engine.telemetry.addData("droneLauncher", droneLauncher.getPower());
+        engine.telemetry.addData("left claw", leftClaw.getPosition());
+        engine.telemetry.addData("right claw", rightClaw.getPosition());
+        engine.telemetry.addData("arm", arm.getPower());
+        engine.telemetry.addData("droneLatch", droneLatch.getPosition());
 
         engine.telemetry.addLine();
+
+        engine.telemetry.addData("arm endstop left", armEndStopLeft.isPressed());
+        engine.telemetry.addData("arm endstop right", armEndStopRight.isPressed());
+
+        engine.telemetry.addLine();
+
     }
 
     public void teleopTelemetry() {
         engine.telemetry.addLine();
 
         engine.telemetry.addLine();
-    }
-
-    public double distanceMM(int ticks) {
-        return distancePerTick * ticks;
-    }
-
-
-    public double initialFacing() {
-        return initialFacing;
-    }
-
-    public double facing() {
-        double imuDegrees = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-
-        return (((imuDegrees + 360.0) % 360.0) + imuAngleOffset) % 360.0;
-    }
-
-    public double heading() {
-        return AngleUnit.normalizeRadians(-facing() * Math.PI / 180.0);
-//        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-    }
-
-    public double turnRate() {
-        return imu.getRobotAngularVelocity(AngleUnit.DEGREES).yRotationRate; // NOTE: UNTESTED
-    }
-
-    public boolean isBetween(double value, double min, double max) {
-        return value >= min && value <= max;
-    }
-
-    // Adapted from: https://github.com/gosu/gosu/blob/980d64de2ce52e4b16fdd5cb9c9e11c8bbb80671/src/Math.cpp#L38
-    public double angleDiff(double from, double to) {
-        double value = (to - from + 180);
-
-        double fmod = (value - 0.0) % (360.0 - 0.0);
-
-        return (fmod < 0 ? fmod + 360.0 : fmod +  0.0) - 180;
-    }
-
-    public double lerp(double min, double max, double t)
-    {
-        return min + (max - min) * t;
     }
 }

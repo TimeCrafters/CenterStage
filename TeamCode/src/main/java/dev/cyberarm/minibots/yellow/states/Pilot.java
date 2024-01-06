@@ -1,40 +1,43 @@
 package dev.cyberarm.minibots.yellow.states;
 
+import com.qualcomm.robotcore.hardware.Gamepad;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import dev.cyberarm.engine.V2.CyberarmState;
+import dev.cyberarm.engine.V2.Utilities;
 import dev.cyberarm.minibots.yellow.YellowMinibot;
 
 public class Pilot extends CyberarmState {
     final YellowMinibot robot;
+    private boolean leftClawOpen, rightClawOpen;
 
     public Pilot(YellowMinibot robot) {
         this.robot = robot;
+
+        this.leftClawOpen = false;
+        this.rightClawOpen = false;
     }
     @Override
     public void exec() {
-        /// --- IMU Reset --- ///
-        if (engine.gamepad1.guide) {
-            robot.imu.resetYaw();
-        }
+        drivetrain();
+        armController();
+        clawControllers();
+        droneLatchController();
+    }
 
-        /// --- DRONE --- ///
-        if (engine.gamepad1.y) {
-            robot.droneLauncher.setPower(1.0);
-        } else if (engine.gamepad1.a) {
-            robot.droneLauncher.setPower(0.0);
-        }
-
-        /// --- DRIVE --- ///
+    private void drivetrain()
+    {
 //        robot.left.set(engine.gamepad1.left_stick_y);
 //        robot.right.set(engine.gamepad1.right_stick_y);
 
 
         // https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html#field-centric
 
-        double y = engine.gamepad1.left_stick_y; // Remember, Y stick value is reversed;
-        double x = -engine.gamepad1.left_stick_x;
-        double rx = -engine.gamepad1.right_stick_x;
+        double y = -engine.gamepad1.left_stick_y; // Remember, Y stick value is reversed;
+        double x = engine.gamepad1.left_stick_x;
+        double rx = engine.gamepad1.right_stick_x;
 
         double botHeading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
@@ -53,16 +56,72 @@ public class Pilot extends CyberarmState {
         double frontRightPower = (rotY - rotX - rx) / denominator;
         double backRightPower = (rotY + rotX - rx) / denominator;
 
-//        frontLeftPower *= 24.0;
-//        backLeftPower *= 24.0;
-//        frontRightPower *= 24.0;
-//        backRightPower *= 24.0;
+        double velocity = Utilities.unitToTicks(
+                robot.DRIVETRAIN_MOTOR_TICKS,
+                robot.DRIVETRAIN_MOTOR_GEAR_RATIO,
+                robot.DRIVETRAIN_WHEEL_DIAMETER_MM,
+                DistanceUnit.MM,
+                robot.DRIVETRAIN_MAX_VELOCITY_MM);
 
-        double maxPower = 1.0;
+        robot.backLeft.setVelocity(frontLeftPower * velocity);
+        robot.frontLeft.setVelocity(backLeftPower * velocity);
+        robot.frontRight.setVelocity(frontRightPower * velocity);
+        robot.backRight.setVelocity(backRightPower * velocity);
+    }
 
-        robot.leftFront.motorEx.setPower(frontLeftPower * maxPower);
-        robot.leftBack.motorEx.setPower(backLeftPower * maxPower);
-        robot.rightFront.motorEx.setPower(frontRightPower * maxPower);
-        robot.rightBack.motorEx.setPower(backRightPower * maxPower);
+    private void armController()
+    {
+        double armPower = engine.gamepad1.right_trigger - engine.gamepad1.left_trigger;
+        if (armPower > 0) {
+            if (robot.armEndStopLeft.isPressed() || robot.armEndStopRight.isPressed())
+                armPower = 0;
+        }
+
+        robot.arm.setPower(armPower);
+    }
+
+    private void clawControllers()
+    {
+        robot.leftClaw.setPosition(leftClawOpen ? robot.LEFT_CLAW_OPEN_POSITION : robot.LEFT_CLAW_CLOSED_POSITION);
+        robot.rightClaw.setPosition(rightClawOpen ? robot.RIGHT_CLAW_OPEN_POSITION : robot.RIGHT_CLAW_CLOSED_POSITION);
+    }
+
+    private void droneLatchController()
+    {}
+
+    @Override
+    public void telemetry() {
+        robot.standardTelemetry();
+        robot.teleopTelemetry();
+    }
+
+    @Override
+    public void buttonDown(Gamepad gamepad, String button) {
+        if (gamepad == engine.gamepad1)
+        {
+            switch (button) {
+                case "guide":
+                    /// --- IMU Reset --- ///
+                    robot.imu.resetYaw();
+                    break;
+                case "start":
+                    robot.reloadConfig();
+                    break;
+                case "left_bumper":
+                    leftClawOpen = !leftClawOpen;
+                    break;
+                case "right_bumper":
+                    rightClawOpen = !rightClawOpen;
+                    break;
+                case "y":
+                    /// DRONE LATCH ///
+                    robot.droneLatch.setPosition(robot.DRONE_LATCH_LAUNCH_POSITION);
+                    break;
+                case "a":
+                    /// DRONE LATCH ///
+                    robot.droneLatch.setPosition(robot.DRONE_LATCH_INITIAL_POSITION);
+                    break;
+            }
+        }
     }
 }
