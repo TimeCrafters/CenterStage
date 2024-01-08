@@ -11,9 +11,9 @@ public abstract class RedCrabAutonomousEngine extends CyberarmEngine {
     public void loop() {
         Utilities.hubsClearBulkReadCache(hardwareMap);
 
+        super.loop();
+
         if (robot != null)
             robot.standardTelemetry();
-
-        super.loop();
     }
 }
