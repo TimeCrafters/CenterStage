@@ -19,8 +19,7 @@ public class SodiPizzaMinibotObject extends Robot {
 
     public HardwareMap hardwareMap;
     public DcMotor leftFront, rightFront, leftBack, rightBack;
-//    public Servo shoulder, gripper;
-    public Servo launcher;
+    public Servo shoulder, gripper, launcher;
     public IMU imu;
     public Rev2mDistanceSensor distSensor;
     private String string;
@@ -71,7 +70,7 @@ public class SodiPizzaMinibotObject extends Robot {
         rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //Servo Defining
-//        shoulder = engine.hardwareMap.servo.get("arm");
+        shoulder = engine.hardwareMap.servo.get("shoulder");
 //        gripper = engine.hardwareMap.servo.get("gripper");
         launcher = engine.hardwareMap.servo.get("launcher");
 

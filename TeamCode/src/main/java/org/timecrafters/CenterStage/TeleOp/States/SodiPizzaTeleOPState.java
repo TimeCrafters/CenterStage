@@ -43,6 +43,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     public float getApproxObjPos() {
         if (System.currentTimeMillis() - lastDistRead >= 500) {
             /*Pseudocode: take objData1, wait, take 2, wait, take 3*/
+
         }
         approxObjPos = (objData1 + objData2 + objData3)/3;
         return approxObjPos;
@@ -52,6 +53,9 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     public void telemetry() {
         engine.telemetry.addData("Launcher Servo: ", robot.launcher.getPosition());
         engine.telemetry.addData("Drone Launched?", droneLaunched);
+
+        engine.telemetry.addLine();
+        engine.telemetry.addData("Arm servo position", robot.shoulder.getPosition());
     }
 
     @Override
@@ -99,7 +103,6 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.leftFront.setPower(lfPower);
             robot.rightFront.setPower(rfPower);
 
-
         }
 
 
@@ -123,6 +126,18 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         if (!engine.gamepad2.left_stick_button && droneLaunched) {
             if (System.currentTimeMillis() - lastMoveTime >= 200) {
                 robot.launcher.setPosition(robot.launcher.getPosition() - 0.025);
+                lastMoveTime = System.currentTimeMillis();
+            }
+        }
+
+        if (engine.gamepad2.left_stick_y > 0.1) {
+            if (System.currentTimeMillis() - lastMoveTime >= 200) {
+                robot.shoulder.setPosition(robot.shoulder.getPosition() + 0.05);
+                lastMoveTime = System.currentTimeMillis();
+            }
+        } else if (engine.gamepad2.left_stick_y < -0.1) {
+            if (System.currentTimeMillis() - lastMoveTime >= 200) {
+                robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
                 lastMoveTime = System.currentTimeMillis();
             }
         }
