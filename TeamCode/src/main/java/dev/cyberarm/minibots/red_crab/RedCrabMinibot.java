@@ -194,7 +194,9 @@ public class RedCrabMinibot {
 
         /// --- Claw Arm Motor
         /// --- --- (SOFT) RESET MOTOR ENCODER
-        clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // ONLY RESET ENCODER IN AUTONOMOUS
+        if (autonomous)
+            clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         /// --- --- DIRECTION
         clawArm.setDirection(DcMotorSimple.Direction.FORWARD);
         /// --- --- BRAKING
