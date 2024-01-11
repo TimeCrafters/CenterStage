@@ -120,7 +120,7 @@ public class CompetitionTeleOpState extends CyberarmState {
                 drivePower = 1;
             }
         }
-        lbsVar1 = lbs1
+        lbsVar1 = lbs1;
 
 
         double x = -(engine.gamepad1.left_stick_x);
