@@ -1,11 +1,11 @@
 package org.timecrafters.CenterStage.Autonomous.CompetitionStates;
 
+import android.util.Log;
+
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.controller.PIDController;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
-import org.timecrafters.CenterStage.Common.PrototypeRobot;
 
 import dev.cyberarm.engine.V2.CyberarmState;
 @Config
@@ -21,8 +21,11 @@ public class DriveToCoordinatesState extends CyberarmState {
     public boolean posSpecific;
     public double maxXPower;
     public double maxYPower;
+    private String actionName;
 
     public DriveToCoordinatesState(CompetitionRobotV1 robot, String groupName, String actionName) {
+        this.actionName = actionName;
+
         this.robot = robot;
         this.xTarget = robot.configuration.variable(groupName, actionName, "xTarget").value();
         this.yTarget = robot.configuration.variable(groupName, actionName, "yTarget").value();
@@ -42,6 +45,9 @@ public class DriveToCoordinatesState extends CyberarmState {
         robot.xTarget = xTarget;
         robot.yMaxPower = maxYPower;
         robot.xMaxPower = maxXPower;
+
+        Log.d("TTT?", ""  + actionName + " CURRENT POSITION: x: " + robot.positionX + " Y: " + robot.positionY + "h: " + robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        Log.d("TTT?", ""  + actionName + " TARGET POSITION: x: " + robot.xTarget + " Y: " + robot.yTarget + "h: " + robot.hTarget);
 
     }
 
@@ -64,10 +70,8 @@ public class DriveToCoordinatesState extends CyberarmState {
         robot.DriveToCoordinates();
         robot.OdometryLocalizer();
 
-        if ((Math.abs(robot.backLeftPower) < 0.15 &&
-                Math.abs(robot.backRightPower) < 0.15 &&
-                Math.abs(robot.frontLeftPower) < .15 &&
-                Math.abs(robot.frontRightPower) < 0.15)){
+        if (Math.abs(robot.positionX - robot.xTarget) < 2
+                && Math.abs(robot.positionY - robot.yTarget) < 2){
                 setHasFinished(true);
         }
     }

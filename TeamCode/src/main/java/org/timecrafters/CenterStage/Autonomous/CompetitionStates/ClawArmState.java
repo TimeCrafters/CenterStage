@@ -29,6 +29,7 @@ public class ClawArmState extends CyberarmState {
 
     @Override
     public void exec() {
+        robot.armTime = System.currentTimeMillis() - initTime;
         // odometry driving ALWAYS
         robot.DriveToCoordinates();
         robot.OdometryLocalizer();

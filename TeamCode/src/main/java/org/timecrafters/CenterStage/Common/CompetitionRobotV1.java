@@ -5,10 +5,12 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -38,10 +40,11 @@ public class CompetitionRobotV1 extends Robot {
     // ------------------------------------------------------------------------------------------------------------------ HardwareMap setup:
     public OpenCvWebcam webcam1 = null;
     public WebcamName webCamName;
-    public DcMotor frontLeft, frontRight, backLeft, backRight, lift, clawArm, chinUp;
+    public DcMotor frontLeft, frontRight, backLeft, backRight, lift, /*clawArm,*/ chinUp;
+    public DcMotorEx clawArm;
 
     public IMU imu;
-    public Servo shoulder, elbow, leftClaw, rightClaw, chinUpServo;
+    public Servo shoulder, elbow, leftClaw, rightClaw, chinUpServo, shootServo;
     public DistanceSensor customObject;
     public TouchSensor touchLeftArm, touchRightArm;
 
@@ -97,14 +100,16 @@ public class CompetitionRobotV1 extends Robot {
     PIDController pidController;
     public double power;
     public String armPos;
+    public long armTime;
+
 
     public int target;
-    public  double p = 0.007, i = 0,  d = 0.0001, f = 0;
-    public  double shoulderCollect = 0.38;
-    public  double shoulderDeposit = 0.36;
-    public  double shoulderPassive = 0.8;
-    public  double elbowCollect = 0.02;
-    public  double elbowDeposit = 0;
+    public double p = 0.007, i = 0,  d = 0.0001, f = 0;
+    public double shoulderCollect = 1;
+    public double shoulderDeposit = 1;
+    public double shoulderPassive = 1;
+    public double elbowCollect = 0.02;
+    public double elbowDeposit = 0;
 
 
     private HardwareMap hardwareMap;
@@ -140,7 +145,7 @@ public class CompetitionRobotV1 extends Robot {
         backLeft = engine.hardwareMap.dcMotor.get("backLeft");
         chinUp = engine.hardwareMap.dcMotor.get("chinUp");
         lift = engine.hardwareMap.dcMotor.get("Lift");
-        clawArm = engine.hardwareMap.dcMotor.get("clawArm");
+        clawArm = (DcMotorEx) engine.hardwareMap.dcMotor.get("clawArm");
 
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -160,9 +165,6 @@ public class CompetitionRobotV1 extends Robot {
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         chinUp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        clawArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
 
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -198,7 +200,7 @@ public class CompetitionRobotV1 extends Robot {
         leftClaw = hardwareMap.servo.get("leftClaw");
         rightClaw = hardwareMap.servo.get("rightClaw");
         chinUpServo = hardwareMap.servo.get("chinUpServo");
-
+        shootServo = hardwareMap.servo.get("shoot");
 
         elbow.setDirection(Servo.Direction.REVERSE);
 
@@ -365,24 +367,27 @@ public class CompetitionRobotV1 extends Robot {
             if (lift.getCurrentPosition() >= 20) {
                 lift.setPower(-0.6);
             } else {
-                shoulder.setPosition(0.38);
+                shoulder.setPosition(shoulderCollect);
                 target = 120;
             }
 
         }
         if (armPos.equals("search")) {
-            shoulder.setPosition(0.15);
-            target = 570;
+            shoulder.setPosition(0.48);
+            if (armTime > 400){
+                target = 570;
+            }
 
         }
 
-        pidController.setPID(p, i, d);
-        int armPos = clawArm.getCurrentPosition();
-        double pid = pidController.calculate(armPos, target);
+//        pidController.setPID(p, i, d);
+//        int armPos = clawArm.getCurrentPosition();
+//        double pid = pidController.calculate(armPos, target);
+//
+//        power = pid;
 
-        power = pid;
-
-        clawArm.setPower(power);
+        clawArm.setTargetPosition(target);
+        clawArm.setPower(0.4);
 
     }
 }

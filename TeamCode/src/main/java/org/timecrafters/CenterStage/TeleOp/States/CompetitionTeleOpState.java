@@ -20,8 +20,12 @@ public class CompetitionTeleOpState extends CyberarmState {
     private CompetitionRobotV1 robot;
     // ------------------------------------------------------------------------------------------------------------robot claw arm variables:
     private PIDController pidController;
-    public  double p = 0.007, i = 0,  d = 0.0001, f = 0;
+    public  double p = 0.005, i = 0,  d = 0.0001, f = 0;
     public int target = 0;
+
+    // ---------------------------------------------------------------------------------------------------------------------shoot variables:
+    public static double releasePos = 0.95;
+    public static double holdPos = 0.55                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ;
 
 
     // ------------------------------------------------------------------------------------------------------------- Heading lock variables:
@@ -111,19 +115,16 @@ public class CompetitionTeleOpState extends CyberarmState {
         boolean lbs1 = engine.gamepad1.left_stick_button;
         if (lbs1 && !lbsVar1) {
             if (drivePower == 1) {
-                drivePower = 0.5;
+                drivePower = 0.35;
             } else {
                 drivePower = 1;
             }
         }
-        lbsVar1 = lbs1;
+        lbsVar1 = lbs1
 
-        if (engine.gamepad1.left_stick_x != 0 || engine.gamepad1.left_stick_y != 0){
-            boost = engine.gamepad1.right_trigger + 1;
-        }
 
-        double x = -((engine.gamepad1.left_stick_x * 0.5)  * boost);
-        double y = ((engine.gamepad1.left_stick_y * 0.5)  * boost);
+        double x = -(engine.gamepad1.left_stick_x);
+        double y = (engine.gamepad1.left_stick_y);
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
         // angle math to make things field oriented
@@ -139,10 +140,10 @@ public class CompetitionTeleOpState extends CyberarmState {
 
         // setting each power determined previously from the math above
         // as well as multiplying it by a drive power that can be changed.
-        robot.backLeft.setPower(backLeftPower);
-        robot.backRight.setPower(-backRightPower);
-        robot.frontLeft.setPower(frontLeftPower);
-        robot.frontRight.setPower(frontRightPower);
+        robot.backLeft.setPower(backLeftPower * drivePower);
+        robot.backRight.setPower(-backRightPower * drivePower);
+        robot.frontLeft.setPower(frontLeftPower * drivePower);
+        robot.frontRight.setPower(frontRightPower * drivePower);
     }
 
     public double angleWrap(double radians) {
@@ -211,6 +212,9 @@ public class CompetitionTeleOpState extends CyberarmState {
         } else if (engine.gamepad2.b) {
             armPos = "hover";
             depositMode = true;
+        } else if (engine.gamepad2.x) {
+            armPos = "passive";
+            depositMode = true;
         } else if (engine.gamepad2.dpad_left) {
             armPos = "lift up";
             depositMode = true;
@@ -230,7 +234,7 @@ public class CompetitionTeleOpState extends CyberarmState {
                 robot.shoulder.setPosition(robot.shoulderCollect);
                 robot.elbow.setPosition(robot.elbowCollect);
                 robot.chinUpServo.setPosition(chinUpServoDown);
-                target = 30;
+                target = 0;
 
             }
         }
@@ -251,8 +255,18 @@ public class CompetitionTeleOpState extends CyberarmState {
                 robot.elbow.setPosition(robot.elbowCollect);
                 target = 120;
             }
-
         }
+
+        if (Objects.equals(armPos, "passive")) {
+            if (robot.lift.getCurrentPosition() >= 20) {
+                robot.chinUpServo.setPosition(chinUpServoDown);
+                robot.lift.setPower(-0.6);
+            } else {
+                robot.shoulder.setPosition(robot.shoulderPassive);
+                target = 570;
+            }
+        }
+
         if (Objects.equals(armPos, "lift up")) {
             robot.shoulder.setPosition(robot.shoulderDeposit);
             robot.elbow.setPosition(robot.elbowDeposit);
@@ -275,9 +289,10 @@ public class CompetitionTeleOpState extends CyberarmState {
 
         if (armPos.equals("reset")) {
             robot.shoulder.setPosition(robot.shoulderPassive);
+            target = -10000;
             if (robot.touchLeftArm.isPressed() || robot.touchRightArm.isPressed()) {
                 robot.clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                robot.clawArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.clawArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 armPos = "collect";
             }
         }
@@ -290,10 +305,21 @@ public class CompetitionTeleOpState extends CyberarmState {
             pidController = new PIDController(p, i, d);
             robot.imu.resetYaw();
 
+        robot.clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.clawArm.setTargetPosition(0);
+        robot.clawArm.setPower(0);
+        robot.clawArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
     }
 
     @Override
     public void exec() {
+
+        if (engine.gamepad2.start && engine.gamepad2.x){
+            robot.shootServo.setPosition(releasePos);
+        } else {
+            robot.shootServo.setPosition(holdPos);
+        }
 
 
         if (engine.gamepad2.dpad_up) {
@@ -334,16 +360,16 @@ public class CompetitionTeleOpState extends CyberarmState {
         DriveTrainTeleOp();
 
         // ---------------------------------------------------------------------------------------- Game Pad 2, arms, claw, drone, and lift:
-        pidController.setPID(p, i, d);
-        int armCurrentPos = robot.clawArm.getCurrentPosition();
-        double pid = pidController.calculate(armCurrentPos, target);
+//        pidController.setPID(p, i, d);
+//        int armCurrentPos = robot.clawArm.getCurrentPosition();
+//        double pid = pidController.calculate(armCurrentPos, target);
 
         if (armPos.equals("reset")){
-            armPower = -0.2;
+            robot.clawArm.setPower(armPower);
         } else {
-            armPower = pid;
+            armPower = 0.4; // pid
         }
-
+        robot.clawArm.setTargetPosition(target);
         robot.clawArm.setPower(armPower);
 
         // ------------------------------------------------------------------------------------------------------------------- Lift Control:
