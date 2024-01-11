@@ -514,11 +514,15 @@ public abstract class CyberarmEngine extends OpMode {
 
           RuntimeException exception = new RuntimeException(cause.getMessage(), cause.getCause());
           exception.setStackTrace(cause.getStackTrace());
+
+          throw(exception);
         } else {
           e.printStackTrace();
 
           RuntimeException exception = new RuntimeException(e.getMessage(), e.getCause());
           exception.setStackTrace(e.getStackTrace());
+
+          throw(exception);
         }
       }
     }

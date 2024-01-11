@@ -1,5 +1,7 @@
 package dev.cyberarm.minibots.red_crab.states;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.Range;
@@ -27,12 +29,20 @@ public class Move extends CyberarmState {
         this.lerpMM_DOWN = robot.config.variable(groupName, actionName, "lerpMM_DOWN").value();
         this.toleranceMM = robot.config.variable(groupName, actionName, "toleranceMM").value();
 
-        this.maxVelocityMM = robot.config.variable(groupName, actionName, "maxVelocityMM").value();
-        this.minVelocityMM = robot.config.variable(groupName, actionName, "minVelocityMM").value();
+        double maxVelocityMM = robot.config.variable(groupName, actionName, "maxVelocityMM").value();
+        double minVelocityMM = robot.config.variable(groupName, actionName, "minVelocityMM").value();
 
         this.strafe = robot.config.variable(groupName, actionName, "strafe").value();
 
         this.timeoutMS = robot.config.variable(groupName, actionName, "timeoutMS").value();
+
+        if (distanceMM < 0) {
+            this.maxVelocityMM = Math.abs(maxVelocityMM) * -1;
+            this.minVelocityMM = Math.abs(minVelocityMM) * -1;
+        } else {
+            this.maxVelocityMM = Math.abs(maxVelocityMM);
+            this.minVelocityMM = Math.abs(minVelocityMM);
+        }
 
         // Validate distance and lerp distances
         if (lerpMM_UP == 0 && lerpMM_DOWN == 0) { return; }
@@ -94,6 +104,9 @@ public class Move extends CyberarmState {
             robot.backLeft.setTargetPosition(distanceTicks);
             robot.backRight.setTargetPosition(distanceTicks);
         }
+
+        // Explicitly reset cached hub data, fixes Move state erroneous instantly finishing- sometimes.
+        Utilities.hubsClearBulkReadCache(engine.hardwareMap);
     }
 
     @Override
@@ -122,14 +135,17 @@ public class Move extends CyberarmState {
         double velocity = lerpVelocity(travelledDistance);
 
         double angleDiff = Utilities.angleDiff(initialHeadingDegrees, Utilities.facing(robot.imu));
+        if (maxVelocityMM < 0)
+            angleDiff = -1 * angleDiff;
 
         double leftVelocity = velocity;
         double rightVelocity = velocity;
         // use +10% of power at 7 degrees of error to correct angle
         double correctiveVelocity = Utilities.lerp(0.0, 1.0, angleDiff / 7.0) * (velocity * 0.1);
-        if (angleDiff > -0.5) {
+
+        if (angleDiff < -0.5) {
             leftVelocity += correctiveVelocity;
-        } else if (angleDiff < 0.5) {
+        } else if (angleDiff > 0.5) {
             rightVelocity += correctiveVelocity;
         }
 
@@ -155,7 +171,6 @@ public class Move extends CyberarmState {
         double velocity = lerpVelocity(travelledDistance);
 
         double angleDiff = Utilities.angleDiff(initialHeadingDegrees, Utilities.facing(robot.imu));
-
         double frontVelocity = velocity;
         double backVelocity = velocity;
         // use +40% of power at 7 degrees of error to correct angle

@@ -1,9 +1,6 @@
 package dev.cyberarm.minibots.red_crab;
 
 import com.arcrobotics.ftclib.controller.PIDFController;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,7 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -46,6 +42,7 @@ public class RedCrabMinibot {
     public static double CLAW_ARM_MAX_SPEED = 0.5;
     public static double CLAW_ARM_MAX_VELOCITY_DEGREES = 10;
     private static double CLAW_ARM_MOTOR_MAX_CURRENT_MILLIAMPS = 1588.0;
+    private static long CLAW_ARM_WARN_OVERCURRENT_AFTER_MS = 5000;
     public static double CLAW_ARM_kP = 0.0;
     public static double CLAW_ARM_kI = 0.0;
     public static double CLAW_ARM_kD = 0.0;
@@ -92,6 +89,8 @@ public class RedCrabMinibot {
     private final PIDFController clawArmPIDFController;
     public final String webcamName = "Webcam 1";
 
+    private long lastClawArmOverCurrentAnnounced = 0;
+    private boolean clawArmOverCurrent = false;
     public enum Path {
         LEFT,
         CENTER,
@@ -195,7 +194,9 @@ public class RedCrabMinibot {
 
         /// --- Claw Arm Motor
         /// --- --- (SOFT) RESET MOTOR ENCODER
-        clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // ONLY RESET ENCODER IN AUTONOMOUS
+        if (autonomous)
+            clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         /// --- --- DIRECTION
         clawArm.setDirection(DcMotorSimple.Direction.FORWARD);
         /// --- --- BRAKING
@@ -258,6 +259,7 @@ public class RedCrabMinibot {
         RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO = config.variable("Robot", "ClawArm_Tuning", "gear_ratio").value();
         RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION = config.variable("Robot", "ClawArm_Tuning", "motor_ticks").value();
         RedCrabMinibot.CLAW_ARM_MOTOR_MAX_CURRENT_MILLIAMPS = config.variable("Robot", "ClawArm_Tuning", "max_current_milliamps").value();
+        RedCrabMinibot.CLAW_ARM_WARN_OVERCURRENT_AFTER_MS = config.variable("Robot", "ClawArm_Tuning", "warn_overcurrent_after_ms").value();
 
         /// WINCH
 
@@ -412,6 +414,18 @@ public class RedCrabMinibot {
     public void controlClawArm() {
         Action action = config.action("Robot", "ClawArm_Tuning");
 
+        long milliseconds = System.currentTimeMillis();
+        if (clawArm.isOverCurrent())
+        {
+            if (milliseconds - lastClawArmOverCurrentAnnounced >= CLAW_ARM_WARN_OVERCURRENT_AFTER_MS) {
+                lastClawArmOverCurrentAnnounced = System.currentTimeMillis();
+
+                engine.telemetry.speak("WARNING. ARM. OVER. CURRENT.");
+            }
+        } else {
+            lastClawArmOverCurrentAnnounced = milliseconds;
+        }
+
         double ticksInDegree = Utilities.motorAngleToTicks(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, 1);
 
         for (Variable v : action.getVariables()) {
@@ -449,6 +463,18 @@ public class RedCrabMinibot {
         clawArm.setCurrentAlert(CLAW_ARM_MOTOR_MAX_CURRENT_MILLIAMPS, CurrentUnit.MILLIAMPS);
 
         double velocity = Utilities.motorAngleToTicks(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, CLAW_ARM_MAX_VELOCITY_DEGREES);
+
+        double currentAngle = Utilities.motorTicksToAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, clawArm.getCurrentPosition());
+        double targetAngle = Utilities.motorTicksToAngle(CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION, CLAW_ARM_MOTOR_GEAR_RATIO, clawArm.getTargetPosition());
+        double angleDiff = Math.abs(Utilities.angleDiff(currentAngle, targetAngle));
+
+        // Turn off motor if it is stowed or all the way down
+        if (targetAngle <= CLAW_ARM_STOW_ANGLE + 5.0 && angleDiff <= 5.0) {
+            velocity = 0.0;
+        } else if (targetAngle >= CLAW_ARM_COLLECT_ANGLE - 5.0 && angleDiff <= 5.0)
+        {
+            velocity = 0.0;
+        }
 
         clawArm.setVelocity(velocity);
     }

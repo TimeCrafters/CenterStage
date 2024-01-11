@@ -12,9 +12,7 @@ import dev.cyberarm.minibots.red_crab.states.ClawArmTask;
 public class RedCrabAutonomousRedBackstageEngine extends RedCrabAutonomousEngine {
     @Override
     public void setup() {
-        RedCrabMinibot robot = new RedCrabMinibot(true);
-        blackboardSet("clawArmPower", 0.0);
-
+        robot = new RedCrabMinibot(true);
         addTask(new ClawArmTask(robot));
 
         setupFromConfig(

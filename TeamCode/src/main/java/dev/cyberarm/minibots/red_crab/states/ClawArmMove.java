@@ -31,7 +31,7 @@ public class ClawArmMove extends CyberarmState {
         int tolerance = robot.clawArm.getTargetPositionTolerance();
         int position = robot.clawArm.getCurrentPosition();
 
-        if (Utilities.isBetween(position, position - tolerance, position + tolerance) || runTime() >= timeoutMS) {
+        if (Utilities.isBetween(robot.clawArm.getTargetPosition(), position - tolerance, position + tolerance) || runTime() >= timeoutMS) {
             this.finished();
         }
     }

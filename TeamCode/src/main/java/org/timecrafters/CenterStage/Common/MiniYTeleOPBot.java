@@ -30,7 +30,8 @@ public class MiniYTeleOPBot extends Robot {
         this.hardwareMap = CyberarmEngine.instance.hardwareMap;
         CyberarmEngine engine = CyberarmEngine.instance;
 
-        configuration = new TimeCraftersConfiguration("Minibot Yellow");
+//        configuration = new TimeCraftersConfiguration("Minibot Yellow");
+        configuration = new TimeCraftersConfiguration();
 
 
         imu = engine.hardwareMap.get(IMU.class, "imu");

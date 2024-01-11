@@ -209,17 +209,6 @@ public class Pilot extends CyberarmState {
 
                 robot.clawWrist.setPosition(RedCrabMinibot.CLAW_WRIST_COLLECT_POSITION);
                 break;
-
-        }
-
-        if (clawArmPosition == RedCrabMinibot.ClawArm_COLLECT &&
-                robot.clawArm.getCurrentPosition() >= Utilities.motorAngleToTicks(
-                RedCrabMinibot.CLAW_ARM_MOTOR_TICKS_PER_REVOLUTION,
-                RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO,
-                RedCrabMinibot.CLAW_ARM_COLLECT_ANGLE) - 5.0) {
-            robot.clawArm.setPower(0);
-        } else {
-            robot.clawArm.setPower(RedCrabMinibot.CLAW_ARM_MAX_SPEED);
         }
     }
 

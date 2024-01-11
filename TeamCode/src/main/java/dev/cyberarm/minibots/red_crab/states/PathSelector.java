@@ -18,7 +18,6 @@ public class PathSelector extends CyberarmState {
     private final int timeoutMS;
     private final int path;
     private final double minConfidence;
-    private List<Recognition> recognitions = new ArrayList<>();
 
     public PathSelector(RedCrabMinibot robot, String groupName, String actionName) {
         this.robot = robot;
@@ -34,40 +33,27 @@ public class PathSelector extends CyberarmState {
         robot.visionPortal = VisionPortal.easyCreateWithDefaults(
                 engine.hardwareMap.get(WebcamName.class, robot.webcamName), robot.teamProp);
 
-//        robot.tfPixel.setClippingMargins(0, 0, 0, 0);
-//        robot.tfPixel.setMinResultConfidence((float) minConfidence);
-
         engine.blackboardSet("autonomousPath", path);
     }
 
     @Override
     public void exec() {
-        if (engine.blackboardGetInt("autonomousPath") != 0) {
-            this.finished();
-
-            return;
-        }
-
-//        recognitions = robot.tfPixel.getRecognitions();
-//        for (Recognition recognition : recognitions) {
-//            double x = (recognition.getLeft() + recognition.getRight()) / 2;
-//            double y = (recognition.getTop()  + recognition.getBottom()) / 2;
-//
-//            if (recognition.getLabel().equals("pixel")) {
-//                engine.blackboardSet("autonomousPath", path);
-//            }
-//        }
-
-        switch (robot.teamProp.getLocation()) {
-            case LEFT:
-                engine.blackboardSet("autonomousPath", 0);
-                break;
-            case CENTER:
-                engine.blackboardSet("autonomousPath", 1);
-                break;
-            case RIGHT:
-                engine.blackboardSet("autonomousPath", 2);
-                break;
+        // If we've got enough Saturation for our min confidence then do the needful.
+        if (robot.teamProp.getHighestSaturation() >= minConfidence) {
+            switch (robot.teamProp.getLocation()) {
+                case LEFT:
+                    engine.blackboardSet("autonomousPath", 0);
+                    break;
+                case CENTER:
+                    engine.blackboardSet("autonomousPath", 1);
+                    break;
+                case RIGHT:
+                    engine.blackboardSet("autonomousPath", 2);
+                    break;
+            }
+        } else
+        {
+            engine.blackboardSet("autonomousPath", path); // min confidence not meant, default to center.
         }
 
         if (runTime() >= timeoutMS) {
@@ -85,19 +71,9 @@ public class PathSelector extends CyberarmState {
     public void telemetry() {
         engine.telemetry.addLine();
 
-//        engine.telemetry.addData("Saturation", robot.spikeMark.getSaturation());
-
-//        engine.telemetry.addData("# Objects Detected", recognitions.size());
-//
-//        for(Recognition recognition : recognitions) {
-//            double x = (recognition.getLeft() + recognition.getRight()) / 2;
-//            double y = (recognition.getTop()  + recognition.getBottom()) / 2;
-//
-//            engine.telemetry.addLine();
-//
-//            engine.telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-//            engine.telemetry.addData("- Position", "%.0f / %.0f", x, y);
-//            engine.telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
-//        }
+        engine.telemetry.addData("Location", robot.teamProp.getLocation());
+        engine.telemetry.addData("Saturation Left", robot.teamProp.getSaturationLeft());
+        engine.telemetry.addData("Saturation Center", robot.teamProp.getSaturationCenter());
+        engine.telemetry.addData("Saturation Right", robot.teamProp.getSaturationRight());
     }
 }
