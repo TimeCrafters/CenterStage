@@ -268,7 +268,7 @@ public class CompetitionTeleOpState extends CyberarmState {
         }
 
         if (Objects.equals(armPos, "lift up")) {
-            robot.shoulder.setPosition(robot.shoulderDeposit);
+            robot.shoulder.setPosition(robot.shoulderCollect);
             robot.elbow.setPosition(robot.elbowDeposit);
             target = 120;
             robot.chinUpServo.setPosition(chinUpServoUp);
@@ -282,8 +282,7 @@ public class CompetitionTeleOpState extends CyberarmState {
                 robot.lift.setPower(0);
                 robot.chinUpServo.setPosition(chinUpServoDown);
                 robot.shoulder.setPosition(robot.shoulderCollect);
-                robot.elbow.setPosition(robot.elbowCollect);
-                target = 850;
+                target = 120;
             }
         }
 

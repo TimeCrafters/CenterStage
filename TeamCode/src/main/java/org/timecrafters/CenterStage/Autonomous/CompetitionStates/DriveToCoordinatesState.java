@@ -57,26 +57,28 @@ public class DriveToCoordinatesState extends CyberarmState {
             if (objectPos != robot.objectPos) {
                 // enter the ending loop
                 setHasFinished(true);
+            } else {
+
+                if (armDrive) {
+                    robot.clawArmControl();
+                }
+
+                if (Math.abs(robot.positionX - robot.xTarget) < 5
+                        && Math.abs(robot.positionY - robot.yTarget) < 5) {
+                    setHasFinished(true);
+                }
+            }
+        } else {
+                if (armDrive) {
+                    robot.clawArmControl();
+                }
+
+                if (Math.abs(robot.positionX - robot.xTarget) < 5
+                        && Math.abs(robot.positionY - robot.yTarget) < 5) {
+                    setHasFinished(true);
+                }
             }
         }
-
-        if (armDrive) {
-            robot.clawArmControl();
-        }
-
-        robot.OdometryLocalizer();
-        robot.XDrivePowerModifier();
-        robot.YDrivePowerModifier();
-        robot.DriveToCoordinates();
-        robot.OdometryLocalizer();
-
-        if (Math.abs(robot.positionX - robot.xTarget) < 2
-                && Math.abs(robot.positionY - robot.yTarget) < 2){
-                setHasFinished(true);
-        }
-    }
-
-
 
     @Override
     public void telemetry() {

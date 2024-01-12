@@ -40,7 +40,7 @@ public class CompetitionRobotV1 extends Robot {
     // ------------------------------------------------------------------------------------------------------------------ HardwareMap setup:
     public OpenCvWebcam webcam1 = null;
     public WebcamName webCamName;
-    public DcMotor frontLeft, frontRight, backLeft, backRight, lift, /*clawArm,*/ chinUp;
+    public DcMotor frontLeft, frontRight, backLeft, backRight, lift, chinUp;
     public DcMotorEx clawArm;
 
     public IMU imu;
@@ -258,7 +258,7 @@ public class CompetitionRobotV1 extends Robot {
     public double HeadingPIDControl(double reference, double current){
         double error = angleWrap(current - reference);
         headingIntegralSum += error * headingTimer.seconds();
-        double derivative = (headingLastError - error) / headingTimer.seconds();
+        double derivative = (error - headingLastError) / headingTimer.seconds();
 
         headingTimer.reset();
 
