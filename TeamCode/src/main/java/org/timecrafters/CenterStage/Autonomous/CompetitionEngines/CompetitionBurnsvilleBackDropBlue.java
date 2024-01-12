@@ -12,7 +12,7 @@ import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-@Autonomous(name = "Burnsville blue audience")
+@Autonomous(name = "Burnsville blue backdrop")
 
 public class CompetitionBurnsvilleBackDropBlue extends CyberarmEngine {
 
@@ -33,31 +33,32 @@ public class CompetitionBurnsvilleBackDropBlue extends CyberarmEngine {
 
     @Override
     public void setup() {
-        this.robot = new CompetitionRobotV1("Burnsville audience blue");
+        this.robot = new CompetitionRobotV1("Burnsville BackDrop blue");
         addTask(new DriveToCoordinatesTask(robot));
         addTask(new OdometryLocalizerTask(robot));
 //        addTask(new ClawArmControlTask(robot));
 
         this.robot.setup();
-        addState(new ClawArmState(robot,"Burnsville audience blue", "0-01-0"));
+        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-01-0"));
 
 //        addState(new CameraVisionState(robot));
 
-        addState(new ClawArmState(robot,"Burnsville audience blue", "0-01-1"));
+        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-01-1"));
 
         // drive to the left, center, or right spike mark
-//        addState(new DriveToCoordinatesState(robot,"Burnsville audience blue", "3-02-0"));
-//        addState(new DriveToCoordinatesState(robot,"Burnsville audience blue", "2-02-0"));
-        addState(new DriveToCoordinatesState(robot,"Burnsville audience blue", "1-02-0"));
+        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "3-02-0"));
+        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "3-02-1"));
+//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "2-02-0"));
+//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "1-02-0"));
 
         // place pixel
-        addState(new ClawFingerState(robot,"Burnsville audience blue", "0-02-1"));
+        addState(new ClawFingerState(robot,"Burnsville BackDrop blue", "0-02-1"));
 
         // drive to search pos
-        addState(new ClawArmState(robot,"Burnsville audience blue", "0-02-2"));
+        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-02-2"));
 
         // close right finger
-        addState(new ClawFingerState(robot,"Burnsville audience blue", "0-02-3"));
+        addState(new ClawFingerState(robot,"Burnsville BackDrop blue", "0-02-3"));
 
 //        // drive back and away from the spike mark (x,y) (1050, 1000) H = 0
 ////        addState(new DriveToCoordinatesState(robot,"Burnsville audience blue", "3-03-0"));
