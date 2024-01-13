@@ -9,13 +9,12 @@ import org.timecrafters.CenterStage.Autonomous.CompetitionStates.DriveToCoordina
 import org.timecrafters.CenterStage.Autonomous.CompetitionStates.DriveToCoordinatesTask;
 import org.timecrafters.CenterStage.Autonomous.CompetitionStates.OdometryLocalizerTask;
 import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
-import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfiguration;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-@Autonomous(name = "Burnsville BackDrop blue")
+@Autonomous(name = "Burnsville BackDrop red")
 
-public class CompetitionBurnsvilleBackDropBlue extends CyberarmEngine {
+public class CompetitionBurnsvilleBackDropRed extends CyberarmEngine {
 
     CompetitionRobotV1 robot;
 
@@ -34,34 +33,35 @@ public class CompetitionBurnsvilleBackDropBlue extends CyberarmEngine {
 
     @Override
     public void setup() {
-        this.robot = new CompetitionRobotV1("Burnsville BackDrop blue");
+        this.robot = new CompetitionRobotV1("Burnsville BackDrop red");
         addTask(new DriveToCoordinatesTask(robot));
         addTask(new OdometryLocalizerTask(robot));
 //        addTask(new ClawArmControlTask(robot));
 
         this.robot.setup();
-        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-01-0"));
+        addState(new ClawArmState(robot,"Burnsville BackDrop red", "0-01-0"));
 
 //        addState(new CameraVisionState(robot));
 
-        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-01-1"));
+        addState(new ClawArmState(robot,"Burnsville BackDrop red", "0-01-1"));
 
         // drive to the left, center, or right spike mark
-        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "3-02-0"));
-        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "3-02-1"));
-//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "2-02-0"));
-//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "1-02-0"));
+//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop red", "1-02-0"));
+//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop red", "1-02-1"));
+//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop red", "2-02-0"));
+        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop red", "3-02-0"));
 
-        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-02-4"));
+        addState(new ClawArmState(robot,"Burnsville BackDrop red", "0-02-5"));
+
 
         // place pixel
-        addState(new ClawFingerState(robot,"Burnsville BackDrop blue", "0-02-1"));
+        addState(new ClawFingerState(robot,"Burnsville BackDrop red", "0-02-1"));
 
         // drive to search pos
-        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-02-2"));
+        addState(new ClawArmState(robot,"Burnsville BackDrop red", "0-02-2"));
 
         // close right finger
-        addState(new ClawFingerState(robot,"Burnsville BackDrop blue", "0-02-3"));
+        addState(new ClawFingerState(robot,"Burnsville BackDrop red", "0-02-3"));
 
         addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop red", "0-03-0"));
 
@@ -80,7 +80,8 @@ public class CompetitionBurnsvilleBackDropBlue extends CyberarmEngine {
 
         addState(new ClawArmState(robot,"Burnsville BackDrop red", "end task"));
 
-//
+
+
     }
 
 }
