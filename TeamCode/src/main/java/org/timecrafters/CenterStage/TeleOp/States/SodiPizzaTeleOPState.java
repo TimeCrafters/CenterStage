@@ -97,7 +97,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         robot.rightFront.setPower(rfPower * drivePower);
         robot.rightBack.setPower(rbPower * drivePower);
 
-        if (engine.gamepad1.left_stick_x > 0.1) {
+        if (engine.gamepad1.left_stick_x >= 0.1 || engine.gamepad1.left_stick_y >= 0.1 || engine.gamepad1.right_stick_x >= 0.1) {
             robot.leftBack.setPower(lbPower);
             robot.rightBack.setPower(rbPower);
             robot.leftFront.setPower(lfPower);
