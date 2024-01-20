@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -51,7 +52,9 @@ public class CompetitionRobotV1 extends Robot {
     // ----------------------------------------------------------------------------------------------------------------- odometry variables:
     public static double Hp = 0.8, Hi = 0, Hd = 0;
     public static double Xp = -0.03, Xi = 0, Xd = 0;
+    public static double xvp = -0.03, xvi = 0, xvd = 0;
     public static double Yp = 0.03, Yi = 0, Yd = 0;
+    public static double yvp = 0.03, yvi = 0, yvd = 0;
     public double xMultiplier = 1;
     public double yMultiplier = 1;
     public double positionX = 1000;
@@ -60,6 +63,8 @@ public class CompetitionRobotV1 extends Robot {
     public double xTarget = 1000;
     public double yTarget = 1000;
     public double hTarget = 0;
+    public double targetVelocityX = 0;
+    public double targetVelocityY = 0;
 
     public int currentRightPosition = 0;
     public int currentLeftPosition = 0;
@@ -75,14 +80,20 @@ public class CompetitionRobotV1 extends Robot {
     // heading math variables for pid with imu
     public double headingIntegralSum = 0;
     public double xIntegralSum = 0;
+    public double xVeloIntegralSum = 0;
     public double yIntegralSum = 0;
+    public double yVeloIntegralSum = 0;
     public final double cm_per_tick = (2 * Math.PI * R) / N;
     private double headingLastError = 0;
     private double xLastError = 0;
+    private double xVeloLastError = 0;
     private double yLastError = 0;
+    private double yVeloLastError = 0;
     ElapsedTime headingTimer = new ElapsedTime();
     ElapsedTime xTimer = new ElapsedTime();
     ElapsedTime yTimer = new ElapsedTime();
+    ElapsedTime xVeloTimer = new ElapsedTime();
+    ElapsedTime yVeloTimer = new ElapsedTime();
 
     public double frontLeftPower;
     public double backLeftPower;
@@ -95,6 +106,11 @@ public class CompetitionRobotV1 extends Robot {
     public double pidY;
     public double rawPidX;
     public double rawPidY;
+
+    public double xVelocity;
+    public double yVelocity;
+    public double deltaTime;
+
 
     //-------------------------------------------------------------------------------------------------------------- arm sequence variables:
     PIDController pidController;
@@ -211,6 +227,17 @@ public class CompetitionRobotV1 extends Robot {
 
     // -------------------------------------------------------------------------------------------------------------------------- Functions:
 
+    public void velocityChecker(){
+        long startTime = System.currentTimeMillis();
+        double oldXpos = positionX;
+        double oldYpos = positionX;
+
+        xVelocity = (oldXpos - positionX) / deltaTime;
+        yVelocity = (oldYpos - positionY) / deltaTime;
+
+        deltaTime = startTime - System.currentTimeMillis();
+
+    }
 
     public void OdometryLocalizer() { // ------------------------------------------------------------------------------- Odometry Localizer:
         // update positions
@@ -264,6 +291,27 @@ public class CompetitionRobotV1 extends Robot {
         headingTimer.reset();
 
         double output = (error * Hp) + (derivative * Hd) + (headingIntegralSum * Hi);
+        return output;
+    }
+    public double XVeloPIDControl ( double reference, double current){
+        double error = (reference - current);
+        xVeloIntegralSum += error * xVeloTimer.seconds();
+        double derivative = (error - xVeloLastError) / xVeloTimer.seconds();
+
+        xTimer.reset();
+
+        double output = (error * xvp) + (derivative * xvd) + (xIntegralSum * xvi);
+        return output;
+    }
+
+    public double YVeloPIDControl ( double reference, double current){
+        double error = (reference - current);
+        yVeloIntegralSum += error * yVeloTimer.seconds();
+        double derivative = (error - yVeloLastError) / xTimer.seconds();
+
+        xTimer.reset();
+
+        double output = (error * yvp) + (derivative * yvd) + (yVeloIntegralSum * yvi);
         return output;
     }
 
@@ -322,6 +370,8 @@ public class CompetitionRobotV1 extends Robot {
     public void DriveToCoordinates () {
         // determine the powers needed for each direction
         // this uses PID to adjust needed Power for robot to move to target
+        XVeloPIDControl(targetVelocityX, xVelocity);
+        XVeloPIDControl(targetVelocityY, yVelocity);
 
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double rx = HeadingPIDControl(Math.toRadians(hTarget), heading);
