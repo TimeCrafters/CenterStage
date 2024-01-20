@@ -55,7 +55,7 @@ public class CameraVisionState extends CyberarmState {
     @Override
     public void exec() {
         robot.clawArmControl();
-        if (System.currentTimeMillis() - initTime > 3000){
+        if (System.currentTimeMillis() - initTime > 4000){
             robot.objectPos = pipeline.objectPos();
             setHasFinished(true);
         }
