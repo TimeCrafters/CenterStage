@@ -22,7 +22,7 @@ import dev.cyberarm.engine.V2.GamepadChecker;
 public class SodiPizzaTeleOPState extends CyberarmState {
 
     final private SodiPizzaMinibotObject robot;
-    private long lastMoveTime, lastDistRead /* <- last time Distance was read*/;
+    private long lastMoveTime, lastDistRead /* <- last time Distance was read*/, startingTime;
     public double drivePower;
     public final double minInput = 0.1 /* <- Minimum input from stick to send command */;
     public double lastToldAngle /* <- The angle the bot was last told to stop at */, proportion, integral, derivative;
@@ -87,6 +87,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
         lastMoveTime = System.currentTimeMillis();
         lastDistRead = System.currentTimeMillis();
+        startingTime = System.currentTimeMillis();
 
         robot.distSensor.getDistance(DistanceUnit.MM);
     }
@@ -94,42 +95,27 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     @Override
     public void exec() {
 
-        double y = -engine.gamepad1.left_stick_y; // Remember, this is reversed!
-        double x = engine.gamepad1.left_stick_x;
+        if(System.currentTimeMillis() - startingTime <= 2000) {
+            getApproxObjPos();
+        }
+
+        double y = -engine.gamepad1.left_stick_y; // Remember, Y stick value is reversed
+        double x = engine.gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
         double rx = engine.gamepad1.right_stick_x;
 
-        double lbPower = (y - x + rx);
-        double rbPower = (y + x - rx);
-        double lfPower = (y + x + rx);
-        double rfPower = (y - x - rx);
+// Denominator is the largest motor power (absolute value) or 1
+// This ensures all the powers maintain the same ratio,
+// but only if at least one is out of the range [-1, 1]
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double frontLeftPower = (y + x + rx) / denominator;
+        double backLeftPower = (y - x + rx) / denominator;
+        double frontRightPower = (y - x - rx) / denominator;
+        double backRightPower = (y + x - rx) / denominator;
 
-        robot.leftFront.setPower(lfPower * drivePower);
-        robot.leftBack.setPower(lbPower * drivePower);
-        robot.rightFront.setPower(rfPower * drivePower);
-        robot.rightBack.setPower(rbPower * drivePower);
-
-        /* For some reason, the robot reacts to both positive and negative direction from sticks as positive.
-        (It moves forward when I make it go forward, and forward when I make it go backward, as well as for strafing and turning.)*/
-        if (Math.abs(engine.gamepad1.left_stick_x) >= 0.1) {
-            drivePower = engine.gamepad1.left_stick_x;
-//            robot.leftFront.setPower(lfPower * drivePower);
-//            robot.leftBack.setPower(lbPower * drivePower);
-//            robot.rightFront.setPower(rfPower * drivePower);
-//            robot.rightBack.setPower(rbPower * drivePower);
-
-        }else if (Math.abs(engine.gamepad1.left_stick_y) >= 0.1) {
-            drivePower = engine.gamepad1.left_stick_y;
-//            robot.leftFront.setPower(lfPower * drivePower);
-//            robot.leftBack.setPower(lbPower * drivePower);
-//            robot.rightFront.setPower(rfPower * drivePower);
-//            robot.rightBack.setPower(rbPower * drivePower);
-        }else if (Math.abs(engine.gamepad1.right_stick_x) >= 0.1) {
-            drivePower = engine.gamepad1.right_stick_x;
-//            robot.leftFront.setPower(lfPower * drivePower);
-//            robot.leftBack.setPower(lbPower * drivePower);
-//            robot.rightFront.setPower(rfPower * drivePower);
-//            robot.rightBack.setPower(rbPower * drivePower);
-        }
+        robot.leftFront.setPower(frontLeftPower);
+        robot.leftBack.setPower(backLeftPower);
+        robot.rightFront.setPower(frontRightPower);
+        robot.rightBack.setPower(backRightPower);
 
 
         if (engine.gamepad2.left_stick_button) {
