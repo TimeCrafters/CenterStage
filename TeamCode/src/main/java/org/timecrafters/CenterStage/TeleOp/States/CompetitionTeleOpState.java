@@ -257,16 +257,6 @@ public class CompetitionTeleOpState extends CyberarmState {
             }
         }
 
-        if (Objects.equals(armPos, "passive")) {
-            if (robot.lift.getCurrentPosition() >= 20) {
-                robot.chinUpServo.setPosition(chinUpServoDown);
-                robot.lift.setPower(-0.6);
-            } else {
-                robot.shoulder.setPosition(robot.shoulderPassive);
-                target = 570;
-            }
-        }
-
         if (Objects.equals(armPos, "lift up")) {
             robot.shoulder.setPosition(robot.shoulderCollect);
             robot.elbow.setPosition(robot.elbowDeposit);
@@ -303,8 +293,6 @@ public class CompetitionTeleOpState extends CyberarmState {
             super.init();
             pidController = new PIDController(p, i, d);
             robot.imu.resetYaw();
-
-        robot.clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.clawArm.setTargetPosition(0);
         robot.clawArm.setPower(0);
         robot.clawArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);

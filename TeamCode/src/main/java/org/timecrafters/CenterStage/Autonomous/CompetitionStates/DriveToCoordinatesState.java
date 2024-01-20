@@ -40,11 +40,15 @@ public class DriveToCoordinatesState extends CyberarmState {
     @Override
     public void start() {
         super.start();
-        robot.hTarget = hTarget;
-        robot.yTarget = yTarget;
-        robot.xTarget = xTarget;
-        robot.yMaxPower = maxYPower;
-        robot.xMaxPower = maxXPower;
+        if (posSpecific) {
+            robot.hTarget = hTarget;
+            robot.yTarget = yTarget;
+            robot.xTarget = xTarget;
+            robot.yMaxPower = maxYPower;
+            robot.xMaxPower = maxXPower;
+        } else {
+            setHasFinished(true);
+        }
 
         Log.d("TTT?", ""  + actionName + " CURRENT POSITION: x: " + robot.positionX + " Y: " + robot.positionY + "h: " + robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         Log.d("TTT?", ""  + actionName + " TARGET POSITION: x: " + robot.xTarget + " Y: " + robot.yTarget + "h: " + robot.hTarget);
