@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
 import org.timecrafters.CenterStage.Common.SodiPizzaMinibotObject;
@@ -25,7 +26,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     public double drivePower;
     public final double minInput = 0.1 /* <- Minimum input from stick to send command */;
     public double lastToldAngle /* <- The angle the bot was last told to stop at */, proportion, integral, derivative;
-    public float approxObjPos /* <- Approximate distance away the nearest obstruction is */, objData1, objData2, objData3;
+    public double approxObjPos /* <- Approximate distance away the nearest obstruction is */, objData1, objData2, objData3;
     private double lfPower, rfPower, lbPower, rbPower;
     private float yTransitPercent, xTransitPercent, rotPercent, percentDenom;
     private int objectPos;
@@ -40,11 +41,17 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         robot.setup();
     }
 
-    public float getApproxObjPos() {
-        if (System.currentTimeMillis() - lastDistRead >= 500) {
+    public double getApproxObjPos() {
+        if (System.currentTimeMillis() - lastDistRead >= 500 && System.currentTimeMillis() - lastDistRead <= 750) {
             /*Pseudocode: take objData1, wait, take 2, wait, take 3*/
-
-        }
+            objData1 = robot.distSensor.getDistance(DistanceUnit.MM);
+        } else if (System.currentTimeMillis() - lastDistRead >= 750 && System.currentTimeMillis() - lastDistRead <= 1250) {
+            /*Pseudocode: take objData1, wait, take 2, wait, take 3*/
+            objData2 = robot.distSensor.getDistance(DistanceUnit.MM);
+        } else if (System.currentTimeMillis() - lastDistRead >= 1250 && System.currentTimeMillis() - lastDistRead <= 1750) {
+            /*Pseudocode: take objData1, wait, take 2, wait, take 3*/
+            objData3 = robot.distSensor.getDistance(DistanceUnit.MM);
+        } else
         approxObjPos = (objData1 + objData2 + objData3)/3;
         return approxObjPos;
     }
@@ -56,6 +63,8 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
         engine.telemetry.addLine();
         engine.telemetry.addData("Arm servo position", robot.shoulder.getPosition());
+        engine.telemetry.addLine();
+        engine.telemetry.addData("Approx Object Dist", approxObjPos);
     }
 
     @Override
@@ -78,6 +87,8 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
         lastMoveTime = System.currentTimeMillis();
         lastDistRead = System.currentTimeMillis();
+
+        robot.distSensor.getDistance(DistanceUnit.MM);
     }
 
     @Override
@@ -97,12 +108,27 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         robot.rightFront.setPower(rfPower * drivePower);
         robot.rightBack.setPower(rbPower * drivePower);
 
-        if (engine.gamepad1.left_stick_x >= 0.1 || engine.gamepad1.left_stick_y >= 0.1 || engine.gamepad1.right_stick_x >= 0.1) {
-            robot.leftBack.setPower(lbPower);
-            robot.rightBack.setPower(rbPower);
-            robot.leftFront.setPower(lfPower);
-            robot.rightFront.setPower(rfPower);
+        /* For some reason, the robot reacts to both positive and negative direction from sticks as positive.
+        (It moves forward when I make it go forward, and forward when I make it go backward, as well as for strafing and turning.)*/
+        if (Math.abs(engine.gamepad1.left_stick_x) >= 0.1) {
+            drivePower = engine.gamepad1.left_stick_x;
+//            robot.leftFront.setPower(lfPower * drivePower);
+//            robot.leftBack.setPower(lbPower * drivePower);
+//            robot.rightFront.setPower(rfPower * drivePower);
+//            robot.rightBack.setPower(rbPower * drivePower);
 
+        }else if (Math.abs(engine.gamepad1.left_stick_y) >= 0.1) {
+            drivePower = engine.gamepad1.left_stick_y;
+//            robot.leftFront.setPower(lfPower * drivePower);
+//            robot.leftBack.setPower(lbPower * drivePower);
+//            robot.rightFront.setPower(rfPower * drivePower);
+//            robot.rightBack.setPower(rbPower * drivePower);
+        }else if (Math.abs(engine.gamepad1.right_stick_x) >= 0.1) {
+            drivePower = engine.gamepad1.right_stick_x;
+//            robot.leftFront.setPower(lfPower * drivePower);
+//            robot.leftBack.setPower(lbPower * drivePower);
+//            robot.rightFront.setPower(rfPower * drivePower);
+//            robot.rightBack.setPower(rbPower * drivePower);
         }
 
 
