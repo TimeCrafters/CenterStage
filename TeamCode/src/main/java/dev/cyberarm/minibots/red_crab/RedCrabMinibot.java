@@ -253,7 +253,7 @@ public class RedCrabMinibot {
         RedCrabMinibot.CLAW_ARM_POSITION_TOLERANCE = config.variable("Robot", "ClawArm_Tuning", "tolerance").value();
         RedCrabMinibot.CLAW_ARM_STOW_ANGLE = config.variable("Robot", "ClawArm_Tuning", "stow_angle").value();
         RedCrabMinibot.CLAW_ARM_DEPOSIT_ANGLE = config.variable("Robot", "ClawArm_Tuning", "deposit_angle").value();
-        RedCrabMinibot.CLAW_ARM_COLLECT_FLOAT_ANGLE = config.variable("Robot", "ClawArm_Tuning", "collect_angle").value();
+        RedCrabMinibot.CLAW_ARM_COLLECT_FLOAT_ANGLE = config.variable("Robot", "ClawArm_Tuning", "collect_float_angle").value();
         RedCrabMinibot.CLAW_ARM_COLLECT_ANGLE = config.variable("Robot", "ClawArm_Tuning", "collect_angle").value();
 
         RedCrabMinibot.CLAW_ARM_MOTOR_GEAR_RATIO = config.variable("Robot", "ClawArm_Tuning", "gear_ratio").value();
