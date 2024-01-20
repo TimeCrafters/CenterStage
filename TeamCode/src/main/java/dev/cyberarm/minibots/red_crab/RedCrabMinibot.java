@@ -198,7 +198,7 @@ public class RedCrabMinibot {
         if (autonomous)
             clawArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         /// --- --- DIRECTION
-        clawArm.setDirection(DcMotorSimple.Direction.FORWARD);
+        clawArm.setDirection(DcMotorSimple.Direction.REVERSE);
         /// --- --- BRAKING
         /// --- --- NOTE: This won't hold back much, if anything, but its a small help, maybe? 😃
         clawArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
