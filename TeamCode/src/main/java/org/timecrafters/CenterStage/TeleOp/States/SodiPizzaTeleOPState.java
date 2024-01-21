@@ -98,6 +98,8 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         if(System.currentTimeMillis() - startingTime <= 2000) {
             getApproxObjPos();
         }
+/*Driving can now differentiate between positive and negative directions, but now it's acting like
+the directions of left stick are switched with eachother (Forward/backward moves robot left/right and vice versa)*/
 
         double y = -engine.gamepad1.left_stick_y; // Remember, Y stick value is reversed
         double x = engine.gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
