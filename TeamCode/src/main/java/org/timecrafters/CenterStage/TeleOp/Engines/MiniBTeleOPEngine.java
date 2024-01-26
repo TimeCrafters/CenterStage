@@ -7,7 +7,7 @@ import org.timecrafters.CenterStage.TeleOp.States.BlackMiniTeleOP;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-@TeleOp(name = "Black Minibot")
+@TeleOp(name = "Black Minibot", group = "MINIBOT_SODI")
 
 public class MiniBTeleOPEngine extends CyberarmEngine {
     private MiniBTeleOPBot robot;

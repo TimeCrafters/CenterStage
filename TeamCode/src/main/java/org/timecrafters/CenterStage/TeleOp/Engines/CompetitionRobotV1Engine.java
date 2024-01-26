@@ -7,7 +7,7 @@ import org.timecrafters.CenterStage.TeleOp.States.CompetitionTeleOpState;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-@TeleOp(name = "Competition V1 TeleOp", group = "Competition V1")
+@TeleOp(name = "Competition V1 TeleOp", group = "0 Competition V1")
 public class CompetitionRobotV1Engine extends CyberarmEngine {
     private CompetitionRobotV1 robot;
     @Override

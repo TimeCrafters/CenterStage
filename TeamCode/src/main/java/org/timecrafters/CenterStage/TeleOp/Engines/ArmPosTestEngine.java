@@ -9,7 +9,7 @@ import org.timecrafters.CenterStage.TeleOp.States.YellowMinibotTeleOP;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-@TeleOp(name = "arm test prototype bot")
+@TeleOp(name = "arm test prototype bot", group = "PROTOTYPE")
 
     public class ArmPosTestEngine extends CyberarmEngine {
     private PrototypeRobot robot;

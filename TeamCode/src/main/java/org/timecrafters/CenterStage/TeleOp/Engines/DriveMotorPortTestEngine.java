@@ -10,7 +10,7 @@ import org.timecrafters.CenterStage.TeleOp.TestingState.MotorPortTestingState;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-@TeleOp (name = "Motor Port Test")
+@TeleOp (name = "Motor Port Test", group = "PROTOTYPE")
 public class DriveMotorPortTestEngine extends CyberarmEngine {
 
     MotorPortTestRobot robot;
