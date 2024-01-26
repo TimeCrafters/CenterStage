@@ -29,7 +29,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     public double approxObjPos /* <- Approximate distance away the nearest obstruction is */, objData1, objData2, objData3;
     private double lfPower, rfPower, lbPower, rbPower;
     private float yTransitPercent, xTransitPercent, rotPercent, percentDenom;
-    private int objectPos;
+    private int objectPos, armPos;
     private boolean droneLaunched;
     private char buttonPressed;
     private GamepadChecker gp1checker, gp2checker;
@@ -98,10 +98,9 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         if(System.currentTimeMillis() - startingTime <= 2000) {
             getApproxObjPos();
         }
-/*Driving can now differentiate between positive and negative directions, but now it's acting like
-the directions of left stick are switched with eachother (Forward/backward moves robot left/right and vice versa)*/
+/*Driving is almost all normal hopefully.*/
 
-        double y = -engine.gamepad1.left_stick_y; // Remember, Y stick value is reversed
+        double y = engine.gamepad1.left_stick_y; // Remember, Y stick value is reversed
         double x = engine.gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
         double rx = engine.gamepad1.right_stick_x;
 
@@ -156,140 +155,140 @@ the directions of left stick are switched with eachother (Forward/backward moves
             }
         }
 
-//        // This moves the arm to Collect position, which is at servo position 0.00.
-//        if (engine.gamepad2.a && !engine.gamepad2.start) {
-//            armPos = 1;
-//        }
-//
-//        if (armPos == 1) {
-//
-//            buttonPressed = 'a';
-//
-//            if (Math.abs(drivePower) > 0.25) {
-//                drivePower = 0.15;
-//                robot.leftFront.setPower(drivePower);
-//                robot.leftBack.setPower(drivePower);
-//                robot.rightFront.setPower(drivePower);
-//                robot.rightBack.setPower(drivePower);
-//            } else {
-//                //if servo's position is greater than Collect position with a run-to tolerance of 0.05,
-//                //decrement position at a rate of 0.05 per 150 milliseconds.
-//                if (robot.shoulder.getPosition() > ARM_PRECOLLECT && System.currentTimeMillis() - lastMoveTime >= 150) {
-//                    robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
-//                    lastMoveTime = System.currentTimeMillis();
-//                } else if (System.currentTimeMillis() - lastMoveTime >= 150) {
-//                    robot.shoulder.setPosition(ARM_COLLECT);
-//                    armPos = 0;
-//                }
-//
-//            }
-//
-//        }
-//        //End of code for armPos = 1
-//
-//        // This moves the arm to Precollect position, which is at servo position 0.05.
-//        if (engine.gamepad2.x) {
-//            armPos = 2;
-//        }
-//
-//        if (armPos == 2) {
-//
-//            buttonPressed = 'x';
-//
-//            if (Math.abs(drivePower) > 0.25) {
-//                drivePower = 0.15;
-//                robot.leftFront.setPower(drivePower);
-//                robot.leftBack.setPower(drivePower);
-//                robot.rightFront.setPower(drivePower);
-//                robot.rightBack.setPower(drivePower);
-//            } else {
-//                //if servo's position is greater than Precollect position with a run-to tolerance of 0.05,
-//                //decrement position at a rate of 0.05 per 150 milliseconds.
-//                if (robot.shoulder.getPosition() > ARM_PRECOLLECT + 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
-//                    robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
-//                    lastMoveTime = System.currentTimeMillis();
-//                }//Incrementing from Collect position is unnecessary, because Collect is within the tolerance of run-to.
-//                 else if (System.currentTimeMillis() - lastMoveTime >= 150) {
-//                    robot.shoulder.setPosition(ARM_PRECOLLECT);
-//                    armPos = 0;
-//                }
-//
-//            }
-//        }
-//        //End of code for armPos = 2
-//
-//        // This moves the arm to Deliver position, which is at servo position 0.28.
-//        if (engine.gamepad2.b && !engine.gamepad2.start) {
-//            armPos = 3;
-//        }
-//
-//        if (armPos == 3) {
-//
-//            buttonPressed = 'b';
-//
-//            if (Math.abs(drivePower) > 0.25) {
-//                drivePower = 0.15;
-//                robot.leftFront.setPower(drivePower);
-//                robot.leftBack.setPower(drivePower);
-//                robot.rightFront.setPower(drivePower);
-//                robot.rightBack.setPower(drivePower);
-//            } else {
-//                //if servo's position is less than Deliver position with a run-to tolerance of 0.05,
-//                //increment position at a rate of 0.05 per 150 milliseconds.
-//                if (robot.shoulder.getPosition() < ARM_DELIVER - 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
-//                    robot.shoulder.setPosition(robot.shoulder.getPosition() + 0.05);
-//                    lastMoveTime = System.currentTimeMillis();
-//                }//if servo's position is greater than Deliver position with a run-to tolerance of 0.05,
-//                //decrement position at a rate of 0.05 per 150 milliseconds.
-//                else if (robot.shoulder.getPosition() > ARM_DELIVER + 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
-//                    robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
-//                    lastMoveTime = System.currentTimeMillis();
-//                } else if (System.currentTimeMillis() - lastMoveTime >= 150) {
-//                    robot.shoulder.setPosition(ARM_DELIVER);
-//                    armPos = 0;
-//                }
-//
-//            }
-//        }
-//        //End of code for armPos = 3
-//
-//        // This moves the arm to Stow position, which is at servo position 0.72.
-//         if (engine.gamepad2.y) {
-//            armPos = 4;
-//        }
-//
-//        if (armPos == 4) {
-//
-//            buttonPressed = 'y';
-//
-//            if (Math.abs(drivePower) > 0.25) {
-//                drivePower = 0.15;
-//                robot.leftFront.setPower(drivePower);
-//                robot.leftBack.setPower(drivePower);
-//                robot.rightFront.setPower(drivePower);
-//                robot.rightBack.setPower(drivePower);
-//            } else {
-//                //if servo's position is less than Collect position with a run-to tolerance of 0.05,
-//                //increment position at a rate of 0.05 per 150 milliseconds.
-//                if (robot.shoulder.getPosition() < ARM_STOW - 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
-//                    robot.shoulder.setPosition(robot.shoulder.getPosition() + 0.05);
-//                    lastMoveTime = System.currentTimeMillis();
-//                }
-//                //Decrementing is unnecessary, because servo is mechanically inhibited from further advancing.
-//                else if (System.currentTimeMillis() - lastMoveTime >= 150) {
-//                    robot.shoulder.setPosition(ARM_STOW);
-//                    armPos = 0;
-//                }
-//
-//            }
-//        }
-        //End of code for armPos = 4
+        // This moves the arm to Collect position, which is at servo position 0.00.
+        if (engine.gamepad2.a && !engine.gamepad2.start) {
+            armPos = 1;
+        }
 
-//        if (engine.gamepad2.dpad_left) {
-//            robot.gripper.setPosition(GRIPPER_OPEN);
-//        } else if (engine.gamepad2.dpad_right) {
-//            robot.gripper.setPosition(GRIPPER_CLOSED);
-//        }
+        if (armPos == 1) {
+
+            buttonPressed = 'a';
+
+            if (Math.abs(drivePower) > 0.15) {
+                drivePower = 0.15;
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
+            } else {
+                //if servo's position is greater than Collect position with a run-to tolerance of 0.05,
+                //decrement position at a rate of 0.05 per 150 milliseconds.
+                if (robot.shoulder.getPosition() > ARM_PRECOLLECT && System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
+                    lastMoveTime = System.currentTimeMillis();
+                } else if (System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(ARM_COLLECT);
+                    armPos = 0;
+                }
+
+            }
+
+        }
+        //End of code for armPos = 1
+
+        // This moves the arm to Precollect position, which is at servo position 0.05.
+        if (engine.gamepad2.x) {
+            armPos = 2;
+        }
+
+        if (armPos == 2) {
+
+            buttonPressed = 'x';
+
+            if (Math.abs(drivePower) > 0.15) {
+                drivePower = 0.15;
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
+            } else {
+                //if servo's position is greater than Precollect position with a run-to tolerance of 0.05,
+                //decrement position at a rate of 0.05 per 150 milliseconds.
+                if (robot.shoulder.getPosition() > ARM_PRECOLLECT + 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
+                    lastMoveTime = System.currentTimeMillis();
+                }//Incrementing from Collect position is unnecessary, because Collect is within the tolerance of run-to.
+                 else if (System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(ARM_PRECOLLECT);
+                    armPos = 0;
+                }
+
+            }
+        }
+        //End of code for armPos = 2
+
+        // This moves the arm to Deliver position, which is at servo position 0.28.
+        if (engine.gamepad2.b && !engine.gamepad2.start) {
+            armPos = 3;
+        }
+
+        if (armPos == 3) {
+
+            buttonPressed = 'b';
+
+            if (Math.abs(drivePower) > 0.15) {
+                drivePower = 0.15;
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
+            } else {
+                //if servo's position is less than Deliver position with a run-to tolerance of 0.05,
+                //increment position at a rate of 0.05 per 150 milliseconds.
+                if (robot.shoulder.getPosition() < ARM_DELIVER - 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(robot.shoulder.getPosition() + 0.05);
+                    lastMoveTime = System.currentTimeMillis();
+                }//if servo's position is greater than Deliver position with a run-to tolerance of 0.05,
+                //decrement position at a rate of 0.05 per 150 milliseconds.
+                else if (robot.shoulder.getPosition() > ARM_DELIVER + 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
+                    lastMoveTime = System.currentTimeMillis();
+                } else if (System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(ARM_DELIVER);
+                    armPos = 0;
+                }
+
+            }
+        }
+        //End of code for armPos = 3
+
+        // This moves the arm to Stow position, which is at servo position 0.72.
+         if (engine.gamepad2.y) {
+            armPos = 4;
+        }
+
+        if (armPos == 4) {
+
+            buttonPressed = 'y';
+
+            if (Math.abs(drivePower) > 0.15) {
+                drivePower = 0.15;
+                robot.leftFront.setPower(drivePower);
+                robot.leftBack.setPower(drivePower);
+                robot.rightFront.setPower(drivePower);
+                robot.rightBack.setPower(drivePower);
+            } else {
+                //if servo's position is less than Collect position with a run-to tolerance of 0.05,
+                //increment position at a rate of 0.05 per 150 milliseconds.
+                if (robot.shoulder.getPosition() < ARM_STOW - 0.05 && System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(robot.shoulder.getPosition() + 0.05);
+                    lastMoveTime = System.currentTimeMillis();
+                }
+                //Decrementing is unnecessary, because servo is mechanically inhibited from further advancing.
+                else if (System.currentTimeMillis() - lastMoveTime >= 150) {
+                    robot.shoulder.setPosition(ARM_STOW);
+                    armPos = 0;
+                }
+
+            }
+        }
+//        End of code for armPos = 4
+
+        if (engine.gamepad2.dpad_left) {
+            robot.gripper.setPosition(GRIPPER_OPEN);
+        } else if (engine.gamepad2.dpad_right) {
+            robot.gripper.setPosition(GRIPPER_CLOSED);
+        }
 
         gp1checker.update();
         gp2checker.update();
