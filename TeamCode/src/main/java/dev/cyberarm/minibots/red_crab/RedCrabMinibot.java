@@ -20,6 +20,7 @@ import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfig
 import org.timecrafters.TimeCraftersConfigurationTool.library.backend.config.Action;
 import org.timecrafters.TimeCraftersConfigurationTool.library.backend.config.Variable;
 
+import dev.cyberarm.drivers.EncoderCustomKB2040;
 import dev.cyberarm.engine.V2.CyberarmEngine;
 import dev.cyberarm.engine.V2.Utilities;
 
@@ -82,6 +83,8 @@ public class RedCrabMinibot {
     public final DcMotorEx frontLeft, frontRight, backLeft, backRight, winch;
     public final DcMotorEx clawArm;
     public final Servo leftClaw, rightClaw, clawWrist, droneLatch, hookArm;
+    public final DcMotorEx deadWheelXLeft, deadWheelXRight;
+    public final EncoderCustomKB2040 deadWheelYCenter;
 
     final CyberarmEngine engine;
 
@@ -109,6 +112,8 @@ public class RedCrabMinibot {
     public AprilTagProcessor aprilTag = null;
     /// Doohickey
     public VisionPortal visionPortal = null;
+
+    public static Localizer localizer;
 
     public RedCrabMinibot(boolean autonomous) {
         engine = CyberarmEngine.instance;
@@ -228,8 +233,25 @@ public class RedCrabMinibot {
         hookArm.setDirection(Servo.Direction.FORWARD);
 //        hookArm.setPosition(HOOK_ARM_STOW_POSITION); // LEAVE OFF:
 
+        /// DEAD WHEELS ///
+        deadWheelXLeft = (DcMotorEx) engine.hardwareMap.dcMotor.get("deadwheel_x_left");
+        deadWheelXRight = (DcMotorEx) engine.hardwareMap.dcMotor.get("deadwheel_x_right");
+        deadWheelYCenter = engine.hardwareMap.get(EncoderCustomKB2040.class, "deadwheel_y_center");
+
+        deadWheelXLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        deadWheelXRight.setDirection(DcMotorSimple.Direction.FORWARD);
+//        deadWheelYCenter.setDirection(DcMotorSimple.Direction.FORWARD);
+
         // Bulk read from hubs
         Utilities.hubsBulkReadMode(engine.hardwareMap, LynxModule.BulkCachingMode.MANUAL);
+
+        // Initialize localizer
+        if (autonomous || RedCrabMinibot.localizer == null) {
+            RedCrabMinibot.localizer = new Localizer(this);
+        }
+
+        if (autonomous)
+            RedCrabMinibot.localizer.reset();
     }
 
     public void reloadConfig() {
@@ -288,6 +310,21 @@ public class RedCrabMinibot {
     }
 
     public void standardTelemetry() {
+        engine.telemetry.addLine();
+
+        if (RedCrabMinibot.localizer != null) {
+            engine.telemetry.addLine("Localizer");
+            engine.telemetry.addData("X (MM)", "%.2fmm", RedCrabMinibot.localizer.xMM());
+            engine.telemetry.addData("Y (MM)", "%.2fmm", RedCrabMinibot.localizer.yMM());
+            engine.telemetry.addData("R (De)", "%.2fdeg", RedCrabMinibot.localizer.headingDegrees());
+            engine.telemetry.addLine();
+        }
+
+        engine.telemetry.addLine("Deadwheels");
+        engine.telemetry.addData("X Left", deadWheelXLeft.getCurrentPosition());
+        engine.telemetry.addData("X Right", deadWheelXRight.getCurrentPosition());
+        // Use .getLastPosition instead of .getCurrentPosition here to not make an additional round trip just for telemetry
+        engine.telemetry.addData("Y Center", deadWheelYCenter.getLastPosition());
         engine.telemetry.addLine();
 
         engine.telemetry.addLine("Motors");

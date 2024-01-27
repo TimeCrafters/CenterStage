@@ -22,6 +22,9 @@ public class RedCrabTeleOpEngine extends CyberarmEngine {
     @Override
     public void loop() {
         Utilities.hubsClearBulkReadCache(hardwareMap);
+        if (RedCrabMinibot.localizer != null) {
+            RedCrabMinibot.localizer.integrate();
+        }
 
         super.loop();
     }

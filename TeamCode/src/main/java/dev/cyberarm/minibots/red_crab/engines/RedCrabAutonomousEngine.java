@@ -10,6 +10,9 @@ public abstract class RedCrabAutonomousEngine extends CyberarmEngine {
     @Override
     public void loop() {
         Utilities.hubsClearBulkReadCache(hardwareMap);
+        if (RedCrabMinibot.localizer != null) {
+            RedCrabMinibot.localizer.integrate();
+        }
 
         super.loop();
 

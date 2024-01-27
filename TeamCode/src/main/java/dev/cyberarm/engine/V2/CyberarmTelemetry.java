@@ -4,6 +4,9 @@ import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -16,8 +19,16 @@ public class CyberarmTelemetry {
     private static final int MAX_PACKET_RAW_SIZE = 508; // bytes
     private static final int PACKET_HEADER_SIZE = 16; // bytes
     private static final int MAX_PACKET_BODY_SIZE = MAX_PACKET_RAW_SIZE - PACKET_HEADER_SIZE; // bytes
+    private static final String MULTICAST_ADDRESS = "236.77.83.76";
+    private static final int MULTICAST_PORT = 6388;
+    private static final int MULTICAST_TTL = 5;
     private static final String TAG = "CYBERARM_TELEMETRY";
     private final ArrayList<ByteArrayOutputStream> queueBuffer = new ArrayList<>();
+    private InetAddress group;
+    private MulticastSocket multicastSocket;
+
+    private boolean usable = false;
+
     enum Encode {
         // Generic/Type encodings
         INTEGER,
@@ -33,8 +44,33 @@ public class CyberarmTelemetry {
         GAMEPAD, // all 15 buttons + joysticks + triggers input values
         MOTOR, // current power, velocity, position, target position, and current (amps)
         SERVO, // current target position
+        CONTINUOUS_SERVO, // current power
         SENSOR_2M_DISTANCE, // Rev 2 meter distance sensor
         SENSOR_DIGITAL, // touch or other digital/binary sensor
+    }
+
+    CyberarmTelemetry() {
+        try {
+            this.group = InetAddress.getByName(MULTICAST_ADDRESS);
+            this.multicastSocket = new MulticastSocket(MULTICAST_PORT);
+            this.multicastSocket.setTimeToLive(MULTICAST_TTL);
+            this.multicastSocket.joinGroup(group);
+
+            this.usable = true;
+        } catch (IOException e) {
+            Log.e(TAG, "FAILED to create multicast socket!");
+            e.printStackTrace();
+
+            this.usable = false;
+        }
+    }
+
+    /**
+     * Whether the multicast socket was successfully created
+     * @return usable
+     */
+    public boolean isUsable() {
+        return usable;
     }
 
     public void publish() throws IOException
@@ -99,8 +135,15 @@ public class CyberarmTelemetry {
         output.write(buffer.toByteArray());
     }
 
-    private void commitPacket(ByteArrayOutputStream buffer) {
+    private void commitPacket(ByteArrayOutputStream buffer) throws IOException {
         // TODO: send multicast packet(s) on LAN
+
+        // Drop packet if multicast socket is not yet created or failed to be created.
+        if (!isUsable())
+            return;
+
+        DatagramPacket packet = new DatagramPacket(buffer.toByteArray(), buffer.size(), group, MULTICAST_PORT);
+        multicastSocket.send(packet);
     }
 
     private void packInt(ByteArrayOutputStream stream, int i) throws IOException {
@@ -113,28 +156,24 @@ public class CyberarmTelemetry {
         stream.write(Long.toBinaryString(i).getBytes());
     }
 
-    private void packFloat(ByteArrayOutputStream stream, float i, int precision) throws IOException {
+    private void packFloat(ByteArrayOutputStream stream, float i) throws IOException {
         stream.write(Encode.FLOAT.ordinal());
-        String string = String.format("%." + precision + "f", i, Locale.US);
-        stream.write(string.length());
-        stream.write(string.getBytes(StandardCharsets.UTF_8));
+        String[] string = String.format(Locale.US, "%.8f", i).split("\\.");
+        int wholeNum = Integer.parseInt(string[0]);
+        int decimalPart = Integer.parseInt(string[1]);
+
+        stream.write(wholeNum);
+        stream.write(decimalPart);
     }
 
-    private void packFloat(ByteArrayOutputStream stream, float i) throws IOException
-    {
-        packFloat(stream, i, 3);
-    }
-
-    private void packDouble(ByteArrayOutputStream stream, double i, int precision) throws IOException {
+    private void packDouble(ByteArrayOutputStream stream, double i) throws IOException {
         stream.write(Encode.DOUBLE.ordinal());
-        String string = String.format("%." + precision + "f", i, Locale.US);
-        stream.write(string.length());
-        stream.write(string.getBytes(StandardCharsets.UTF_8));
-    }
+        String[] string = String.format(Locale.US, "%.8f", i).split("\\.");
+        int wholeNum = Integer.parseInt(string[0]);
+        int decimalPart = Integer.parseInt(string[1]);
 
-    private void packDouble(ByteArrayOutputStream stream, double i) throws IOException
-    {
-        packDouble(stream, i, 3);
+        stream.write(wholeNum);
+        stream.write(decimalPart);
     }
 
     private void packString(ByteArrayOutputStream stream, String i) throws IOException {
