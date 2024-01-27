@@ -20,6 +20,10 @@ public class Pilot extends CyberarmState {
     private boolean droneLaunchAuthorized = false;
     private boolean droneLaunchRequested = false;
     private double droneLastLaunchRequestStartMS = 0;
+    private double odometryResetRequestStartMS = 0;
+    private boolean odometryResetRequested = false;
+    private boolean odometryResetRequestLeftStick = false;
+    private boolean odometryResetRequestRightStick = false;
     private boolean robotSlowMode = false;
     private boolean triggersControlClawArm = false;
     private double deltaTime = 0;
@@ -40,6 +44,7 @@ public class Pilot extends CyberarmState {
         droneLatchController();
         hookArmController(); // disabled for swrist debug
         winchController();
+        odometryDebugController();
 
         lastLoopTimeMS = runTime();
     }
@@ -60,6 +65,8 @@ public class Pilot extends CyberarmState {
                     break;
                 case "guide":
                     robot.imu.resetYaw();
+                    robot.ams.addNotice("IMU", "IMU RESET");
+                    engine.telemetry.speak("IMU. RESET.");
                     break;
                 case "left_bumper":
                     leftClawOpen = !leftClawOpen;
@@ -85,13 +92,21 @@ public class Pilot extends CyberarmState {
 
                     if (triggersControlClawArm)
                     {
-                        engine.telemetry.speak("Claw Arm Manual");
+                        robot.ams.addNotice("CLAW ARM", "Claw Arm Manual");
+                        engine.telemetry.speak("Claw. Arm. Manual.");
                     } else {
-                        engine.telemetry.speak("Winch Manual");
+                        robot.ams.addNotice("WINCH", "Winch Manual");
+                        engine.telemetry.speak("Winch. Manual.");
                     }
                     break;
                 case "start":
                     robot.reloadConfig();
+                    break;
+                case "left_stick_button":
+                    odometryResetRequestLeftStick = true;
+                    break;
+                case "right_stick_button":
+                    odometryResetRequestRightStick = true;
                     break;
             }
         }
@@ -104,6 +119,12 @@ public class Pilot extends CyberarmState {
                 case "y":
                     droneLaunchRequested = false;
                     droneLastLaunchRequestStartMS = runTime();
+                    break;
+                case "left_stick_button":
+                    odometryResetRequestLeftStick = false;
+                    break;
+                case "right_stick_button":
+                    odometryResetRequestRightStick = false;
                     break;
             }
         }
@@ -224,6 +245,13 @@ public class Pilot extends CyberarmState {
         if (droneLaunchAuthorized) {
             robot.droneLatch.setPosition(RedCrabMinibot.DRONE_LATCH_LAUNCH_POSITION);
         }
+
+        // Auto reset drone latch after DRONE_LAUNCH_CONFIRMATION_TIME_MS + 1 second
+        if (!droneLaunchRequested && runTime() - droneLastLaunchRequestStartMS >= RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS + 1_000) {
+            droneLaunchAuthorized = false;
+
+            robot.droneLatch.setPosition(RedCrabMinibot.DRONE_LATCH_INITIAL_POSITION);
+        }
     }
 
     private void hookArmController() {
@@ -247,6 +275,24 @@ public class Pilot extends CyberarmState {
         } else {
             robot.winch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.winch.setPower(RedCrabMinibot.WINCH_MAX_SPEED);
+        }
+    }
+
+    private void odometryDebugController() {
+        if (odometryResetRequestLeftStick && odometryResetRequestRightStick) {
+            if (!odometryResetRequested) {
+                odometryResetRequested = true;
+                odometryResetRequestStartMS = runTime();
+            } else if (runTime() - odometryResetRequestStartMS >= 1_000) {
+                RedCrabMinibot.localizer.reset();
+                odometryResetRequestStartMS = runTime();
+                odometryResetRequested = false;
+                robot.ams.addNotice("ODOMETRY", "Odometry Reset");
+                engine.telemetry.speak("ODOMETRY. RESET.");
+            }
+        } else {
+            odometryResetRequested = false;
+            odometryResetRequestStartMS = runTime();
         }
     }
 }

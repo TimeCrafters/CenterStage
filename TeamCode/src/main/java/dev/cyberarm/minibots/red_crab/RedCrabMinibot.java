@@ -113,7 +113,11 @@ public class RedCrabMinibot {
     /// Doohickey
     public VisionPortal visionPortal = null;
 
+    /* --- Localizer / Odometry --- */
     public static Localizer localizer;
+
+    /// Alert Management System ///
+    public AlertManagementSystem ams = new AlertManagementSystem();
 
     public RedCrabMinibot(boolean autonomous) {
         engine = CyberarmEngine.instance;
@@ -242,6 +246,13 @@ public class RedCrabMinibot {
         deadWheelXRight.setDirection(DcMotorSimple.Direction.FORWARD);
 //        deadWheelYCenter.setDirection(DcMotorSimple.Direction.FORWARD);
 
+        deadWheelXLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        deadWheelXRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        deadWheelYCenter.reset();
+
+        deadWheelXLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        deadWheelXRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         // Bulk read from hubs
         Utilities.hubsBulkReadMode(engine.hardwareMap, LynxModule.BulkCachingMode.MANUAL);
 
@@ -311,6 +322,8 @@ public class RedCrabMinibot {
 
     public void standardTelemetry() {
         engine.telemetry.addLine();
+
+        this.ams.report(engine.telemetry);
 
         if (RedCrabMinibot.localizer != null) {
             engine.telemetry.addLine("Localizer");
@@ -457,6 +470,7 @@ public class RedCrabMinibot {
             if (milliseconds - lastClawArmOverCurrentAnnounced >= CLAW_ARM_WARN_OVERCURRENT_AFTER_MS) {
                 lastClawArmOverCurrentAnnounced = System.currentTimeMillis();
 
+                this.ams.addWarning("CLAW ARM", String.format("Claw Arm Over Current (%.0f mAmp)", clawArm.getCurrent(CurrentUnit.MILLIAMPS)));
                 engine.telemetry.speak("WARNING. ARM. OVER. CURRENT.");
             }
         } else {

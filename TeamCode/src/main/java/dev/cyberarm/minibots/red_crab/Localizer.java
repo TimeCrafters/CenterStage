@@ -1,5 +1,7 @@
 package dev.cyberarm.minibots.red_crab;
 
+import com.arcrobotics.ftclib.kinematics.HolonomicOdometry;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.slf4j.helpers.Util;
@@ -9,7 +11,7 @@ import dev.cyberarm.engine.V2.Utilities;
 public class Localizer {
     private final RedCrabMinibot robot;
     private double rawX = 0, rawY = 0, rawR = 0;
-    private double trackWidthMM = 365.0, forwardOffsetMM = -140.0, wheelDiameterMM = 90.0;
+    private double trackWidthMM = 365.0, forwardOffsetMM = 140.0, wheelDiameterMM = 90.0;
     private int lastEncoderXLeft = 0, lastEncoderXRight = 0, lastEncoderYCenter = 0;
 
     public Localizer(RedCrabMinibot robot) {
@@ -45,8 +47,6 @@ public class Localizer {
         int rightEncoder = robot.deadWheelXRight.getCurrentPosition();
         int centerEncoder = robot.deadWheelYCenter.getCurrentPosition();
 
-        double heading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
         int deltaLeft = leftEncoder - lastEncoderXLeft;
         int deltaRight = rightEncoder - lastEncoderXRight;
         int deltaCenter = centerEncoder - lastEncoderYCenter;
@@ -55,6 +55,7 @@ public class Localizer {
         double deltaMiddle = (deltaLeft + deltaRight) / 2.0;
         double deltaPerp = deltaCenter - forwardOffsetMM * phi;
 
+        double heading = rawR + phi;
         double deltaX = deltaMiddle * Math.cos(heading) - deltaPerp * Math.sin(heading);
         double deltaY = deltaMiddle * Math.sin(heading) + deltaPerp * Math.cos(heading);
 
