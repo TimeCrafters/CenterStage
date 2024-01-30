@@ -6,7 +6,9 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -85,6 +87,7 @@ public class RedCrabMinibot {
     public final Servo leftClaw, rightClaw, clawWrist, droneLatch, hookArm;
     public final DcMotorEx deadWheelXLeft, deadWheelXRight;
     public final EncoderCustomKB2040 deadWheelYCenter;
+    public final DigitalChannel greenLED, redLED;
 
     final CyberarmEngine engine;
 
@@ -244,6 +247,15 @@ public class RedCrabMinibot {
 
         if (autonomous)
             resetDeadWheels();
+
+        /// LED(s) ///
+        greenLED = engine.hardwareMap.get(DigitalChannel.class, "led_green"); // GREEN LED NOT WORKING
+        redLED = engine.hardwareMap.get(DigitalChannel.class, "led_red");
+
+        greenLED.setMode(DigitalChannel.Mode.OUTPUT);
+        redLED.setMode(DigitalChannel.Mode.OUTPUT);
+        greenLED.setState(true);
+        redLED.setState(true);
 
         // Bulk read from hubs
         Utilities.hubsBulkReadMode(engine.hardwareMap, LynxModule.BulkCachingMode.MANUAL);
