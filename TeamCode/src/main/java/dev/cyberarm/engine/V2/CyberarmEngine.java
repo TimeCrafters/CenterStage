@@ -41,6 +41,8 @@ public abstract class CyberarmEngine extends OpMode {
   private GamepadChecker gamepadCheckerGamepad1, gamepadCheckerGamepad2;
   private boolean useThreads = true;
 
+  private long startTime;
+
   /**
    * Called when INIT button on Driver Station is pushed
    * ENSURE to call super.init() if you override this method
@@ -84,6 +86,8 @@ public abstract class CyberarmEngine extends OpMode {
    * ENSURE to call super.start() if you override this method
    */
   public void start() {
+    startTime = System.currentTimeMillis();
+
     if (cyberarmStates.size() > 0) {
       runState(cyberarmStates.get(0));
     }
@@ -533,5 +537,13 @@ public abstract class CyberarmEngine extends OpMode {
    */
   public void threadless() {
     useThreads = false;
+  }
+
+  /**
+   * Time in milliseconds since START button was pushed
+   * @return runTime
+   */
+  public double runTime() {
+    return (System.currentTimeMillis() - startTime);
   }
 }

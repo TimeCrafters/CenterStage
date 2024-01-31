@@ -130,11 +130,6 @@ public class Pilot extends CyberarmState {
         }
     }
 
-    @Override
-    public void telemetry() {
-        robot.standardTelemetry();
-    }
-
     private void drivetrain() {
         // https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html#field-centric
 

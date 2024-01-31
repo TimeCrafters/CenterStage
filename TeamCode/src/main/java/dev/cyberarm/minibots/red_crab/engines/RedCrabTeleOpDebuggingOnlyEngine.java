@@ -15,8 +15,9 @@ public class RedCrabTeleOpDebuggingOnlyEngine extends RedCrabEngine {
     public void setup() {
         threadless();
 
+        robot = new RedCrabMinibot(false);
+
         addState(new CyberarmState() {
-            final RedCrabMinibot robot = new RedCrabMinibot(false);
 
             @Override
             public void exec() {

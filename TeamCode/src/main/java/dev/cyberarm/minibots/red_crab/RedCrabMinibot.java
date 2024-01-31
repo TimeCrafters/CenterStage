@@ -91,6 +91,7 @@ public class RedCrabMinibot {
     public final boolean LED_OFF = true, LED_ON = false;
 
     final CyberarmEngine engine;
+    public final boolean autonomous;
 
     public TimeCraftersConfiguration config;
     private final PIDFController clawArmPIDFController;
@@ -125,6 +126,7 @@ public class RedCrabMinibot {
 
     public RedCrabMinibot(boolean autonomous) {
         engine = CyberarmEngine.instance;
+        this.autonomous = autonomous;
 
         config = new TimeCraftersConfiguration("cyberarm_RedCrab");
         loadConstants();

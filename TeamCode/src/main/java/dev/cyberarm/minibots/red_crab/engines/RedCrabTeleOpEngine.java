@@ -12,7 +12,7 @@ import dev.cyberarm.minibots.red_crab.states.Pilot;
 public class RedCrabTeleOpEngine extends RedCrabEngine {
     @Override
     public void setup() {
-        RedCrabMinibot robot = new RedCrabMinibot(false);
+        robot = new RedCrabMinibot(false);
 
         addTask(new ClawArmTask(robot));
 
