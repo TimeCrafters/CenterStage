@@ -6,7 +6,9 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -85,6 +87,7 @@ public class RedCrabMinibot {
     public final Servo leftClaw, rightClaw, clawWrist, droneLatch, hookArm;
     public final DcMotorEx deadWheelXLeft, deadWheelXRight;
     public final EncoderCustomKB2040 deadWheelYCenter;
+    public final DigitalChannel greenLED, redLED;
 
     final CyberarmEngine engine;
 
@@ -242,16 +245,17 @@ public class RedCrabMinibot {
         deadWheelXRight = (DcMotorEx) engine.hardwareMap.dcMotor.get("deadwheel_x_right");
         deadWheelYCenter = engine.hardwareMap.get(EncoderCustomKB2040.class, "deadwheel_y_center");
 
-        deadWheelXLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        deadWheelXRight.setDirection(DcMotorSimple.Direction.FORWARD);
-//        deadWheelYCenter.setDirection(DcMotorSimple.Direction.FORWARD);
+        if (autonomous)
+            resetDeadWheels();
 
-        deadWheelXLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        deadWheelXRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        deadWheelYCenter.reset();
+        /// LED(s) ///
+        greenLED = engine.hardwareMap.get(DigitalChannel.class, "led_green"); // GREEN LED NOT WORKING
+        redLED = engine.hardwareMap.get(DigitalChannel.class, "led_red");
 
-        deadWheelXLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        deadWheelXRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        greenLED.setMode(DigitalChannel.Mode.OUTPUT);
+        redLED.setMode(DigitalChannel.Mode.OUTPUT);
+        greenLED.setState(true);
+        redLED.setState(true);
 
         // Bulk read from hubs
         Utilities.hubsBulkReadMode(engine.hardwareMap, LynxModule.BulkCachingMode.MANUAL);
@@ -320,6 +324,19 @@ public class RedCrabMinibot {
         RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS = config.variable("Robot", "DroneLauncher_Tuning", "launch_confirmation_time_ms").value();
     }
 
+    public void resetDeadWheels() {
+        deadWheelXLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        deadWheelXRight.setDirection(DcMotorSimple.Direction.FORWARD);
+//        deadWheelYCenter.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        deadWheelXLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        deadWheelXRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        deadWheelYCenter.reset();
+
+        deadWheelXLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        deadWheelXRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
     public void standardTelemetry() {
         engine.telemetry.addLine();
 
@@ -327,8 +344,8 @@ public class RedCrabMinibot {
 
         if (RedCrabMinibot.localizer != null) {
             engine.telemetry.addLine("Localizer");
-            engine.telemetry.addData("X (MM)", "%.2fmm", RedCrabMinibot.localizer.xMM());
-            engine.telemetry.addData("Y (MM)", "%.2fmm", RedCrabMinibot.localizer.yMM());
+            engine.telemetry.addData("X (MM)", "%.2fmm (%.2f IN)", RedCrabMinibot.localizer.xMM(), RedCrabMinibot.localizer.xIn());
+            engine.telemetry.addData("Y (MM)", "%.2fmm (%.2f IN)", RedCrabMinibot.localizer.yMM(), RedCrabMinibot.localizer.yIn());
             engine.telemetry.addData("R (De)", "%.2fdeg", RedCrabMinibot.localizer.headingDegrees());
             engine.telemetry.addLine();
         }
