@@ -22,6 +22,7 @@ public class MoveToCoordinate extends CyberarmState {
     private double distanceFromTargetMM = 0;
     private double velocity = 0;
     private double angleDiffDegrees = 0;
+    private double rotationStrength = 0;
 
     public MoveToCoordinate(RedCrabMinibot robot, String groupName, String actionName) {
         this.robot = robot;
@@ -85,10 +86,11 @@ public class MoveToCoordinate extends CyberarmState {
     }
 
     private void drivetrain(Vector2D direction) {
-        double rotationStrength = Utilities.lerp(
-                minVelocityMM,
-                maxVelocityMM,
-                Range.clip(Math.abs(angleDiffDegrees) / lerpDegrees, 0.0, 1.0));
+        // rotationStrength = Utilities.lerp(
+        //         minVelocityMM,
+        //         maxVelocityMM,
+        //         Range.clip(Math.abs(angleDiffDegrees) / lerpDegrees, 0.0, 1.0));
+        rotationStrength = Range.clip(Math.abs(angleDiffDegrees) / lerpDegrees, 0.0, 1.0);
         if (angleDiffDegrees < 0)
             rotationStrength *= -1;
 
@@ -153,7 +155,7 @@ public class MoveToCoordinate extends CyberarmState {
     public void telemetry() {
         engine.telemetry.addData("Current Position MM", "X: %.2f Y: %.2f", robotPosMM.x(), robotPosMM.y());
         engine.telemetry.addData("Target Position MM", "X: %.2f Y: %.2f", targetPosMM.x(), targetPosMM.y());
-        engine.telemetry.addData("Move NORMAL", "X: %.2f Y: %.2f", direction.x(), direction.y());
+        engine.telemetry.addData("Move NORMAL", "X: %.2f Y: %.2f R: %.2f", direction.x(), direction.y(), rotationStrength);
         engine.telemetry.addData("Distance MM", "%.2fmm", distanceFromTargetMM);
         engine.telemetry.addData("Angle Diff DEGREES", "%.2f degrees", angleDiffDegrees);
 //        engine.telemetry.addData("Velocity", "%.2f T/s", velocity);

@@ -9,7 +9,7 @@ import dev.cyberarm.minibots.red_crab.states.ClawArmTask;
 import dev.cyberarm.minibots.red_crab.states.Pilot;
 
 @TeleOp(name = "Cyberarm Red Crab TeleOp", group = "MINIBOT")
-public class RedCrabTeleOpEngine extends CyberarmEngine {
+public class RedCrabTeleOpEngine extends RedCrabEngine {
     @Override
     public void setup() {
         RedCrabMinibot robot = new RedCrabMinibot(false);
@@ -17,15 +17,5 @@ public class RedCrabTeleOpEngine extends CyberarmEngine {
         addTask(new ClawArmTask(robot));
 
         addState(new Pilot(robot));
-    }
-
-    @Override
-    public void loop() {
-        Utilities.hubsClearBulkReadCache(hardwareMap);
-        if (RedCrabMinibot.localizer != null) {
-            RedCrabMinibot.localizer.integrate();
-        }
-
-        super.loop();
     }
 }

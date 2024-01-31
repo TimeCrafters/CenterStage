@@ -4,7 +4,7 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 import dev.cyberarm.engine.V2.Utilities;
 import dev.cyberarm.minibots.red_crab.RedCrabMinibot;
 
-public abstract class RedCrabAutonomousEngine extends CyberarmEngine {
+public abstract class RedCrabEngine extends CyberarmEngine {
     protected RedCrabMinibot robot;
 
     @Override
@@ -18,5 +18,12 @@ public abstract class RedCrabAutonomousEngine extends CyberarmEngine {
 
         if (robot != null)
             robot.standardTelemetry();
+    }
+
+    @Override
+    public void stop() {
+        robot.shutdown();
+
+        super.stop();
     }
 }

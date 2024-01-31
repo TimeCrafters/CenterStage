@@ -10,7 +10,7 @@ import dev.cyberarm.engine.V2.Utilities;
 import dev.cyberarm.minibots.red_crab.RedCrabMinibot;
 
 @TeleOp(name = "Cyberarm Red Crab TeleOp DEBUGGING", group = "MINIBOT")
-public class RedCrabTeleOpDebuggingOnlyEngine extends CyberarmEngine {
+public class RedCrabTeleOpDebuggingOnlyEngine extends RedCrabEngine {
     @Override
     public void setup() {
         threadless();
@@ -30,18 +30,6 @@ public class RedCrabTeleOpDebuggingOnlyEngine extends CyberarmEngine {
                 robot.clawArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 robot.clawArm.setPower(-engine.gamepad1.left_stick_y * 0.5);
             }
-
-            @Override
-            public void telemetry() {
-                robot.standardTelemetry();
-            }
         });
-    }
-
-    @Override
-    public void loop() {
-        Utilities.hubsClearBulkReadCache(hardwareMap);
-
-        super.loop();
     }
 }

@@ -88,6 +88,7 @@ public class RedCrabMinibot {
     public final DcMotorEx deadWheelXLeft, deadWheelXRight;
     public final EncoderCustomKB2040 deadWheelYCenter;
     public final DigitalChannel greenLED, redLED;
+    public final boolean LED_OFF = true, LED_ON = false;
 
     final CyberarmEngine engine;
 
@@ -254,8 +255,8 @@ public class RedCrabMinibot {
 
         greenLED.setMode(DigitalChannel.Mode.OUTPUT);
         redLED.setMode(DigitalChannel.Mode.OUTPUT);
-        greenLED.setState(true);
-        redLED.setState(true);
+        greenLED.setState(LED_OFF);
+        redLED.setState(LED_ON);
 
         // Bulk read from hubs
         Utilities.hubsBulkReadMode(engine.hardwareMap, LynxModule.BulkCachingMode.MANUAL);
@@ -267,6 +268,12 @@ public class RedCrabMinibot {
 
         if (autonomous)
             RedCrabMinibot.localizer.reset();
+    }
+
+    public void shutdown() {
+        // Prevent LED(s) from being on while idle
+        greenLED.setMode(DigitalChannel.Mode.INPUT);
+        redLED.setMode(DigitalChannel.Mode.INPUT);
     }
 
     public void reloadConfig() {
