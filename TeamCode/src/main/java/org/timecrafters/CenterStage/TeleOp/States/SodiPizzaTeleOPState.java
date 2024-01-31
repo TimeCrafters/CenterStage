@@ -98,11 +98,10 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         if(System.currentTimeMillis() - startingTime <= 2000) {
             getApproxObjPos();
         }
-/*Driving is almost all normal hopefully.*/
 
-        double y = engine.gamepad1.left_stick_y; // Remember, Y stick value is reversed
+        double y = engine.gamepad1.left_stick_y;
         double x = engine.gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-        double rx = engine.gamepad1.right_stick_x;
+        double rx = -engine.gamepad1.right_stick_x;
 
 // Denominator is the largest motor power (absolute value) or 1
 // This ensures all the powers maintain the same ratio,
