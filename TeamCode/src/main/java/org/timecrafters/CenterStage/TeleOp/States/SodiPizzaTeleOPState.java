@@ -27,8 +27,6 @@ public class SodiPizzaTeleOPState extends CyberarmState {
     public final double minInput = 0.1 /* <- Minimum input from stick to send command */;
     public double lastToldAngle /* <- The angle the bot was last told to stop at */, proportion, integral, derivative;
     public double approxObjPos /* <- Approximate distance away the nearest obstruction is */, objData1, objData2, objData3;
-    private double lfPower, rfPower, lbPower, rbPower;
-    private float yTransitPercent, xTransitPercent, rotPercent, percentDenom;
     private int objectPos, armPos;
     private boolean droneLaunched;
     private char buttonPressed;
@@ -83,7 +81,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         lastToldAngle = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
         gp1checker = new GamepadChecker(engine, engine.gamepad1);
-        gp2checker = new GamepadChecker(engine, engine.gamepad2);
+        gp2checker = new GamepadChecker(engine, engine.gamepad1);
 
         lastMoveTime = System.currentTimeMillis();
         lastDistRead = System.currentTimeMillis();
@@ -117,13 +115,27 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         robot.rightFront.setPower(frontRightPower);
         robot.rightBack.setPower(backRightPower);
 
+        double heading = -robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double rotX = x * Math.cos(heading) - y * Math.sin(heading);
+        double rotY = x * Math.sin(heading) + y * Math.cos(heading);
 
-        if (engine.gamepad2.left_stick_button) {
+        frontLeftPower = (rotY + rotX + rx) / denominator;
+        backLeftPower = (rotY - rotX + rx) / denominator;
+        frontRightPower = (rotY - rotX - rx) / denominator;
+        backRightPower = (rotY + rotX - rx) / denominator;
+
+        robot.leftBack.setPower(backLeftPower * drivePower);
+        robot.rightBack.setPower(backRightPower * drivePower);
+        robot.leftFront.setPower(frontLeftPower * drivePower);
+        robot.rightFront.setPower(frontRightPower * drivePower);
+
+
+        if (engine.gamepad1.left_stick_button) {
             if (System.currentTimeMillis() - lastMoveTime >= 200) {
                 robot.launcher.setPosition(0.98);
                 lastMoveTime = System.currentTimeMillis();
             }
-        } else if (engine.gamepad2.right_stick_button) {
+        } else if (engine.gamepad1.right_stick_button) {
             if (System.currentTimeMillis() - lastMoveTime >= 100) {
                 robot.launcher.setPosition(robot.launcher.getPosition() - 0.2);
                 lastMoveTime = System.currentTimeMillis();
@@ -135,19 +147,19 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             }
         }
 
-        if (!engine.gamepad2.left_stick_button && droneLaunched) {
+        if (!engine.gamepad1.left_stick_button && droneLaunched) {
             if (System.currentTimeMillis() - lastMoveTime >= 200) {
                 robot.launcher.setPosition(robot.launcher.getPosition() - 0.025);
                 lastMoveTime = System.currentTimeMillis();
             }
         }
 
-        if (engine.gamepad2.left_stick_y > 0.1) {
+        if (engine.gamepad1.dpad_up) {
             if (System.currentTimeMillis() - lastMoveTime >= 200) {
                 robot.shoulder.setPosition(robot.shoulder.getPosition() + 0.05);
                 lastMoveTime = System.currentTimeMillis();
             }
-        } else if (engine.gamepad2.left_stick_y < -0.1) {
+        } else if (engine.gamepad1.dpad_down) {
             if (System.currentTimeMillis() - lastMoveTime >= 200) {
                 robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
                 lastMoveTime = System.currentTimeMillis();
@@ -155,7 +167,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         }
 
         // This moves the arm to Collect position, which is at servo position 0.00.
-        if (engine.gamepad2.a && !engine.gamepad2.start) {
+        if (engine.gamepad1.a && !engine.gamepad1.start) {
             armPos = 1;
         }
 
@@ -186,7 +198,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         //End of code for armPos = 1
 
         // This moves the arm to Precollect position, which is at servo position 0.05.
-        if (engine.gamepad2.x) {
+        if (engine.gamepad1.x) {
             armPos = 2;
         }
 
@@ -217,7 +229,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         //End of code for armPos = 2
 
         // This moves the arm to Deliver position, which is at servo position 0.28.
-        if (engine.gamepad2.b && !engine.gamepad2.start) {
+        if (engine.gamepad1.b && !engine.gamepad1.start) {
             armPos = 3;
         }
 
@@ -252,7 +264,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         //End of code for armPos = 3
 
         // This moves the arm to Stow position, which is at servo position 0.72.
-         if (engine.gamepad2.y) {
+         if (engine.gamepad1.y) {
             armPos = 4;
         }
 
@@ -283,9 +295,9 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         }
 //        End of code for armPos = 4
 
-        if (engine.gamepad2.dpad_left) {
+        if (engine.gamepad1.dpad_left) {
             robot.gripper.setPosition(GRIPPER_OPEN);
-        } else if (engine.gamepad2.dpad_right) {
+        } else if (engine.gamepad1.dpad_right) {
             robot.gripper.setPosition(GRIPPER_CLOSED);
         }
 
