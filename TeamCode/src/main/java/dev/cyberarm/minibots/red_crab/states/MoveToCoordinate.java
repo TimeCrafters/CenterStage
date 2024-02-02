@@ -1,7 +1,8 @@
 package dev.cyberarm.minibots.red_crab.states;
 
+import com.qualcomm.robotcore.util.Range;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import dev.cyberarm.engine.V2.CyberarmState;
 import dev.cyberarm.engine.V2.Utilities;
@@ -13,8 +14,15 @@ public class MoveToCoordinate extends CyberarmState {
     private final String groupName, actionName;
     private final boolean stopDrivetrain;
     private final int timeoutMS;
-    private final double targetAngleDegrees, angleToleranceDegrees, minDistanceMM, targetX_MM, targetY_MM;
+    private final double targetAngleDegrees, targetAngleToleranceDegrees, minDistanceMM;
+    private final double maxVelocityMM, minVelocityMM, lerpMM_UP, lerpMM_DOWN, lerpDegrees;
     private final Vector2D targetPosMM;
+    private Vector2D robotInitialPosMM = new Vector2D(), robotPosMM = new Vector2D();
+    private Vector2D direction = new Vector2D();
+    private double distanceFromTargetMM = 0;
+    private double velocity = 0;
+    private double angleDiffDegrees = 0;
+    private double rotationStrength = 0;
 
     public MoveToCoordinate(RedCrabMinibot robot, String groupName, String actionName) {
         this.robot = robot;
@@ -23,24 +31,46 @@ public class MoveToCoordinate extends CyberarmState {
 
         this.timeoutMS = robot.config.variable(groupName, actionName, "timeoutMS").value();
         this.stopDrivetrain = robot.config.variable(groupName, actionName, "stopDrivetrain").value();
-        this.angleToleranceDegrees = robot.config.variable(groupName, actionName, "angleToleranceDEGREES").value();
+
+        this.targetAngleToleranceDegrees = robot.config.variable(groupName, actionName, "targetAngleToleranceDEGREES").value();
         this.targetAngleDegrees = robot.config.variable(groupName, actionName, "targetAngleDEGREES").value();
+
+        this.lerpDegrees = robot.config.variable(groupName, actionName, "lerpDEGREES").value();
+        this.lerpMM_UP = robot.config.variable(groupName, actionName, "lerpMM_UP").value();
+        this.lerpMM_DOWN = robot.config.variable(groupName, actionName, "lerpMM_DOWN").value();
+
+        this.maxVelocityMM = robot.config.variable(groupName, actionName, "maxVelocityMM").value();
+        this.minVelocityMM = robot.config.variable(groupName, actionName, "minVelocityMM").value();
+
         this.minDistanceMM = robot.config.variable(groupName, actionName, "minDistanceMM").value();
         String targetPosMM = robot.config.variable(groupName, actionName, "targetPosMM").value();
         String[] targetPos = targetPosMM.split("x");
-        this.targetX_MM = Double.parseDouble(targetPos[0]);
-        this.targetY_MM = Double.parseDouble(targetPos[1]);
+        this.targetPosMM = new Vector2D(Double.parseDouble(targetPos[0]), Double.parseDouble(targetPos[1]));
+    }
 
-        this.targetPosMM = new Vector2D(this.targetX_MM, this.targetY_MM);
+    @Override
+    public void start() {
+        this.robotInitialPosMM = new Vector2D(RedCrabMinibot.localizer.xMM(), RedCrabMinibot.localizer.yMM());
     }
 
     @Override
     public void exec() {
-        Vector2D robotPosMM = new Vector2D(RedCrabMinibot.localizer.xMM(), RedCrabMinibot.localizer.yMM());
-        Vector2D direction = targetPosMM.minus(robotPosMM).normalize();
-        double distanceMM = robotPosMM.distance(this.targetPosMM);
+        this.robotPosMM = new Vector2D(RedCrabMinibot.localizer.xMM(), RedCrabMinibot.localizer.yMM());
+        this.direction = targetPosMM.minus(robotPosMM).normalize();
+        this.distanceFromTargetMM = robotPosMM.distance(this.targetPosMM);
+        double newAngleDiffDegrees = Utilities.angleDiff(Utilities.facing(robot.imu), targetAngleDegrees);
+        // FIXME: Test this!
+        // Ignore new angle diff since it appears to be a numeric sign flip and not a useful value (prevent toggling shortest rotation decision.)
+        if (!(Math.abs(newAngleDiffDegrees) - Math.abs(this.angleDiffDegrees) <= 2.0 && Math.abs(newAngleDiffDegrees) >= 178.0))
+            this.angleDiffDegrees = newAngleDiffDegrees;
 
-        if (distanceMM <= minDistanceMM || runTime() >= timeoutMS) {
+
+        boolean rotationGood = Utilities.isBetween(
+                angleDiffDegrees,
+                targetAngleDegrees - targetAngleToleranceDegrees,
+                targetAngleDegrees + targetAngleToleranceDegrees);
+
+        if ((distanceFromTargetMM <= minDistanceMM && rotationGood) || runTime() >= timeoutMS) {
             if (stopDrivetrain) {
                 robot.frontLeft.setVelocity(0);
                 robot.frontRight.setVelocity(0);
@@ -56,12 +86,19 @@ public class MoveToCoordinate extends CyberarmState {
     }
 
     private void drivetrain(Vector2D direction) {
+        // rotationStrength = Utilities.lerp(
+        //         minVelocityMM,
+        //         maxVelocityMM,
+        //         Range.clip(Math.abs(angleDiffDegrees) / lerpDegrees, 0.0, 1.0));
+        rotationStrength = Range.clip(Math.abs(angleDiffDegrees) / lerpDegrees, 0.0, 1.0);
+        if (angleDiffDegrees < 0)
+            rotationStrength *= -1;
+
         // https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html#field-centric
 
         double y = direction.x(); // robot forward is in the X axis
         double x = direction.y(); // robot side to side is on the Y axis
-        // FIXME: Dynamically set rotation as needed to achieve target heading using shortest rotation
-        double rx = 0;//engine.gamepad1.right_stick_x;
+        double rx = 0; // -rotationStrength; //engine.gamepad1.right_stick_x;
 
         double botHeading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
@@ -80,20 +117,7 @@ public class MoveToCoordinate extends CyberarmState {
         double frontRightPower = (rotY - rotX - rx) / denominator;
         double backRightPower = (rotY + rotX - rx) / denominator;
 
-        double maxVelocity = Utilities.unitToTicks(
-                RedCrabMinibot.DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
-                RedCrabMinibot.DRIVETRAIN_GEAR_RATIO,
-                RedCrabMinibot.DRIVETRAIN_WHEEL_DIAMETER_MM,
-                DistanceUnit.MM,
-                RedCrabMinibot.DRIVETRAIN_VELOCITY_MAX_MM);
-        double slowVelocity = Utilities.unitToTicks(
-                RedCrabMinibot.DRIVETRAIN_MOTOR_TICKS_PER_REVOLUTION,
-                RedCrabMinibot.DRIVETRAIN_GEAR_RATIO,
-                RedCrabMinibot.DRIVETRAIN_WHEEL_DIAMETER_MM,
-                DistanceUnit.MM,
-                RedCrabMinibot.DRIVETRAIN_VELOCITY_SLOW_MM);
-        // FIXME: Lerp up/down when starting move and getting close to target
-        double velocity = slowVelocity; //robotSlowMode ? slowVelocity : maxVelocity;
+        velocity = lerpVelocity();
 
         robot.frontLeft.setVelocity(frontLeftPower * velocity);
         robot.backLeft.setVelocity(backLeftPower * velocity);
@@ -101,14 +125,40 @@ public class MoveToCoordinate extends CyberarmState {
         robot.backRight.setVelocity(backRightPower * velocity);
     }
 
+    private double lerpVelocity() {
+        double distanceFromInitialPosMM = robotInitialPosMM.distance(robotPosMM);
+        double lerpVelocity;
+
+        // Ease power up
+        if (distanceFromInitialPosMM < lerpMM_UP) {
+            lerpVelocity = Utilities.lerp(
+                    minVelocityMM,
+                    maxVelocityMM,
+                    Range.clip(
+                            distanceFromInitialPosMM / lerpMM_UP, 0.0, 1.0));
+            // Cruising power
+        } else if (distanceFromTargetMM > lerpMM_DOWN) {
+            lerpVelocity = maxVelocityMM;
+            // Ease power down
+        } else {
+            lerpVelocity = Utilities.lerp(
+                    minVelocityMM,
+                    maxVelocityMM,
+                    Range.clip(
+                            distanceFromTargetMM / lerpMM_DOWN, 0.0, 1.0));
+        }
+
+        return lerpVelocity;
+    }
+
     @Override
     public void telemetry() {
-        Vector2D robotPosMM = new Vector2D(RedCrabMinibot.localizer.xMM(), RedCrabMinibot.localizer.yMM());
-        Vector2D direction = targetPosMM.minus(robotPosMM).normalize();
-
         engine.telemetry.addData("Current Position MM", "X: %.2f Y: %.2f", robotPosMM.x(), robotPosMM.y());
         engine.telemetry.addData("Target Position MM", "X: %.2f Y: %.2f", targetPosMM.x(), targetPosMM.y());
-        engine.telemetry.addData("Move NORMAL", "X: %.2f Y: %.2f", direction.x(), direction.y());
-        engine.telemetry.addData("Distance MM", "%.2fmm", robotPosMM.distance(targetPosMM));
+        engine.telemetry.addData("Move NORMAL", "X: %.2f Y: %.2f R: %.2f", direction.x(), direction.y(), rotationStrength);
+        engine.telemetry.addData("Distance MM", "%.2fmm", distanceFromTargetMM);
+        engine.telemetry.addData("Angle Diff DEGREES", "%.2f degrees", angleDiffDegrees);
+//        engine.telemetry.addData("Velocity", "%.2f T/s", velocity);
+//        engine.telemetry.addData("LERP DOWN", "%.2f (%.2fmm)", distanceFromTargetMM / lerpMM_DOWN, distanceFromTargetMM);
     }
 }

@@ -13,12 +13,12 @@ import dev.cyberarm.engine.V2.Utilities;
 public class Localizer {
     private final RedCrabMinibot robot;
     private double rawX = 0, rawY = 0, rawR = 0, offsetX = 0, offsetY = 0;
-    private final double trackWidthMM = 365.0, forwardOffsetMM = 140.0, wheelDiameterMM = 90.0;
+    private final double trackWidthMM = 387.35, forwardOffsetMM = 133.35, wheelDiameterMM = 90.0;
     private final int encoderTicksPerRevolution = 8192;
     private final double encoderGearRatio = 1;
     private double lastEncoderXLeftMM, lastEncoderXRightMM, lastEncoderYCenterMM;
 //    private double xDeltaMultiplier = 0.87012987, yDeltaMultiplier = 0.25;
-    private double xDeltaMultiplier = 1, yDeltaMultiplier = 1;
+    private double xPosMultiplier = 0.675956739, yPosMultiplier = 0.941867531;
     private HolonomicOdometry odometry;
     public Localizer(RedCrabMinibot robot) {
         this.robot = robot;
@@ -100,11 +100,11 @@ public class Localizer {
     }
 
     public double xMM() {
-        return odometry.getPose().getX() + offsetX; //rawX;
+        return odometry.getPose().getX() * xPosMultiplier + offsetX; //rawX;
     }
 
     public double yMM() {
-        return odometry.getPose().getY() + offsetY;  //rawY;
+        return odometry.getPose().getY() * xPosMultiplier + offsetY;  //rawY;
     }
 
     public double xIn() {
