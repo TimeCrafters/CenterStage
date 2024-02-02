@@ -6,6 +6,7 @@ import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfig
 
 import dev.cyberarm.minibots.red_crab.RedCrabMinibot;
 import dev.cyberarm.minibots.red_crab.states.ClawArmTask;
+import dev.cyberarm.minibots.red_crab.states.LocalizerTask;
 
 @Autonomous(name = "Cyberarm Red Crab BLUE AUDIENCE", group = "MINIBOT", preselectTeleOp = "Cyberarm Red Crab TeleOp")
 public class RedCrabAutonomousBlueAudienceEngine extends RedCrabEngine {
@@ -13,6 +14,7 @@ public class RedCrabAutonomousBlueAudienceEngine extends RedCrabEngine {
     public void setup() {
         robot = new RedCrabMinibot(true);
         addTask(new ClawArmTask(robot));
+        addTask(new LocalizerTask(robot));
 
         setupFromConfig(
                 new TimeCraftersConfiguration("cyberarm_RedCrab"),

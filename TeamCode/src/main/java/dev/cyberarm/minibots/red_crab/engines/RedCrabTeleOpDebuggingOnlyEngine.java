@@ -8,6 +8,7 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 import dev.cyberarm.engine.V2.CyberarmState;
 import dev.cyberarm.engine.V2.Utilities;
 import dev.cyberarm.minibots.red_crab.RedCrabMinibot;
+import dev.cyberarm.minibots.red_crab.states.LocalizerTask;
 
 @TeleOp(name = "Cyberarm Red Crab TeleOp DEBUGGING", group = "MINIBOT")
 public class RedCrabTeleOpDebuggingOnlyEngine extends RedCrabEngine {
@@ -16,6 +17,8 @@ public class RedCrabTeleOpDebuggingOnlyEngine extends RedCrabEngine {
         threadless();
 
         robot = new RedCrabMinibot(false);
+
+        addTask(new LocalizerTask(robot));
 
         addState(new CyberarmState() {
 

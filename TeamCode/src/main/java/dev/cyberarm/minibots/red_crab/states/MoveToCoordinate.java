@@ -98,7 +98,7 @@ public class MoveToCoordinate extends CyberarmState {
 
         double y = direction.x(); // robot forward is in the X axis
         double x = direction.y(); // robot side to side is on the Y axis
-        double rx = rotationStrength; //engine.gamepad1.right_stick_x;
+        double rx = 0; // -rotationStrength; //engine.gamepad1.right_stick_x;
 
         double botHeading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
