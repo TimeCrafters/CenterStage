@@ -371,7 +371,7 @@ public class CompetitionRobotV1 extends Robot {
         // determine the powers needed for each direction
         // this uses PID to adjust needed Power for robot to move to target
         XVeloPIDControl(targetVelocityX, xVelocity);
-        XVeloPIDControl(targetVelocityY, yVelocity);
+        YVeloPIDControl(targetVelocityY, yVelocity);
 
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double rx = HeadingPIDControl(Math.toRadians(hTarget), heading);
