@@ -63,11 +63,15 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         engine.telemetry.addData("Arm servo position", robot.shoulder.getPosition());
         engine.telemetry.addLine();
         engine.telemetry.addData("Approx Object Dist", approxObjPos);
+        engine.telemetry.addLine();
+        engine.telemetry.addData("Yaw", robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        engine.telemetry.addData("Pitch", robot.imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
+        engine.telemetry.addData("Roll", robot.imu.getRobotYawPitchRollAngles().getRoll(AngleUnit.DEGREES));
     }
 
     @Override
     public void init() {
-        drivePower = 0;
+        drivePower = 1;
         robot.leftFront.setPower(0);
         robot.rightFront.setPower(0);
         robot.leftBack.setPower(0);
@@ -78,7 +82,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 
         robot.imu.resetYaw();
         imuInitAngle = robot.imu.getRobotYawPitchRollAngles();
-        lastToldAngle = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+//        lastToldAngle = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
         gp1checker = new GamepadChecker(engine, engine.gamepad1);
         gp2checker = new GamepadChecker(engine, engine.gamepad1);
@@ -104,31 +108,35 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 // Denominator is the largest motor power (absolute value) or 1
 // This ensures all the powers maintain the same ratio,
 // but only if at least one is out of the range [-1, 1]
+//        double frontLeftPower = (y + x + rx) / denominator;
+//        double backLeftPower = (y - x + rx) / denominator;
+//        double frontRightPower = (y - x - rx) / denominator;
+//        double backRightPower = (y + x - rx) / denominator;
+//
+//        robot.leftFront.setPower(frontLeftPower);
+//        robot.leftBack.setPower(backLeftPower);
+//        robot.rightFront.setPower(frontRightPower);
+//        robot.rightBack.setPower(backRightPower);
+
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        double frontLeftPower = (y + x + rx) / denominator;
-        double backLeftPower = (y - x + rx) / denominator;
-        double frontRightPower = (y - x - rx) / denominator;
-        double backRightPower = (y + x - rx) / denominator;
 
-        robot.leftFront.setPower(frontLeftPower);
-        robot.leftBack.setPower(backLeftPower);
-        robot.rightFront.setPower(frontRightPower);
-        robot.rightBack.setPower(backRightPower);
-
-        double heading = -robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double heading = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double rotX = x * Math.cos(heading) - y * Math.sin(heading);
         double rotY = x * Math.sin(heading) + y * Math.cos(heading);
 
-        frontLeftPower = (rotY + rotX + rx) / denominator;
-        backLeftPower = (rotY - rotX + rx) / denominator;
-        frontRightPower = (rotY - rotX - rx) / denominator;
-        backRightPower = (rotY + rotX - rx) / denominator;
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
 
         robot.leftBack.setPower(backLeftPower * drivePower);
         robot.rightBack.setPower(backRightPower * drivePower);
         robot.leftFront.setPower(frontLeftPower * drivePower);
         robot.rightFront.setPower(frontRightPower * drivePower);
 
+        if (engine.gamepad1.start && !engine.gamepad1.a) {
+            robot.imu.resetYaw();
+        }
 
         if (engine.gamepad1.left_stick_button) {
             if (System.currentTimeMillis() - lastMoveTime >= 200) {
