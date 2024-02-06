@@ -55,6 +55,9 @@ public class CompetitionRobotV1 extends Robot {
     public static double xvp = -0.03, xvi = 0, xvd = 0;
     public static double Yp = 0.03, Yi = 0, Yd = 0;
     public static double yvp = 0.03, yvi = 0, yvd = 0;
+
+    public double Dnl1;
+    public double Dnr2;
     public double xMultiplier = 1;
     public double yMultiplier = 1;
     public double positionX = 1000;
@@ -121,8 +124,8 @@ public class CompetitionRobotV1 extends Robot {
 
     public int target;
     public double p = 0.007, i = 0,  d = 0.0001, f = 0;
-    public double shoulderCollect = 1;
-    public double shoulderDeposit = 1;
+    public double shoulderCollect = 0.86;
+    public double shoulderDeposit = 0.86;
     public double shoulderPassive = 1;
     public double elbowCollect = 0.02;
     public double elbowDeposit = 0;
@@ -167,7 +170,7 @@ public class CompetitionRobotV1 extends Robot {
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        clawArm.setDirection(DcMotorSimple.Direction.FORWARD);
+        clawArm.setDirection(DcMotorSimple.Direction.REVERSE);
         lift.setDirection(DcMotorSimple.Direction.FORWARD);
         chinUp.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -246,13 +249,16 @@ public class CompetitionRobotV1 extends Robot {
         oldLeftPosition = currentLeftPosition;
         oldAuxPosition = currentAuxPosition;
 
-        currentRightPosition = frontLeft.getCurrentPosition();
-        currentLeftPosition = -backRight.getCurrentPosition();
-        currentAuxPosition = backLeft.getCurrentPosition();
+        currentRightPosition = frontRight.getCurrentPosition();
+        currentLeftPosition = backLeft.getCurrentPosition();
+        currentAuxPosition = -frontLeft.getCurrentPosition();
 
         int dnl1 = currentLeftPosition - oldLeftPosition;
         int dnr2 = currentRightPosition - oldRightPosition;
         int dna3 = currentAuxPosition - oldAuxPosition;
+
+        Dnl1 = dnl1;
+        Dnr2 = dnr2;
 
         // the robot has turned and moved a tiny bit between two measurements
         double dtheta = cm_per_tick * (dnr2 - dnl1) / L;

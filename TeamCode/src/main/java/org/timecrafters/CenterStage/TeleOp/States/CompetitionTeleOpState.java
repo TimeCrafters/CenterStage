@@ -70,6 +70,7 @@ public class CompetitionTeleOpState extends CyberarmState {
     // chin up servo
     public static double chinUpServoUp = 0.58;
     public static double chinUpServoDown = 1;
+    public long lastExecutedTime;
 
 
 
@@ -201,30 +202,68 @@ public class CompetitionTeleOpState extends CyberarmState {
     }
 
     public void ArmPosControl() {
-
-
-        if (engine.gamepad2.a) {
+        if (engine.gamepad2.a && !engine.gamepad2.back) {
             armPos = "collect";
             depositMode = false;
-        } else if (engine.gamepad2.y) {
+        } else if (engine.gamepad2.y && !engine.gamepad2.back) {
             armPos = "deposit";
             depositMode = true;
-        } else if (engine.gamepad2.b) {
+        } else if (engine.gamepad2.b && !engine.gamepad2.start) {
             armPos = "hover";
             depositMode = true;
-        } else if (engine.gamepad2.x) {
+        } else if (engine.gamepad2.x && !engine.gamepad2.start) {
             armPos = "passive";
             depositMode = true;
-        } else if (engine.gamepad2.dpad_left) {
+        } else if (engine.gamepad2.dpad_left && !engine.gamepad2.start) {
             armPos = "lift up";
             depositMode = true;
-        } else if (engine.gamepad2.dpad_right) {
+        } else if (engine.gamepad2.dpad_right && !engine.gamepad2.start) {
             armPos = "lift down";
             depositMode = false;
         } else if (engine.gamepad2.back) {
             armPos = "reset";
+        } else if (engine.gamepad2.right_bumper) {
+            armPos = "tuning up";
+        } else if (engine.gamepad2.left_bumper) {
+            armPos = "tuning down";
         }
 
+        if (Objects.equals(armPos, "tuning up")) {
+            if (robot.lift.getCurrentPosition() >= 20) {
+                robot.chinUpServo.setPosition(chinUpServoDown);
+                robot.lift.setPower(-0.6);
+            } else {
+                robot.lift.setPower(0);
+                if (System.currentTimeMillis() - lastExecutedTime > 200){
+                    robot.shoulderCollect = robot.shoulderCollect + 0.02;
+                    lastExecutedTime = System.currentTimeMillis();
+                }
+                robot.shoulder.setPosition(robot.shoulderCollect);
+                robot.elbow.setPosition(robot.elbowCollect);
+                robot.chinUpServo.setPosition(chinUpServoDown);
+                target = 0;
+                armPos = "collect";
+
+            }
+        }
+        if (Objects.equals(armPos, "tuning down")) {
+            if (robot.lift.getCurrentPosition() >= 20) {
+                robot.chinUpServo.setPosition(chinUpServoDown);
+                robot.lift.setPower(-0.6);
+            } else {
+                robot.lift.setPower(0);
+                if (System.currentTimeMillis() - lastExecutedTime > 200) {
+                    robot.shoulderCollect = robot.shoulderCollect - 0.02;
+                    lastExecutedTime = System.currentTimeMillis();
+                }
+                robot.shoulder.setPosition(robot.shoulderCollect);
+                robot.elbow.setPosition(robot.elbowCollect);
+                robot.chinUpServo.setPosition(chinUpServoDown);
+                target = 0;
+                armPos = "collect";
+
+            }
+        }
         if (Objects.equals(armPos, "collect")) {
             if (robot.lift.getCurrentPosition() >= 20) {
                 robot.chinUpServo.setPosition(chinUpServoDown);
@@ -296,11 +335,13 @@ public class CompetitionTeleOpState extends CyberarmState {
         robot.clawArm.setTargetPosition(0);
         robot.clawArm.setPower(0);
         robot.clawArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lastExecutedTime = System.currentTimeMillis();
 
     }
 
     @Override
     public void exec() {
+        robot.OdometryLocalizer();
 
         if (engine.gamepad2.start && engine.gamepad2.x){
             robot.shootServo.setPosition(releasePos);
@@ -372,6 +413,14 @@ public class CompetitionTeleOpState extends CyberarmState {
 
         @Override
         public void telemetry () {
+            engine.telemetry.addData("Dnl1", robot.Dnl1);
+            engine.telemetry.addData("Dnr2", robot.Dnr2);
+            engine.telemetry.addData("x pos", robot.positionX);
+            engine.telemetry.addData("y pos", robot.positionY);
+            engine.telemetry.addData("h pos odo", Math.toDegrees(robot.positionH));
+            engine.telemetry.addData("aux encoder", robot.currentAuxPosition);
+            engine.telemetry.addData("left encoder", robot.currentLeftPosition);
+            engine.telemetry.addData("right encoder", robot.currentRightPosition);
             engine.telemetry.addData("Lift Encoder Pos", robot.lift.getCurrentPosition());
             engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             engine.telemetry.addData("imu", -robot.imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
