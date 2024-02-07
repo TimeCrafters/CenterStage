@@ -15,6 +15,9 @@ public class DriveToCoordinatesState extends CyberarmState {
     public double xTarget;
     public double yTarget;
     public double hTarget;
+    public double maxVelocityX;
+    public double maxVelocityY;
+    public double maxVelocityH;
     public boolean posAchieved = false;
     public boolean armDrive;
     public int objectPos;
@@ -57,6 +60,12 @@ public class DriveToCoordinatesState extends CyberarmState {
 
     @Override
     public void exec() {
+        if (robot.xVelocity > maxVelocityX){
+            maxVelocityX = robot.xVelocity;
+        }
+        if (robot.yVelocity > maxVelocityY){
+            maxVelocityY = robot.yVelocity;
+        }
         if (posSpecific) {
             if (objectPos != robot.objectPos) {
                 // enter the ending loop
@@ -86,6 +95,8 @@ public class DriveToCoordinatesState extends CyberarmState {
 
     @Override
     public void telemetry() {
+        engine.telemetry.addData("x velocity max", maxVelocityX);
+        engine.telemetry.addData("y velocity max", maxVelocityY);
         engine.telemetry.addData("x pos", robot.positionX);
         engine.telemetry.addData("y pos", robot.positionY);
         engine.telemetry.addData("h pos odo", Math.toDegrees(robot.positionH));

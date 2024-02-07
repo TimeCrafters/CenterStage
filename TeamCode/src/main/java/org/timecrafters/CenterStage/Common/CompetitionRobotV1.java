@@ -52,7 +52,7 @@ public class CompetitionRobotV1 extends Robot {
     // ----------------------------------------------------------------------------------------------------------------- odometry variables:
     public static double Hp = 0.8, Hi = 0, Hd = 0;
     public static double Xp = -0.03, Xi = 0, Xd = 0;
-    public static double xvp = -0.03, xvi = 0, xvd = 0;
+    public static double xvp = -0, xvi = 0, xvd = 0;
     public static double Yp = 0.03, Yi = 0, Yd = 0;
     public static double yvp = 0.03, yvi = 0, yvd = 0;
 
@@ -75,7 +75,7 @@ public class CompetitionRobotV1 extends Robot {
     public int oldRightPosition = 0;
     public int oldLeftPosition = 0;
     public int oldAuxPosition = 0;
-    public final static double L = 22.5; // distance between left and right encoder in cm
+    public final static double L = 20.9; // distance between left and right encoder in cm
     final static double B = 15; // distance between the midpoint of the left and right encoder from the auxillary encoder in cm
     public final static double R = 3; // wheel radius in cm
     final static double N = 8192; // encoder ticks per revolution (REV encoder)
@@ -376,6 +376,8 @@ public class CompetitionRobotV1 extends Robot {
     public void DriveToCoordinates () {
         // determine the powers needed for each direction
         // this uses PID to adjust needed Power for robot to move to target
+        targetVelocityX = XPIDControl(xTarget, positionX);
+        targetVelocityY = YPIDControl(yTarget, positionY);
         XVeloPIDControl(targetVelocityX, xVelocity);
         YVeloPIDControl(targetVelocityY, yVelocity);
 

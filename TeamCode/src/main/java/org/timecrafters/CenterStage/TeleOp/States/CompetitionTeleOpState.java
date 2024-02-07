@@ -28,6 +28,9 @@ public class CompetitionTeleOpState extends CyberarmState {
     public static double holdPos = 0.55                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ;
 
 
+    public double maxVelocityX;
+    public double maxVelocityY;
+
     // ------------------------------------------------------------------------------------------------------------- Heading lock variables:
     public double integralSum = 0;
     private double targetHeading;
@@ -109,7 +112,6 @@ public class CompetitionTeleOpState extends CyberarmState {
             robot.lift.setPower(0);
         }
     }
-
 
     public void DriveTrainTeleOp () {
 
@@ -340,7 +342,13 @@ public class CompetitionTeleOpState extends CyberarmState {
     }
 
     @Override
-    public void exec() {
+    public void exec() { //------------------------------------------------------------------------------------------------------ EXEC Start
+        if (robot.xVelocity > maxVelocityX){
+            maxVelocityX = robot.xVelocity;
+        }
+        if (robot.yVelocity > maxVelocityY){
+            maxVelocityY = robot.yVelocity;
+        }
         robot.OdometryLocalizer();
 
         if (engine.gamepad2.start && engine.gamepad2.x){
@@ -409,10 +417,15 @@ public class CompetitionTeleOpState extends CyberarmState {
 
         ClawControlTeleOp();
 
+
+        robot.velocityChecker();
+
     }
 
         @Override
         public void telemetry () {
+            engine.telemetry.addData("x velocity max", maxVelocityX);
+            engine.telemetry.addData("y velocity max", maxVelocityY);
             engine.telemetry.addData("Dnl1", robot.Dnl1);
             engine.telemetry.addData("Dnr2", robot.Dnr2);
             engine.telemetry.addData("x pos", robot.positionX);
