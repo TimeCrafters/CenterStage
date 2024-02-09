@@ -112,7 +112,7 @@ public class CompetitionRobotV1 extends Robot {
 
     public double xVelocity;
     public double yVelocity;
-    public double deltaTime;
+    public double deltaTime = 0;
 
 
     //-------------------------------------------------------------------------------------------------------------- arm sequence variables:
@@ -299,27 +299,6 @@ public class CompetitionRobotV1 extends Robot {
         double output = (error * Hp) + (derivative * Hd) + (headingIntegralSum * Hi);
         return output;
     }
-    public double XVeloPIDControl ( double reference, double current){
-        double error = (reference - current);
-        xVeloIntegralSum += error * xVeloTimer.seconds();
-        double derivative = (error - xVeloLastError) / xVeloTimer.seconds();
-
-        xTimer.reset();
-
-        double output = (error * xvp) + (derivative * xvd) + (xIntegralSum * xvi);
-        return output;
-    }
-
-    public double YVeloPIDControl ( double reference, double current){
-        double error = (reference - current);
-        yVeloIntegralSum += error * yVeloTimer.seconds();
-        double derivative = (error - yVeloLastError) / xTimer.seconds();
-
-        xTimer.reset();
-
-        double output = (error * yvp) + (derivative * yvd) + (yVeloIntegralSum * yvi);
-        return output;
-    }
 
     public double XPIDControl ( double reference, double current){
         double error = (reference - current);
@@ -376,10 +355,6 @@ public class CompetitionRobotV1 extends Robot {
     public void DriveToCoordinates () {
         // determine the powers needed for each direction
         // this uses PID to adjust needed Power for robot to move to target
-        targetVelocityX = XPIDControl(xTarget, positionX);
-        targetVelocityY = YPIDControl(yTarget, positionY);
-        XVeloPIDControl(targetVelocityX, xVelocity);
-        YVeloPIDControl(targetVelocityY, yVelocity);
 
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double rx = HeadingPIDControl(Math.toRadians(hTarget), heading);

@@ -12,11 +12,11 @@ import dev.cyberarm.engine.V2.CyberarmState;
 public class DriveToCoordinatesState extends CyberarmState {
 
     CompetitionRobotV1 robot;
-    public double xTarget;
-    public double yTarget;
-    public double hTarget;
-    public double maxVelocityX;
-    public double maxVelocityY;
+    public static double xTarget;
+    public static double yTarget;
+    public static double hTarget;
+    public static double maxVelocityX;
+    public static double maxVelocityY;
     public double maxVelocityH;
     public boolean posAchieved = false;
     public boolean armDrive;
@@ -69,7 +69,7 @@ public class DriveToCoordinatesState extends CyberarmState {
         if (posSpecific) {
             if (objectPos != robot.objectPos) {
                 // enter the ending loop
-                setHasFinished(true);
+//                setHasFinished(true);
             } else {
 
                 if (armDrive) {
@@ -78,7 +78,7 @@ public class DriveToCoordinatesState extends CyberarmState {
 
                 if (Math.abs(robot.positionX - robot.xTarget) < 5
                         && Math.abs(robot.positionY - robot.yTarget) < 5) {
-                    setHasFinished(true);
+//                    setHasFinished(true);
                 }
             }
         } else {
@@ -88,7 +88,7 @@ public class DriveToCoordinatesState extends CyberarmState {
 
                 if (Math.abs(robot.positionX - robot.xTarget) < 5
                         && Math.abs(robot.positionY - robot.yTarget) < 5) {
-                    setHasFinished(true);
+//                    setHasFinished(true);
                 }
             }
         }
