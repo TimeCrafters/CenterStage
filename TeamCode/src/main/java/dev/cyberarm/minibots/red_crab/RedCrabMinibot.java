@@ -22,6 +22,8 @@ import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfig
 import org.timecrafters.TimeCraftersConfigurationTool.library.backend.config.Action;
 import org.timecrafters.TimeCraftersConfigurationTool.library.backend.config.Variable;
 
+import java.util.ArrayList;
+
 import dev.cyberarm.drivers.EncoderCustomKB2040;
 import dev.cyberarm.engine.V2.CyberarmEngine;
 import dev.cyberarm.engine.V2.Utilities;
@@ -87,7 +89,9 @@ public class RedCrabMinibot {
     public final Servo leftClaw, rightClaw, clawWrist, droneLatch, hookArm;
     public final DcMotorEx deadWheelXLeft, deadWheelXRight;
     public final EncoderCustomKB2040 deadWheelYCenter;
-    public final DigitalChannel greenLED, redLED;
+    public final DigitalChannel ledTopGreen, ledTopRed, ledRail0Green, ledRail0Red, ledRail1Green, ledRail1Red, ledRail2Green, ledRail2Red,
+            ledRail3Green, ledRail3Red;
+    public final ArrayList<DigitalChannel> railGreenLEDs = new ArrayList<>(), railRedLEDs = new ArrayList<>();
     public final boolean LED_OFF = true, LED_ON = false;
 
     final CyberarmEngine engine;
@@ -252,13 +256,48 @@ public class RedCrabMinibot {
             resetDeadWheels();
 
         /// LED(s) ///
-        greenLED = engine.hardwareMap.get(DigitalChannel.class, "led_green"); // GREEN LED NOT WORKING
-        redLED = engine.hardwareMap.get(DigitalChannel.class, "led_red");
+        ledTopGreen = engine.hardwareMap.get(DigitalChannel.class, "led_top_green");
+        ledTopRed = engine.hardwareMap.get(DigitalChannel.class, "led_top_red");
+        // RED and GREEN are swapped for the 'new' LEDs, and I'm to lazy to fix the robot config
+        ledRail0Green = engine.hardwareMap.get(DigitalChannel.class, "led_rail_0_red");
+        ledRail0Red = engine.hardwareMap.get(DigitalChannel.class, "led_rail_0_green");
+        ledRail1Green = engine.hardwareMap.get(DigitalChannel.class, "led_rail_1_red");
+        ledRail1Red = engine.hardwareMap.get(DigitalChannel.class, "led_rail_1_green");
+        ledRail2Green = engine.hardwareMap.get(DigitalChannel.class, "led_rail_2_red");
+        ledRail2Red = engine.hardwareMap.get(DigitalChannel.class, "led_rail_2_green");
+        ledRail3Green = engine.hardwareMap.get(DigitalChannel.class, "led_rail_3_red");
+        ledRail3Red = engine.hardwareMap.get(DigitalChannel.class, "led_rail_3_green");
 
-        greenLED.setMode(DigitalChannel.Mode.OUTPUT);
-        redLED.setMode(DigitalChannel.Mode.OUTPUT);
-        greenLED.setState(LED_OFF);
-        redLED.setState(LED_ON);
+        railGreenLEDs.add(ledRail0Green);
+        railGreenLEDs.add(ledRail1Green);
+        railGreenLEDs.add(ledRail2Green);
+        railGreenLEDs.add(ledRail3Green);
+
+        railRedLEDs.add(ledRail0Red);
+        railRedLEDs.add(ledRail1Red);
+        railRedLEDs.add(ledRail2Red);
+        railRedLEDs.add(ledRail3Red);
+
+        ledTopGreen.setMode(DigitalChannel.Mode.OUTPUT);
+        ledTopRed.setMode(DigitalChannel.Mode.OUTPUT);
+        ledRail0Green.setMode(DigitalChannel.Mode.OUTPUT);
+        ledRail0Red.setMode(DigitalChannel.Mode.OUTPUT);
+        ledRail1Green.setMode(DigitalChannel.Mode.OUTPUT);
+        ledRail1Red.setMode(DigitalChannel.Mode.OUTPUT);
+        ledRail2Green.setMode(DigitalChannel.Mode.OUTPUT);
+        ledRail2Red.setMode(DigitalChannel.Mode.OUTPUT);
+        ledRail3Green.setMode(DigitalChannel.Mode.OUTPUT);
+        ledRail3Red.setMode(DigitalChannel.Mode.OUTPUT);
+
+        /// Turn off green LEDs and turn red ones on
+        ledTopGreen.setState(LED_OFF);
+        ledTopRed.setState(LED_ON);
+        for (DigitalChannel led : railGreenLEDs) {
+            led.setState(LED_OFF);
+        }
+        for (DigitalChannel led : railRedLEDs) {
+            led.setState(LED_ON);
+        }
 
         // Bulk read from hubs
         Utilities.hubsBulkReadMode(engine.hardwareMap, LynxModule.BulkCachingMode.MANUAL);
@@ -274,8 +313,16 @@ public class RedCrabMinibot {
 
     public void shutdown() {
         // Prevent LED(s) from being on while idle
-        greenLED.setMode(DigitalChannel.Mode.INPUT);
-        redLED.setMode(DigitalChannel.Mode.INPUT);
+        ledTopGreen.setMode(DigitalChannel.Mode.INPUT);
+        ledTopRed.setMode(DigitalChannel.Mode.INPUT);
+        ledRail0Green.setMode(DigitalChannel.Mode.INPUT);
+        ledRail0Red.setMode(DigitalChannel.Mode.INPUT);
+        ledRail1Green.setMode(DigitalChannel.Mode.INPUT);
+        ledRail1Red.setMode(DigitalChannel.Mode.INPUT);
+        ledRail2Green.setMode(DigitalChannel.Mode.INPUT);
+        ledRail2Red.setMode(DigitalChannel.Mode.INPUT);
+        ledRail3Green.setMode(DigitalChannel.Mode.INPUT);
+        ledRail3Red.setMode(DigitalChannel.Mode.INPUT);
     }
 
     public void reloadConfig() {
@@ -570,5 +617,61 @@ public class RedCrabMinibot {
         double distanceMM = distanceMM(motor);
 
         return Utilities.isBetween(distanceMM, travelledDistanceMM - toleranceMM, travelledDistanceMM + toleranceMM);
+    }
+
+    public void ledController() {
+        if (autonomous) {
+            if (engine.runTime() < 20_000.0) { // KEEP CALM and CARRY ON
+                ledTopRed.setState(LED_OFF);
+                ledTopGreen.setState(LED_ON);
+
+                ledSetRailRedLEDs(LED_OFF);
+                ledSetRailGreenLEDs(LED_ON);
+            } else if (engine.runTime() < 25_000.0) { // RUNNING LOW ON TIME
+                ledTopRed.setState(LED_ON);
+                ledTopGreen.setState(LED_ON);
+
+                ledSetRailRedLEDs(LED_ON);
+                ledSetRailGreenLEDs(LED_ON);
+            } else { // 5 SECONDS LEFT!
+                ledTopRed.setState(LED_ON);
+                ledTopGreen.setState(LED_OFF);
+
+                ledSetRailRedLEDs(LED_ON);
+                ledSetRailGreenLEDs(LED_OFF);
+            }
+        } else {
+            if (engine.runTime() >= 90_000.0) { // LAUNCH DRONE and DO CHIN UP
+                ledTopRed.setState(LED_OFF);
+                ledTopGreen.setState(LED_ON);
+
+                ledSetRailRedLEDs(LED_OFF);
+                ledSetRailGreenLEDs(LED_ON);
+            } else if (engine.runTime() >= 80_000.0) { // GET READY
+                ledTopRed.setState(LED_ON);
+                ledTopGreen.setState(LED_ON);
+
+                ledSetRailRedLEDs(LED_ON);
+                ledSetRailGreenLEDs(LED_ON);
+            } else { // KEEP CALM and CARRY ON
+                ledTopRed.setState(LED_ON);
+                ledTopGreen.setState(LED_OFF);
+
+                ledSetRailRedLEDs(LED_ON);
+                ledSetRailGreenLEDs(LED_OFF);
+            }
+        }
+    }
+
+    public void ledSetRailGreenLEDs(boolean ledState) {
+        for (DigitalChannel led : railGreenLEDs) {
+            led.setState(ledState);
+        }
+    }
+
+    public void ledSetRailRedLEDs(boolean ledState) {
+        for (DigitalChannel led : railRedLEDs) {
+            led.setState(ledState);
+        }
     }
 }
