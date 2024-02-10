@@ -386,6 +386,8 @@ public class RedCrabMinibot {
         RedCrabMinibot.DRONE_LATCH_INITIAL_POSITION = config.variable("Robot", "DroneLauncher_Tuning", "initial_position").value();
         RedCrabMinibot.DRONE_LATCH_LAUNCH_POSITION = config.variable("Robot", "DroneLauncher_Tuning", "launch_position").value();
         RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS = config.variable("Robot", "DroneLauncher_Tuning", "launch_confirmation_time_ms").value();
+
+        localizer.loadConfigConstants();
     }
 
     public void resetDeadWheels() {
