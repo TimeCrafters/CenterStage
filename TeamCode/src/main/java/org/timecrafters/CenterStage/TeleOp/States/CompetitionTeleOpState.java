@@ -34,8 +34,8 @@ public class CompetitionTeleOpState extends CyberarmState {
     // ------------------------------------------------------------------------------------------------------------- Heading lock variables:
     public double integralSum = 0;
     private double targetHeading;
-    public double collectLock = Math.toRadians(90);
-    public double backDropLock = Math.toRadians(-90);
+    public double collectLock = Math.toRadians(-90);
+    public double backDropLock = Math.toRadians(90);
     public double boost;
     public double armPower;
     private double currentHeading;

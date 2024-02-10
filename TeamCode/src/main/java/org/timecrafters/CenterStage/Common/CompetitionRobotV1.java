@@ -51,10 +51,8 @@ public class CompetitionRobotV1 extends Robot {
 
     // ----------------------------------------------------------------------------------------------------------------- odometry variables:
     public static double Hp = 0.8, Hi = 0, Hd = 0;
-    public static double Xp = -0.03, Xi = 0, Xd = 0;
-    public static double xvp = -0, xvi = 0, xvd = 0;
-    public static double Yp = 0.03, Yi = 0, Yd = 0;
-    public static double yvp = 0.03, yvi = 0, yvd = 0;
+    public static double Xp = 0.03, Xi = 0, Xd = 0;
+    public static double Yp = -0.03, Yi = 0, Yd = 0;
 
     public double Dnl1;
     public double Dnr2;
@@ -76,7 +74,7 @@ public class CompetitionRobotV1 extends Robot {
     public int oldLeftPosition = 0;
     public int oldAuxPosition = 0;
     public final static double L = 20.9; // distance between left and right encoder in cm
-    final static double B = 15; // distance between the midpoint of the left and right encoder from the auxillary encoder in cm
+    final static double B = 12.6; // distance between the midpoint of the left and right encoder from the auxillary encoder in cm
     public final static double R = 3; // wheel radius in cm
     final static double N = 8192; // encoder ticks per revolution (REV encoder)
 
@@ -118,14 +116,14 @@ public class CompetitionRobotV1 extends Robot {
     //-------------------------------------------------------------------------------------------------------------- arm sequence variables:
     PIDController pidController;
     public double power;
-    public String armPos;
+    public String armPos = "hover";
     public long armTime;
 
 
     public int target;
     public double p = 0.007, i = 0,  d = 0.0001, f = 0;
     public double shoulderCollect = 0.86;
-    public double shoulderDeposit = 0.86;
+    public double shoulderDeposit = 1;
     public double shoulderPassive = 1;
     public double elbowCollect = 0.02;
     public double elbowDeposit = 0;
@@ -393,7 +391,7 @@ public class CompetitionRobotV1 extends Robot {
         if (Objects.equals(armPos, "deposit")) {
             shoulder.setPosition(shoulderDeposit);
             elbow.setPosition(elbowDeposit);
-            target = 400;
+            target = 300;
 
 
         }
@@ -407,8 +405,8 @@ public class CompetitionRobotV1 extends Robot {
 
         }
         if (armPos.equals("search")) {
-            shoulder.setPosition(0.48);
-            if (armTime > 400){
+            shoulder.setPosition(0.55);
+            if (armTime > 450){
                 target = 570;
             }
 

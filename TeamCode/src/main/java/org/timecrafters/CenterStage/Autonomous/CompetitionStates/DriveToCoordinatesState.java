@@ -12,13 +12,9 @@ import dev.cyberarm.engine.V2.CyberarmState;
 public class DriveToCoordinatesState extends CyberarmState {
 
     CompetitionRobotV1 robot;
-    public static double xTarget;
-    public static double yTarget;
-    public static double hTarget;
-    public static double maxVelocityX;
-    public static double maxVelocityY;
-    public double maxVelocityH;
-    public boolean posAchieved = false;
+    public double xTarget;
+    public double yTarget;
+    public double hTarget;
     public boolean armDrive;
     public int objectPos;
     public boolean posSpecific;
@@ -43,7 +39,7 @@ public class DriveToCoordinatesState extends CyberarmState {
     @Override
     public void start() {
         super.start();
-        if (posSpecific) {
+        if (posSpecific && objectPos == robot.objectPos) {
             robot.hTarget = hTarget;
             robot.yTarget = yTarget;
             robot.xTarget = xTarget;
@@ -60,16 +56,16 @@ public class DriveToCoordinatesState extends CyberarmState {
 
     @Override
     public void exec() {
-        if (robot.xVelocity > maxVelocityX){
-            maxVelocityX = robot.xVelocity;
-        }
-        if (robot.yVelocity > maxVelocityY){
-            maxVelocityY = robot.yVelocity;
-        }
+//        robot.yMaxPower = maxYPower;
+//        robot.xMaxPower = maxXPower;
+//        robot.hTarget = hTarget;
+//        robot.yTarget = yTarget;
+//        robot.xTarget = xTarget;
+
         if (posSpecific) {
             if (objectPos != robot.objectPos) {
                 // enter the ending loop
-//                setHasFinished(true);
+                setHasFinished(true);
             } else {
 
                 if (armDrive) {
@@ -78,7 +74,7 @@ public class DriveToCoordinatesState extends CyberarmState {
 
                 if (Math.abs(robot.positionX - robot.xTarget) < 5
                         && Math.abs(robot.positionY - robot.yTarget) < 5) {
-//                    setHasFinished(true);
+                    setHasFinished(true);
                 }
             }
         } else {
@@ -88,15 +84,13 @@ public class DriveToCoordinatesState extends CyberarmState {
 
                 if (Math.abs(robot.positionX - robot.xTarget) < 5
                         && Math.abs(robot.positionY - robot.yTarget) < 5) {
-//                    setHasFinished(true);
+                    setHasFinished(true);
                 }
             }
         }
 
     @Override
     public void telemetry() {
-        engine.telemetry.addData("x velocity max", maxVelocityX);
-        engine.telemetry.addData("y velocity max", maxVelocityY);
         engine.telemetry.addData("x pos", robot.positionX);
         engine.telemetry.addData("y pos", robot.positionY);
         engine.telemetry.addData("h pos odo", Math.toDegrees(robot.positionH));
