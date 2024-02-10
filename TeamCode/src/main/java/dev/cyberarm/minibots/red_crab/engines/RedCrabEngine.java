@@ -14,8 +14,6 @@ public abstract class RedCrabEngine extends CyberarmEngine {
         super.loop();
 
         robot.standardTelemetry();
-
-        robot.ledController();
     }
 
     @Override

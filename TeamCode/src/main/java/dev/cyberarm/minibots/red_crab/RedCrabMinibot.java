@@ -92,7 +92,12 @@ public class RedCrabMinibot {
     public final DigitalChannel ledTopGreen, ledTopRed, ledRail0Green, ledRail0Red, ledRail1Green, ledRail1Red, ledRail2Green, ledRail2Red,
             ledRail3Green, ledRail3Red;
     public final ArrayList<DigitalChannel> railGreenLEDs = new ArrayList<>(), railRedLEDs = new ArrayList<>();
-    public final boolean LED_OFF = true, LED_ON = false;
+    public int ledChaserIndex = 0;
+    public final long ledChaserIntervalMS;
+    public long lastLedChaserTimeMS;
+    public final boolean LED_OFF = true;
+    public final boolean LED_ON = false;
+    public boolean ledChaseUp = true;
 
     final CyberarmEngine engine;
     public final boolean autonomous;
@@ -298,6 +303,9 @@ public class RedCrabMinibot {
         for (DigitalChannel led : railRedLEDs) {
             led.setState(LED_ON);
         }
+
+        ledChaserIntervalMS = 250;
+        lastLedChaserTimeMS = System.currentTimeMillis();
 
         // Bulk read from hubs
         Utilities.hubsBulkReadMode(engine.hardwareMap, LynxModule.BulkCachingMode.MANUAL);
@@ -625,20 +633,22 @@ public class RedCrabMinibot {
                 ledTopRed.setState(LED_OFF);
                 ledTopGreen.setState(LED_ON);
 
-                ledSetRailRedLEDs(LED_OFF);
-                ledSetRailGreenLEDs(LED_ON);
-            } else if (engine.runTime() < 25_000.0) { // RUNNING LOW ON TIME
-                ledTopRed.setState(LED_ON);
+                ledAnimateChaser(LED_OFF, LED_ON, false);
+            } else if (engine.runTime() < 23_000.0) { // RUNNING LOW ON TIME
+                ledTopRed.setState(LED_OFF);
                 ledTopGreen.setState(LED_ON);
 
-                ledSetRailRedLEDs(LED_ON);
-                ledSetRailGreenLEDs(LED_ON);
+                ledAnimateChaser(LED_ON, LED_ON, false);
             } else { // 5 SECONDS LEFT!
-                ledTopRed.setState(LED_ON);
-                ledTopGreen.setState(LED_OFF);
+                if (engine.runTime() < 29_000.0) {
+                    ledTopRed.setState(LED_ON);
+                    ledTopGreen.setState(LED_ON);
+                } else {
+                    ledTopRed.setState(LED_ON);
+                    ledTopGreen.setState(LED_OFF);
+                }
 
-                ledSetRailRedLEDs(LED_ON);
-                ledSetRailGreenLEDs(LED_OFF);
+                ledAnimateProgress(LED_ON, LED_OFF, (engine.runTime() - 23_000.0) / 5_000.0);
             }
         } else {
             if (engine.runTime() >= 90_000.0) { // LAUNCH DRONE and DO CHIN UP
@@ -648,17 +658,20 @@ public class RedCrabMinibot {
                 ledSetRailRedLEDs(LED_OFF);
                 ledSetRailGreenLEDs(LED_ON);
             } else if (engine.runTime() >= 80_000.0) { // GET READY
-                ledTopRed.setState(LED_ON);
-                ledTopGreen.setState(LED_ON);
+                if (ledChaserIndex == railRedLEDs.size() - 1) {
+                    ledTopRed.setState(LED_OFF);
+                    ledTopGreen.setState(LED_OFF);
+                } else {
+                    ledTopRed.setState(LED_ON);
+                    ledTopGreen.setState(LED_ON);
+                }
 
-                ledSetRailRedLEDs(LED_ON);
-                ledSetRailGreenLEDs(LED_ON);
+                ledAnimateChaser(LED_ON, LED_ON, false);
             } else { // KEEP CALM and CARRY ON
                 ledTopRed.setState(LED_ON);
                 ledTopGreen.setState(LED_OFF);
 
-                ledSetRailRedLEDs(LED_ON);
-                ledSetRailGreenLEDs(LED_OFF);
+                ledAnimateChaser(LED_ON, LED_OFF, false);
             }
         }
     }
@@ -672,6 +685,72 @@ public class RedCrabMinibot {
     public void ledSetRailRedLEDs(boolean ledState) {
         for (DigitalChannel led : railRedLEDs) {
             led.setState(ledState);
+        }
+    }
+
+    public void ledAnimateChaser(boolean ledRed, boolean ledGreen, boolean invert) {
+        if (System.currentTimeMillis() - lastLedChaserTimeMS >= ledChaserIntervalMS) {
+            lastLedChaserTimeMS = System.currentTimeMillis();
+        } else {
+            return;
+        }
+
+        // Turn off current LED
+        if (invert) {
+            railRedLEDs.get(ledChaserIndex).setState(ledRed);
+            railGreenLEDs.get(ledChaserIndex).setState(ledGreen);
+        } else {
+            railRedLEDs.get(ledChaserIndex).setState(LED_OFF);
+            railGreenLEDs.get(ledChaserIndex).setState(LED_OFF);
+        }
+
+        // Cycle up/down
+        if (ledChaseUp) {
+            ledChaserIndex++;
+        } else {
+            ledChaserIndex--;
+        }
+
+        // Switch active LED
+        if (ledChaserIndex >= railRedLEDs.size()) {
+            ledChaseUp = !ledChaseUp;
+            ledChaserIndex = railRedLEDs.size() - 2;
+        } else if (ledChaserIndex < 0) {
+            ledChaseUp = !ledChaseUp;
+            ledChaserIndex = 1;
+        }
+
+        // Control active LED
+        if (!invert) {
+            railRedLEDs.get(ledChaserIndex).setState(ledRed);
+            railGreenLEDs.get(ledChaserIndex).setState(ledGreen);
+        } else {
+            railRedLEDs.get(ledChaserIndex).setState(LED_OFF);
+            railGreenLEDs.get(ledChaserIndex).setState(LED_OFF);
+        }
+    }
+
+    public void ledAnimateProgress(boolean progressLEDsRed, boolean progressLEDsGreen, double ratio) {
+        double i = 0.0;
+        for (DigitalChannel led : railRedLEDs) {
+            i += 1.0 / railRedLEDs.size();
+
+            if (ratio < i) {
+                led.setState(LED_OFF);
+            } else {
+                led.setState(progressLEDsRed);
+            }
+        }
+
+        i = 0.0;
+        for (DigitalChannel led : railGreenLEDs) {
+            i += 1.0 / railGreenLEDs.size();
+
+            if (ratio < i) {
+                led.setState(LED_OFF);
+            } else {
+                led.setState(progressLEDsGreen);
+            }
         }
     }
 }
