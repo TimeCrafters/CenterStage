@@ -18,6 +18,7 @@ public class RedCrabTeleOpDebuggingOnlyEngine extends RedCrabEngine {
 
         robot = new RedCrabMinibot(false);
 
+        addTask(new LEDControllerTask(robot));
         addTask(new LocalizerTask(robot));
 
         addState(new CyberarmState() {

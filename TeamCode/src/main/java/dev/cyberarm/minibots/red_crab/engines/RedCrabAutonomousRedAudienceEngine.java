@@ -14,6 +14,7 @@ public class RedCrabAutonomousRedAudienceEngine extends RedCrabEngine {
     public void setup() {
         robot = new RedCrabMinibot(true);
         addTask(new ClawArmTask(robot));
+        addTask(new LEDControllerTask(robot));
         addTask(new LocalizerTask(robot));
 
         setupFromConfig(
