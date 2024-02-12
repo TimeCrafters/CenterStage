@@ -20,6 +20,7 @@ public class DriveToCoordinatesState extends CyberarmState {
     public boolean posSpecific;
     public double maxXPower;
     public double maxYPower;
+    public double maxHPower;
     private String actionName;
 
     public DriveToCoordinatesState(CompetitionRobotV1 robot, String groupName, String actionName) {
@@ -31,6 +32,7 @@ public class DriveToCoordinatesState extends CyberarmState {
         this.hTarget = robot.configuration.variable(groupName, actionName, "hTarget").value();
         this.maxXPower = robot.configuration.variable(groupName, actionName, "maxXPower").value();
         this.maxYPower = robot.configuration.variable(groupName, actionName, "maxYPower").value();
+        this.maxHPower = robot.configuration.variable(groupName, actionName, "maxHPower").value();
         this.armDrive = robot.configuration.variable(groupName, actionName, "armDrive").value();
         this.objectPos = robot.configuration.variable(groupName, actionName, "objectPos").value();
         this.posSpecific = robot.configuration.variable(groupName, actionName, "posSpecific").value();
@@ -45,22 +47,15 @@ public class DriveToCoordinatesState extends CyberarmState {
             robot.xTarget = xTarget;
             robot.yMaxPower = maxYPower;
             robot.xMaxPower = maxXPower;
+            robot.hMaxPower = maxHPower;
         } else {
             setHasFinished(true);
         }
-
-        Log.d("TTT?", ""  + actionName + " CURRENT POSITION: x: " + robot.positionX + " Y: " + robot.positionY + "h: " + robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-        Log.d("TTT?", ""  + actionName + " TARGET POSITION: x: " + robot.xTarget + " Y: " + robot.yTarget + "h: " + robot.hTarget);
 
     }
 
     @Override
     public void exec() {
-//        robot.yMaxPower = maxYPower;
-//        robot.xMaxPower = maxXPower;
-//        robot.hTarget = hTarget;
-//        robot.yTarget = yTarget;
-//        robot.xTarget = xTarget;
 
         if (posSpecific) {
             if (objectPos != robot.objectPos) {
@@ -73,7 +68,8 @@ public class DriveToCoordinatesState extends CyberarmState {
                 }
 
                 if (Math.abs(robot.positionX - robot.xTarget) < 5
-                        && Math.abs(robot.positionY - robot.yTarget) < 5) {
+                        && Math.abs(robot.positionY - robot.yTarget) < 5
+                        && Math.abs(robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - Math.toDegrees(robot.hTarget)) > 2) {
                     setHasFinished(true);
                 }
             }

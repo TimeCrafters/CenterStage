@@ -103,11 +103,13 @@ public class CompetitionRobotV1 extends Robot {
 
     public double yMaxPower = 1;
     public double xMaxPower = 1;
+    public double hMaxPower = 1;
     public double pidX;
     public double pidY;
+    public double pidH;
     public double rawPidX;
     public double rawPidY;
-
+    public double rawPidH;
     public double xVelocity;
     public double yVelocity;
     public double deltaTime = 0;
@@ -284,7 +286,7 @@ public class CompetitionRobotV1 extends Robot {
      * A Controller taking error of the heading position and converting to a power in the direction of a target.
      * @param reference reference is the target position
      * @param current  current is the measured sensor value.
-     * @return A power to the target the position
+     * @return A power to the target position
      *
      */
     public double HeadingPIDControl(double reference, double current){
@@ -349,15 +351,27 @@ public class CompetitionRobotV1 extends Robot {
             pidX = rawPidX;
         }
     }
+    public void HDrivePowerModifier () {
+
+        rawPidH = HeadingPIDControl(Math.toRadians(hTarget), imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        if (Math.abs(rawPidH) > hMaxPower) {
+            if (rawPidH < 0) {
+                pidH = -hMaxPower;
+            } else {
+                pidH = hMaxPower;
+            }
+        } else {
+            pidH = rawPidH;
+        }
+    }
 
     public void DriveToCoordinates () {
         // determine the powers needed for each direction
         // this uses PID to adjust needed Power for robot to move to target
 
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        double rx = HeadingPIDControl(Math.toRadians(hTarget), heading);
 
-        double denominator = Math.max(Math.abs(pidX) + Math.abs(pidY) + Math.abs(rx), 1);
+        double denominator = Math.max(Math.abs(pidX) + Math.abs(pidY) + Math.abs(pidH), 1);
 
         // field oriented math, (rotating the global field to the relative field)
         double rotY = pidY * Math.cos(heading) - pidX * Math.sin(heading);
@@ -365,10 +379,10 @@ public class CompetitionRobotV1 extends Robot {
 
 
         // finding approximate power for each wheel.
-        frontLeftPower = (rotY + rotX + rx) / denominator;
-        backLeftPower = (rotY - rotX + rx) / denominator;
-        frontRightPower = (rotY - rotX - rx) / denominator;
-        backRightPower = (rotY + rotX - rx) / denominator;
+        frontLeftPower = (rotY + rotX + pidH) / denominator;
+        backLeftPower = (rotY - rotX + pidH) / denominator;
+        frontRightPower = (rotY - rotX - pidH) / denominator;
+        backRightPower = (rotY + rotX - pidH) / denominator;
 
         // apply my powers
         frontLeft.setPower(frontLeftPower);
@@ -411,12 +425,6 @@ public class CompetitionRobotV1 extends Robot {
             }
 
         }
-
-//        pidController.setPID(p, i, d);
-//        int armPos = clawArm.getCurrentPosition();
-//        double pid = pidController.calculate(armPos, target);
-//
-//        power = pid;
 
         clawArm.setTargetPosition(target);
         clawArm.setPower(0.4);
