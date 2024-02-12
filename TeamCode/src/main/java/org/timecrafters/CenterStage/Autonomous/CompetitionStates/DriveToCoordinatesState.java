@@ -69,7 +69,7 @@ public class DriveToCoordinatesState extends CyberarmState {
 
                 if (Math.abs(robot.positionX - robot.xTarget) < 5
                         && Math.abs(robot.positionY - robot.yTarget) < 5
-                        && Math.abs(robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - Math.toDegrees(robot.hTarget)) > 2) {
+                        && Math.abs(robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - Math.toDegrees(robot.hTarget)) < 2) {
                     setHasFinished(true);
                 }
             }
@@ -79,7 +79,8 @@ public class DriveToCoordinatesState extends CyberarmState {
                 }
 
                 if (Math.abs(robot.positionX - robot.xTarget) < 5
-                        && Math.abs(robot.positionY - robot.yTarget) < 5) {
+                        && Math.abs(robot.positionY - robot.yTarget) < 5
+                        && Math.abs(robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - Math.toDegrees(robot.hTarget)) < 2) {
                     setHasFinished(true);
                 }
             }
