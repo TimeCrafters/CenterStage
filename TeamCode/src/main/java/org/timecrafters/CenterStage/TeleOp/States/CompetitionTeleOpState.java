@@ -71,8 +71,8 @@ public class CompetitionTeleOpState extends CyberarmState {
     // ---------------------------------------------------------------------------------------------------------------Arm control Variables:
     public String armPos = "collect";
     // chin up servo
-    public static double chinUpServoUp = 0.58;
-    public static double chinUpServoDown = 1;
+    public static double chinUpServoUp = 0.7;
+    public static double chinUpServoDown = 0;
     public long lastExecutedTime;
 
 

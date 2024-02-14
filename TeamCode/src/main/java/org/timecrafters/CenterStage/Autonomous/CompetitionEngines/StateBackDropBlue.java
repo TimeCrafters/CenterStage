@@ -15,7 +15,7 @@ import dev.cyberarm.engine.V2.CyberarmEngine;
 
 @Autonomous(name = "State BackDrop red", preselectTeleOp = "Competition V1 TeleOp")
 
-public class StateBackDropRed extends CyberarmEngine {
+public class StateBackDropBlue extends CyberarmEngine {
 
     CompetitionRobotV1 robot;
 
@@ -94,7 +94,7 @@ public class StateBackDropRed extends CyberarmEngine {
 
 
 
-
+    // 65, on the left, 235 on the right
 
 
 
