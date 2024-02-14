@@ -28,11 +28,14 @@ public class CompetitionTeleOpState extends CyberarmState {
     public static double holdPos = 0.55                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ;
 
 
+    public double maxVelocityX;
+    public double maxVelocityY;
+
     // ------------------------------------------------------------------------------------------------------------- Heading lock variables:
     public double integralSum = 0;
     private double targetHeading;
-    public double collectLock = Math.toRadians(90);
-    public double backDropLock = Math.toRadians(-90);
+    public double collectLock = Math.toRadians(-90);
+    public double backDropLock = Math.toRadians(90);
     public double boost;
     public double armPower;
     private double currentHeading;
@@ -68,8 +71,8 @@ public class CompetitionTeleOpState extends CyberarmState {
     // ---------------------------------------------------------------------------------------------------------------Arm control Variables:
     public String armPos = "collect";
     // chin up servo
-    public static double chinUpServoUp = 0.58;
-    public static double chinUpServoDown = 1;
+    public static double chinUpServoUp = 0.7;
+    public static double chinUpServoDown = 0;
     public long lastExecutedTime;
 
 
@@ -109,7 +112,6 @@ public class CompetitionTeleOpState extends CyberarmState {
             robot.lift.setPower(0);
         }
     }
-
 
     public void DriveTrainTeleOp () {
 
@@ -337,10 +339,17 @@ public class CompetitionTeleOpState extends CyberarmState {
         robot.clawArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lastExecutedTime = System.currentTimeMillis();
 
+
     }
 
     @Override
-    public void exec() {
+    public void exec() { //------------------------------------------------------------------------------------------------------ EXEC Start
+        if (robot.xVelocity > maxVelocityX){
+            maxVelocityX = robot.xVelocity;
+        }
+        if (robot.yVelocity > maxVelocityY){
+            maxVelocityY = robot.yVelocity;
+        }
         robot.OdometryLocalizer();
 
         if (engine.gamepad2.start && engine.gamepad2.x){
@@ -409,10 +418,15 @@ public class CompetitionTeleOpState extends CyberarmState {
 
         ClawControlTeleOp();
 
+
+        robot.velocityChecker();
+
     }
 
         @Override
         public void telemetry () {
+            engine.telemetry.addData("x velocity max", maxVelocityX);
+            engine.telemetry.addData("y velocity max", maxVelocityY);
             engine.telemetry.addData("Dnl1", robot.Dnl1);
             engine.telemetry.addData("Dnr2", robot.Dnr2);
             engine.telemetry.addData("x pos", robot.positionX);

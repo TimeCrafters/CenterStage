@@ -51,10 +51,8 @@ public class CompetitionRobotV1 extends Robot {
 
     // ----------------------------------------------------------------------------------------------------------------- odometry variables:
     public static double Hp = 0.8, Hi = 0, Hd = 0;
-    public static double Xp = -0.03, Xi = 0, Xd = 0;
-    public static double xvp = -0.03, xvi = 0, xvd = 0;
-    public static double Yp = 0.03, Yi = 0, Yd = 0;
-    public static double yvp = 0.03, yvi = 0, yvd = 0;
+    public static double Xp = 0.03, Xi = 0, Xd = 0;
+    public static double Yp = -0.03, Yi = 0, Yd = 0;
 
     public double Dnl1;
     public double Dnr2;
@@ -75,8 +73,8 @@ public class CompetitionRobotV1 extends Robot {
     public int oldRightPosition = 0;
     public int oldLeftPosition = 0;
     public int oldAuxPosition = 0;
-    public final static double L = 22.5; // distance between left and right encoder in cm
-    final static double B = 15; // distance between the midpoint of the left and right encoder from the auxillary encoder in cm
+    public final static double L = 20.9; // distance between left and right encoder in cm
+    final static double B = 12.6; // distance between the midpoint of the left and right encoder from the auxillary encoder in cm
     public final static double R = 3; // wheel radius in cm
     final static double N = 8192; // encoder ticks per revolution (REV encoder)
 
@@ -105,27 +103,29 @@ public class CompetitionRobotV1 extends Robot {
 
     public double yMaxPower = 1;
     public double xMaxPower = 1;
+    public double hMaxPower = 1;
     public double pidX;
     public double pidY;
+    public double pidH;
     public double rawPidX;
     public double rawPidY;
-
+    public double rawPidH;
     public double xVelocity;
     public double yVelocity;
-    public double deltaTime;
+    public double deltaTime = 0;
 
 
     //-------------------------------------------------------------------------------------------------------------- arm sequence variables:
     PIDController pidController;
     public double power;
-    public String armPos;
+    public String armPos = "hover";
     public long armTime;
 
 
     public int target;
     public double p = 0.007, i = 0,  d = 0.0001, f = 0;
     public double shoulderCollect = 0.86;
-    public double shoulderDeposit = 0.86;
+    public double shoulderDeposit = 1;
     public double shoulderPassive = 1;
     public double elbowCollect = 0.02;
     public double elbowDeposit = 0;
@@ -286,7 +286,7 @@ public class CompetitionRobotV1 extends Robot {
      * A Controller taking error of the heading position and converting to a power in the direction of a target.
      * @param reference reference is the target position
      * @param current  current is the measured sensor value.
-     * @return A power to the target the position
+     * @return A power to the target position
      *
      */
     public double HeadingPIDControl(double reference, double current){
@@ -297,27 +297,6 @@ public class CompetitionRobotV1 extends Robot {
         headingTimer.reset();
 
         double output = (error * Hp) + (derivative * Hd) + (headingIntegralSum * Hi);
-        return output;
-    }
-    public double XVeloPIDControl ( double reference, double current){
-        double error = (reference - current);
-        xVeloIntegralSum += error * xVeloTimer.seconds();
-        double derivative = (error - xVeloLastError) / xVeloTimer.seconds();
-
-        xTimer.reset();
-
-        double output = (error * xvp) + (derivative * xvd) + (xIntegralSum * xvi);
-        return output;
-    }
-
-    public double YVeloPIDControl ( double reference, double current){
-        double error = (reference - current);
-        yVeloIntegralSum += error * yVeloTimer.seconds();
-        double derivative = (error - yVeloLastError) / xTimer.seconds();
-
-        xTimer.reset();
-
-        double output = (error * yvp) + (derivative * yvd) + (yVeloIntegralSum * yvi);
         return output;
     }
 
@@ -372,17 +351,27 @@ public class CompetitionRobotV1 extends Robot {
             pidX = rawPidX;
         }
     }
+    public void HDrivePowerModifier () {
+
+        rawPidH = HeadingPIDControl(Math.toRadians(hTarget), imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        if (Math.abs(rawPidH) > hMaxPower) {
+            if (rawPidH < 0) {
+                pidH = -hMaxPower;
+            } else {
+                pidH = hMaxPower;
+            }
+        } else {
+            pidH = rawPidH;
+        }
+    }
 
     public void DriveToCoordinates () {
         // determine the powers needed for each direction
         // this uses PID to adjust needed Power for robot to move to target
-        XVeloPIDControl(targetVelocityX, xVelocity);
-        YVeloPIDControl(targetVelocityY, yVelocity);
 
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        double rx = HeadingPIDControl(Math.toRadians(hTarget), heading);
 
-        double denominator = Math.max(Math.abs(pidX) + Math.abs(pidY) + Math.abs(rx), 1);
+        double denominator = Math.max(Math.abs(pidX) + Math.abs(pidY) + Math.abs(pidH), 1);
 
         // field oriented math, (rotating the global field to the relative field)
         double rotY = pidY * Math.cos(heading) - pidX * Math.sin(heading);
@@ -390,10 +379,10 @@ public class CompetitionRobotV1 extends Robot {
 
 
         // finding approximate power for each wheel.
-        frontLeftPower = (rotY + rotX + rx) / denominator;
-        backLeftPower = (rotY - rotX + rx) / denominator;
-        frontRightPower = (rotY - rotX - rx) / denominator;
-        backRightPower = (rotY + rotX - rx) / denominator;
+        frontLeftPower = (rotY + rotX + pidH) / denominator;
+        backLeftPower = (rotY - rotX + pidH) / denominator;
+        frontRightPower = (rotY - rotX - pidH) / denominator;
+        backRightPower = (rotY + rotX - pidH) / denominator;
 
         // apply my powers
         frontLeft.setPower(frontLeftPower);
@@ -416,7 +405,7 @@ public class CompetitionRobotV1 extends Robot {
         if (Objects.equals(armPos, "deposit")) {
             shoulder.setPosition(shoulderDeposit);
             elbow.setPosition(elbowDeposit);
-            target = 400;
+            target = 300;
 
 
         }
@@ -430,18 +419,12 @@ public class CompetitionRobotV1 extends Robot {
 
         }
         if (armPos.equals("search")) {
-            shoulder.setPosition(0.48);
-            if (armTime > 400){
+            shoulder.setPosition(0.55);
+            if (armTime > 450){
                 target = 570;
             }
 
         }
-
-//        pidController.setPID(p, i, d);
-//        int armPos = clawArm.getCurrentPosition();
-//        double pid = pidController.calculate(armPos, target);
-//
-//        power = pid;
 
         clawArm.setTargetPosition(target);
         clawArm.setPower(0.4);

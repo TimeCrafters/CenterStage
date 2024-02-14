@@ -1,6 +1,7 @@
 package org.timecrafters.CenterStage.Autonomous.CompetitionEngines;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.timecrafters.CenterStage.Autonomous.CompetitionStates.CameraVisionState;
@@ -15,6 +16,7 @@ import org.timecrafters.TimeCraftersConfigurationTool.library.TimeCraftersConfig
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
 @Autonomous(name = "Burnsville BackDrop blue", preselectTeleOp = "Competition V1 TeleOp")
+@Disabled
 
 public class CompetitionBurnsvilleBackDropBlue extends CyberarmEngine {
 
@@ -41,17 +43,17 @@ public class CompetitionBurnsvilleBackDropBlue extends CyberarmEngine {
 //        addTask(new ClawArmControlTask(robot));
 
         this.robot.setup();
-        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-01-0"));
+//        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-01-0"));
 
-        addState(new CameraVisionState(robot));
+//        addState(new CameraVisionState(robot));
 
-        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-01-1"));
+//        addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-01-1"));
 
         // drive to the left, center, or right spike mark
         addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "3-02-0"));
-        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "3-02-1"));
-        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "2-02-0"));
-        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "1-02-0"));
+//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "3-02-1"));
+//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "2-02-0"));
+//        addState(new DriveToCoordinatesState(robot,"Burnsville BackDrop blue", "1-02-0"));
 
         addState(new ClawArmState(robot,"Burnsville BackDrop blue", "0-02-4"));
 

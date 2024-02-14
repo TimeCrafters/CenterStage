@@ -16,6 +16,7 @@ public class RedCrabTeleOpEngine extends RedCrabEngine {
         robot = new RedCrabMinibot(false);
 
         addTask(new ClawArmTask(robot));
+        addTask(new LEDControllerTask(robot));
         addTask(new LocalizerTask(robot));
 
         addState(new Pilot(robot));

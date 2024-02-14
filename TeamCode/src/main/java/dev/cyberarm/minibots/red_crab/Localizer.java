@@ -13,15 +13,17 @@ import dev.cyberarm.engine.V2.Utilities;
 public class Localizer {
     private final RedCrabMinibot robot;
     private double rawX = 0, rawY = 0, rawR = 0, offsetX = 0, offsetY = 0;
-    private final double trackWidthMM = 387.35, forwardOffsetMM = 133.35, wheelDiameterMM = 90.0;
+    private double trackWidthMM = 387.35, forwardOffsetMM = 133.35, wheelDiameterMM = 90.0;
     private final int encoderTicksPerRevolution = 8192;
     private final double encoderGearRatio = 1;
     private double lastEncoderXLeftMM, lastEncoderXRightMM, lastEncoderYCenterMM;
 //    private double xDeltaMultiplier = 0.87012987, yDeltaMultiplier = 0.25;
-    private double xPosMultiplier = 0.675956739, yPosMultiplier = 0.941867531;
+    private double xPosMultiplier = 0.675956739, yPosMultiplier = 0.675956739;
     private HolonomicOdometry odometry;
     public Localizer(RedCrabMinibot robot) {
         this.robot = robot;
+
+        loadConfigConstants();
 
         // Preset last encoder to current location to not require resetting encoders, ever. (🤞)
         this.lastEncoderXLeftMM = ticksToMM(robot.deadWheelXLeft.getCurrentPosition());
@@ -35,6 +37,22 @@ public class Localizer {
                 trackWidthMM,
                 forwardOffsetMM
         );
+    }
+
+    public void loadConfigConstants() {
+//        trackWidthMM = 387.35;
+//        forwardOffsetMM = 133.35;
+//        wheelDiameterMM = 90.0;
+//
+//        xPosMultiplier = 0.675956739;
+//        yPosMultiplier = 0.675956739;
+
+        trackWidthMM = robot.config.variable("Robot", "Localizer", "track_width_mm").value();
+        forwardOffsetMM = robot.config.variable("Robot", "Localizer", "forward_offset_mm").value();
+        wheelDiameterMM = robot.config.variable("Robot", "Localizer", "wheel_diameter_mm").value();
+
+        xPosMultiplier = robot.config.variable("Robot", "Localizer", "x_position_multiplier").value();
+        yPosMultiplier = robot.config.variable("Robot", "Localizer", "y_position_multiplier").value();
     }
 
     public void reset() {
@@ -104,7 +122,7 @@ public class Localizer {
     }
 
     public double yMM() {
-        return odometry.getPose().getY() * xPosMultiplier + offsetY;  //rawY;
+        return odometry.getPose().getY() * yPosMultiplier + offsetY;  //rawY;
     }
 
     public double xIn() {

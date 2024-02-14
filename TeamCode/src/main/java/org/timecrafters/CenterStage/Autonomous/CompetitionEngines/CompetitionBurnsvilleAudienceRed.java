@@ -1,6 +1,7 @@
 package org.timecrafters.CenterStage.Autonomous.CompetitionEngines;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.timecrafters.CenterStage.Autonomous.CompetitionStates.CameraVisionState;
@@ -14,6 +15,7 @@ import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
 @Autonomous(name = "Burnsville audience red", preselectTeleOp = "Competition V1 TeleOp")
+@Disabled
 
 public class CompetitionBurnsvilleAudienceRed extends CyberarmEngine {
 

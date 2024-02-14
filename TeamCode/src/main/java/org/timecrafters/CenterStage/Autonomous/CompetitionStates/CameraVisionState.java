@@ -54,7 +54,6 @@ public class CameraVisionState extends CyberarmState {
 
     @Override
     public void exec() {
-        robot.clawArmControl();
         if (System.currentTimeMillis() - initTime > 4000){
             robot.objectPos = pipeline.objectPos();
             setHasFinished(true);
@@ -84,6 +83,7 @@ public class CameraVisionState extends CyberarmState {
         Mat leftCrop;
         Mat middleCrop;
         Mat rightCrop;
+        Mat rotatedMat = new Mat();
         double leftavgfin;
         double middleavgfin;
         double rightavgfin;
@@ -91,13 +91,14 @@ public class CameraVisionState extends CyberarmState {
         Scalar rectColor = new Scalar(255.0, 0.0, 0.0);
 
         public Mat processFrame(Mat input) {
-            Imgproc.cvtColor(input, HSV, Imgproc.COLOR_RGB2HSV);
+             Core.rotate(input, rotatedMat,Core.ROTATE_180);
+            Imgproc.cvtColor(rotatedMat, HSV, Imgproc.COLOR_RGB2HSV);
 
             Rect leftRect = new Rect(1, 1, 212, 359);
             Rect rightRect = new Rect(213, 1, 212, 359);
             Rect middleRect = new Rect(426, 1, 212, 359);
 
-            input.copyTo(output);
+            rotatedMat.copyTo(output);
             Imgproc.rectangle(output, leftRect, rectColor, 2);
             Imgproc.rectangle(output, rightRect, rectColor, 2);
             Imgproc.rectangle(output, middleRect, rectColor, 2);
