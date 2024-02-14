@@ -105,6 +105,9 @@ public class RedCrabMinibot {
     public TimeCraftersConfiguration config;
     private final PIDFController clawArmPIDFController;
     public final String webcamName = "Webcam 1";
+    public boolean droneLaunchRequested = false;
+    public double droneLastLaunchRequestStartMS = 0;
+    public boolean droneLaunchAuthorized = false;
 
     private long lastClawArmOverCurrentAnnounced = 0;
     private boolean clawArmOverCurrent = false;
@@ -387,7 +390,8 @@ public class RedCrabMinibot {
         RedCrabMinibot.DRONE_LATCH_LAUNCH_POSITION = config.variable("Robot", "DroneLauncher_Tuning", "launch_position").value();
         RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS = config.variable("Robot", "DroneLauncher_Tuning", "launch_confirmation_time_ms").value();
 
-        localizer.loadConfigConstants();
+        if (RedCrabMinibot.localizer != null)
+            RedCrabMinibot.localizer.loadConfigConstants();
     }
 
     public void resetDeadWheels() {
@@ -653,6 +657,24 @@ public class RedCrabMinibot {
                 ledAnimateProgress(LED_ON, LED_OFF, (engine.runTime() - 23_000.0) / 5_000.0);
             }
         } else {
+            // Show progress of drone launch authorization
+            if (droneLaunchRequested) {
+                if (droneLaunchAuthorized) {
+                    ledTopRed.setState(LED_OFF);
+                    ledTopGreen.setState(LED_ON);
+
+                    ledSetRailRedLEDs(LED_ON);
+                    ledSetRailRedLEDs(LED_ON);
+                } else {
+                    ledTopRed.setState(LED_ON);
+                    ledTopGreen.setState(LED_ON);
+
+                    ledAnimateProgress(LED_ON, LED_ON, (engine.runTime() - droneLastLaunchRequestStartMS) / RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS);
+                }
+
+                return;
+            }
+
             if (engine.runTime() >= 90_000.0) { // LAUNCH DRONE and DO CHIN UP
                 ledTopRed.setState(LED_OFF);
                 ledTopGreen.setState(LED_ON);
