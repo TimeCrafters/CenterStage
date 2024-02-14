@@ -85,7 +85,7 @@ public class SodiPizzaTeleOPState extends CyberarmState {
 //        lastToldAngle = robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
         gp1checker = new GamepadChecker(engine, engine.gamepad1);
-        gp2checker = new GamepadChecker(engine, engine.gamepad1);
+        gp2checker = new GamepadChecker(engine, engine.gamepad2);
 
         lastMoveTime = System.currentTimeMillis();
         lastDistRead = System.currentTimeMillis();
@@ -138,6 +138,12 @@ public class SodiPizzaTeleOPState extends CyberarmState {
             robot.imu.resetYaw();
         }
 
+        if (Math.abs(robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)) > 0.000001 &&
+            Math.abs(robot.imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES)) > 0.000001 &&
+            Math.abs(robot.imu.getRobotYawPitchRollAngles().getRoll(AngleUnit.DEGREES)) > 0.000001) {
+                robot.imu.resetYaw();
+        }
+
         if (engine.gamepad1.left_stick_button) {
             if (System.currentTimeMillis() - lastMoveTime >= 200) {
                 robot.launcher.setPosition(0.98);
@@ -163,12 +169,12 @@ public class SodiPizzaTeleOPState extends CyberarmState {
         }
 
         if (engine.gamepad1.dpad_up) {
-            if (System.currentTimeMillis() - lastMoveTime >= 200) {
+            if (System.currentTimeMillis() - lastMoveTime >= 150) {
                 robot.shoulder.setPosition(robot.shoulder.getPosition() + 0.05);
                 lastMoveTime = System.currentTimeMillis();
             }
         } else if (engine.gamepad1.dpad_down) {
-            if (System.currentTimeMillis() - lastMoveTime >= 200) {
+            if (System.currentTimeMillis() - lastMoveTime >= 150) {
                 robot.shoulder.setPosition(robot.shoulder.getPosition() - 0.05);
                 lastMoveTime = System.currentTimeMillis();
             }
