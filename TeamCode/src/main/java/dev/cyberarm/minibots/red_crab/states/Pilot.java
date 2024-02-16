@@ -17,9 +17,6 @@ public class Pilot extends CyberarmState {
     private boolean rightClawOpen = false;
     private int clawArmPosition = RedCrabMinibot.ClawArm_INITIAL;
     private boolean hookArmUp = false;
-    private boolean droneLaunchAuthorized = false;
-    private boolean droneLaunchRequested = false;
-    private double droneLastLaunchRequestStartMS = 0;
     private double odometryResetRequestStartMS = 0;
     private boolean odometryResetRequested = false;
     private boolean odometryResetRequestLeftStick = false;
@@ -42,7 +39,7 @@ public class Pilot extends CyberarmState {
         clawArmAndWristController();
         clawController();
         droneLatchController();
-        hookArmController(); // disabled for swrist debug
+        hookArmController();
         winchController();
         odometryDebugController();
 
@@ -54,8 +51,8 @@ public class Pilot extends CyberarmState {
         if (gamepad == engine.gamepad1) {
             switch (button) {
                 case "y":
-                    droneLaunchRequested = true;
-                    droneLastLaunchRequestStartMS = runTime();
+                    robot.droneLaunchRequested = true;
+                    robot.droneLastLaunchRequestStartMS = runTime();
                     break;
                 case "x":
                     hookArmUp = true;
@@ -117,8 +114,8 @@ public class Pilot extends CyberarmState {
         if (gamepad == engine.gamepad1) {
             switch (button) {
                 case "y":
-                    droneLaunchRequested = false;
-                    droneLastLaunchRequestStartMS = runTime();
+                    robot.droneLaunchRequested = false;
+                    robot.droneLastLaunchRequestStartMS = runTime();
                     break;
                 case "left_stick_button":
                     odometryResetRequestLeftStick = false;
@@ -234,16 +231,16 @@ public class Pilot extends CyberarmState {
     }
 
     private void droneLatchController() {
-        if (droneLaunchRequested && runTime() - droneLastLaunchRequestStartMS >= RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS)
-            droneLaunchAuthorized = true;
+        if (robot.droneLaunchRequested && runTime() - robot.droneLastLaunchRequestStartMS >= RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS)
+            robot.droneLaunchAuthorized = true;
 
-        if (droneLaunchAuthorized) {
+        if (robot.droneLaunchAuthorized) {
             robot.droneLatch.setPosition(RedCrabMinibot.DRONE_LATCH_LAUNCH_POSITION);
         }
 
         // Auto reset drone latch after DRONE_LAUNCH_CONFIRMATION_TIME_MS + 1 second
-        if (!droneLaunchRequested && runTime() - droneLastLaunchRequestStartMS >= RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS + 1_000) {
-            droneLaunchAuthorized = false;
+        if (!robot.droneLaunchRequested && runTime() - robot.droneLastLaunchRequestStartMS >= RedCrabMinibot.DRONE_LAUNCH_CONFIRMATION_TIME_MS + 1_000) {
+            robot.droneLaunchAuthorized = false;
 
             robot.droneLatch.setPosition(RedCrabMinibot.DRONE_LATCH_INITIAL_POSITION);
         }
