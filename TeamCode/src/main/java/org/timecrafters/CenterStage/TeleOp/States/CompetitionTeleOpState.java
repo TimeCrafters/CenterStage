@@ -24,8 +24,8 @@ public class CompetitionTeleOpState extends CyberarmState {
     public int target = 0;
 
     // ---------------------------------------------------------------------------------------------------------------------shoot variables:
-    public static double releasePos = 0.95;
-    public static double holdPos = 0.55                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ;
+    public static double releasePos = 0.45;
+    public static double holdPos = 0.95                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ;
 
 
     public double maxVelocityX;
@@ -71,7 +71,7 @@ public class CompetitionTeleOpState extends CyberarmState {
     // ---------------------------------------------------------------------------------------------------------------Arm control Variables:
     public String armPos = "collect";
     // chin up servo
-    public static double chinUpServoUp = 0.7;
+    public static double chinUpServoUp = 0.55;
     public static double chinUpServoDown = 0;
     public long lastExecutedTime;
 
@@ -299,9 +299,8 @@ public class CompetitionTeleOpState extends CyberarmState {
         }
 
         if (Objects.equals(armPos, "lift up")) {
-            robot.shoulder.setPosition(robot.shoulderCollect);
-            robot.elbow.setPosition(robot.elbowDeposit);
-            target = 120;
+            robot.shoulder.setPosition(0.2);
+            target = 850;
             robot.chinUpServo.setPosition(chinUpServoUp);
         }
 
@@ -311,9 +310,8 @@ public class CompetitionTeleOpState extends CyberarmState {
                 robot.chinUpServo.setPosition(chinUpServoDown);
             } else {
                 robot.lift.setPower(0);
-                robot.chinUpServo.setPosition(chinUpServoDown);
-                robot.shoulder.setPosition(robot.shoulderCollect);
-                target = 120;
+                robot.shoulder.setPosition(0.2);
+                target = 850;
             }
         }
 

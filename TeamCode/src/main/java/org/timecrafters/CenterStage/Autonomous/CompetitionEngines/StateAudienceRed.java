@@ -13,9 +13,9 @@ import org.timecrafters.CenterStage.Common.CompetitionRobotV1;
 
 import dev.cyberarm.engine.V2.CyberarmEngine;
 
-@Autonomous(name = "State BackDrop blue", preselectTeleOp = "Competition V1 TeleOp")
+@Autonomous(name = "State Audience red", preselectTeleOp = "Competition V1 TeleOp")
 
-public class StateBackDropBlue extends CyberarmEngine {
+public class StateAudienceRed extends CyberarmEngine {
 
     CompetitionRobotV1 robot;
 
@@ -57,44 +57,8 @@ public class StateBackDropBlue extends CyberarmEngine {
         //open claw
         addState(new ClawFingerState(robot,"State BackDrop blue", "4-00-0"));
 
-        addState(new ClawArmState(robot,"State BackDrop blue", "5-00-0"));
-
-        // drive towards backboard
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "6-01-0"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "6-01-1"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "6-02-0"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "6-02-1"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "6-03-0"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "6-03-1"));
-
-        // pause
-        addState(new ClawArmState(robot,"State BackDrop blue", "6-00-0"));
-
-        // drive into board
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "6-01-2"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "6-02-2"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "6-03-2"));
-
-        // pause
-        addState(new ClawArmState(robot,"State BackDrop blue", "6-00-1"));
-
-        //open right close left
-        addState(new ClawFingerState(robot,"State BackDrop blue", "7-00-0"));
-
-        // bring arm up
-        addState(new ClawArmState(robot,"State BackDrop blue", "8-00-0"));
-
-        // drivw to park
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "9-01-0"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "9-02-0"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "9-03-0"));
-        addState(new DriveToCoordinatesState(robot,"State BackDrop blue", "9-03-1"));
-
         addState(new ClawArmState(robot,"State BackDrop blue", "9-00-0"));
 
-
-
-    // 65, on the left, 235 on the right
 
 
 
